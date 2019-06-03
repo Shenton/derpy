@@ -263,12 +263,25 @@ function commandPlaylist(message) {
 
 // This will follow the trolls who launch a music and leave the channel
 client.on('voiceStateUpdate', (oldMember, newMember) => {
+    // Not playing, nothing to do
     if (!isPlaying.status) return;
+
+    // The bot was moved
+    if (newMember.id == client.user.id) {
+        // Get the voice channel of the member who initiated the command, and join
+        const member = newMember.guild.members.get(isPlaying.who.id);
+        member.voiceChannel.join();
+    }
+
+    // The member who moved is not the one who asked for a music, nothing to do
     if (isPlaying.who.id != newMember.id) return;
+
+    // Check if the member left the channel
     if (oldMember.voiceChannelID != newMember.voiceChannelID) {
         if (!config.moduleConfig.music.allowedVoiceChannels.includes(newMember.voiceChannelID)) {
             dispatcher.end();
-            client.guilds.get(config.guildID).channels.get(config.channelID).send('Bien tenté, mais non.').catch(logger.error);
+            client.guilds.get(config.guildID).channels.get(config.channelID).send('Bien tenté, mais non.')
+                .catch(logger.error);
         }
         else {
             isPlaying.where = newMember.voiceChannel;

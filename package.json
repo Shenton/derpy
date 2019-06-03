@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon app.js",
     "start": "cross-env NODE_ENV=production pm2 start app.js",
-    "stop": "pm2 stop app.js && pm2 kill",
+    "stop": "pm2 stop all && pm2 kill",
     "restart": "npm stop && npm start",
-    "list": "pm2 list"
+    "list": "pm2 list",
+    "monit": "pm2 monit",
+    "pm2logrotate": "pm2 install pm2-logrotate"
   },
   "author": "Shenton",
   "license": "MIT",

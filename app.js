@@ -3,11 +3,27 @@ const Discord = require('discord.js');
 const jsonfile = require('jsonfile');
 const path = require('path');
 const { createLogger, format, transports } = require('winston');
+require('winston-daily-rotate-file');
 
 // App root directory
 const rootDir = __dirname;
 
 // Logger
+const errorTransport = new transports.DailyRotateFile({
+    level: 'error',
+    filename: path.join(rootDir, 'log', 'error-%DATE%.log'),
+    datePattern: 'DD-MM-YYYY',
+    zippedArchive: true,
+    maxSize: '10m',
+    maxFiles: '30d',
+});
+const combinedTransport = new transports.DailyRotateFile({
+    filename: path.join(rootDir, 'log', 'combined-%DATE%.log'),
+    datePattern: 'DD-MM-YYYY',
+    zippedArchive: true,
+    maxSize: '10m',
+    maxFiles: '30d',
+});
 const logger = createLogger({
     level: 'info',
     format: format.combine(
@@ -18,8 +34,8 @@ const logger = createLogger({
     ),
     defaultMeta: { service: 'Derpy' },
     transports: [
-        new transports.File({ filename: path.join(rootDir, 'log', 'error.log'), level: 'error' }),
-        new transports.File({ filename: path.join(rootDir, 'log', 'combined.log') }),
+        errorTransport,
+        combinedTransport,
     ],
 });
 // If we are in dev we want to also output the log to the console
@@ -39,6 +55,12 @@ if (process.env.NODE_ENV === 'development') {
         ),
     }));
 }
+errorTransport.on('rotate', function(oldFilename, newFilename) {
+    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
+});
+combinedTransport.on('rotate', function(oldFilename, newFilename) {
+    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
+});
 
 // Config object
 let config = null;

@@ -93,12 +93,18 @@ function getSafe(fn, value) {
     }
 }
 
+// Export what will be used globaly
+// Variables
+exports.rootDir = rootDir;
+
+// Objects
 exports.logger = logger;
 exports.client = client;
-exports.loadConfig = loadConfig;
 exports.config = config;
-exports.rootDir = rootDir;
+
+// Methods
 exports.getSafe = getSafe;
+exports.loadConfig = loadConfig;
 
 // Init the bot
 require('./src/client');

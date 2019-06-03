@@ -267,7 +267,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
     if (!isPlaying.status) return;
 
     // The bot was moved
-    if (newMember.id == client.user.id) {
+    if (newMember.id == client.user.id && oldMember.voiceChannelID != newMember.voiceChannelID) {
         // Get the voice channel of the member who initiated the command, and join
         const member = newMember.guild.members.get(isPlaying.who.id);
         member.voiceChannel.join();

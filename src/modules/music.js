@@ -1,0 +1,286 @@
+// npm modules
+const Youtube = require('simple-youtube-api');
+const ytdl = require('ytdl-core');
+const path = require('path');
+const { Attachment } = require('discord.js');
+const htmlspecialchars = require('html-specialchars');
+
+// Derpy globals
+const { config, logger, rootDir, client } = require('../../app');
+
+// Declare objects
+const youtube = new Youtube(config.moduleConfig.music.youtubeApiKey);
+
+// Module variables
+const playlist = [];
+let isPlaying = {
+    status: false,
+    where: '',
+    who: '',
+};
+let dispatcher = {};
+let isSearching = false;
+const searchExitResponses = ['exit', 'nope', 'sortie'];
+let wasStopped = false;
+
+function isURL(url) {
+    return /^(?:\w+:)?\/\/([^\s.]+\.\S{2}[:?\d]*)\S*$/.test(url);
+}
+function testURL(url) {
+    return /(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/.test(url);
+}
+function testSearch(string) {
+    return /^[a-zA-Z0-9_-\s]+$/.test(string);
+}
+
+async function getVideoObject(message, request) {
+    let url;
+
+    if (isURL(request[0])) {
+        if (testURL(request[0])) url = request[0];
+        else return { valid: false, url: 'URL non valide, seule les vidéos youtube sont supportées.' };
+    }
+    else {
+        const search = request.join(' ');
+
+        if (!search || search.length === 0) return { valid: false, url: 'Si il n\'y a rien à chercher, je ne risque pas de trouver.' };
+        if (search.length > 50) return { valid: false, url: 'Nombre de charactères autorisé pour une recherche dépassé (50).' };
+        if (!testSearch(search)) return { valid: false, url: 'La recherche contient des charactères non autorisés.' };
+
+        try {
+            if (isSearching) return { valid: false, url: 'Je suis déjà en train de rechercher une vidéo, attends ton tour.' };
+            isSearching = true;
+
+            const videos = await youtube.searchVideos(search);
+
+            if (videos.length === 0) return { valid: false, url: 'Aucune vidéo trouvée.' };
+
+            const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
+            const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
+
+            const embedContent = {
+                color: 0x9b0f29,
+                author: {
+                    name: 'Résultat de la recherche YouTube',
+                    icon_url: 'attachment://youtubeIcon.png',
+                },
+                description: 'Choisir la vidéos en répondant avec son numéro',
+                fields: [],
+                timestamp: new Date(),
+                footer: {
+                    text: 'Derpy v' + process.env.npm_package_version,
+                    icon_url: 'attachment://area51.png',
+                },
+            };
+
+            let count = 1;
+            videos.forEach(video => {
+                embedContent.fields.push(
+                    {
+                        name: htmlspecialchars.unescape(video.title),
+                        value: `\`\`\`swift\nNuméro:${count}\`\`\``,
+                        //inline: true,
+                    });
+                count++;
+            });
+            const embedObject = await message.channel.send({ files: [area51, youtubeIcon], embed: embedContent });
+
+            try {
+                const filter = m => (/^[1-5]?$/.test(m.content) || searchExitResponses.includes(m.content)) && m.author.id == message.author.id;
+                const messageObject = await message.channel.awaitMessages(filter, { max: 1, maxMatches: 1, time: 60000, errors: ['time'] });
+
+                if (searchExitResponses.includes(messageObject.first().content)) {
+                    embedObject.delete();
+                    isSearching = false;
+                    return { valid: false, url: 'Recherche annulée.' };
+                }
+                else {
+                    const index = Number(messageObject.first().content);
+
+                    if (!index) {
+                        embedObject.delete();
+                        isSearching = false;
+                        return { valid: false, url: 'Il faut répondre avec un chiffre.' };
+                    }
+                    else {
+                        embedObject.delete();
+                        isSearching = false;
+                        url = videos[index - 1].url;
+                    }
+                }
+            }
+            catch(err) {
+                logger.error(err);
+                embedObject.delete()
+                    .catch(logger.error);
+                isSearching = false;
+                return { valid: false, url: 'Il y a eu une erreur avec la recherche, ou t\'es trop lent.' };
+            }
+        }
+        catch(err) {
+            logger.error(err);
+            isSearching = false;
+            return { valid: false, url: 'Il y a eu une erreur avec la recherche.' };
+        }
+    }
+
+    if (!url) return { valid: false };
+
+    try {
+        const video = await youtube.getVideo(url);
+        if (video) {
+            if (video.raw.snippet.liveBroadcastContent === 'live') return { valid: false, url: 'Je ne lirais pas un live, espèce de troll.' };
+            if (video.durationSeconds > config.moduleConfig.music.maxVideoDuration) return { valid: false, url: 'Je ne lirais pas une vidéo aussi longue, espèce de troll.' };
+
+            const title = htmlspecialchars.unescape(video.title);
+            return { valid: true, url: video.url, title: title };
+        }
+        else {
+            return { valid: false, url: 'Vidéo non trouvée.' };
+        }
+    }
+    catch(err) {
+        logger.error(err);
+        return { valid: false, url: 'Il y a eu une erreur en tentant de récupérer la vidéo.' };
+    }
+}
+
+function play() {
+    const item = playlist.shift();
+    if (!item) return;
+    const { where, source, who } = item;
+
+    where.join().then(connection => {
+        const stream = ytdl(source, { filter: 'audioonly' });
+        dispatcher = connection.playStream(stream);
+        dispatcher.on('start', () => {
+            isPlaying = {
+                status: true,
+                where: where,
+                who: who,
+            };
+        });
+        dispatcher.on('end', () => {
+            if (!wasStopped && playlist.length > 0) {
+                play();
+                return;
+            }
+            isPlaying.where.leave();
+            isPlaying.status = false;
+            wasStopped = false;
+        });
+    });
+}
+
+async function commandAdd(message, request) {
+    if (!request || !request[0]) return message.reply('Si il n\'y a rien à chercher, je ne risque pas de trouver.').catch(logger.error);
+    if (request[0].length > 80) return message.reply('Nombre de charactères autorisé pour une URL dépassé (80).').catch(logger.error);
+
+    const { voiceChannel } = message.member;
+
+    if (!voiceChannel) return message.reply('Il faut être dans un canal vocal, tard!').catch(logger.error);
+    if (!config.moduleConfig.music.allowedVoiceChannels.includes(voiceChannel.id)) return message.reply('Je ne suis pas autorisé à ouvrir ma tronche dans ce canal.').catch(logger.error);
+
+    try {
+        const video = await getVideoObject(message, request);
+        if (video.valid) {
+            if (playlist.length >= config.moduleConfig.music.maxPlaylistSize) return message.reply('La playlist est pleine.');
+            playlist.push({ source: video.url, where: voiceChannel, who: message.author, title: video.title });
+            message.reply(`Vidéo ${video.title} ajoutée à la playlist`).catch(logger.error);
+        }
+        else if (video.url) {
+            message.reply(video.url);
+        }
+    }
+    catch(err) {
+        logger.error(err);
+        message.reply('Il y a eu une erreur en tentant d\'ajouter la vidéo.').catch(logger.error);
+    }
+}
+
+async function commandPlay(message, request) {
+    if (isPlaying.status) return message.reply(`Je suis déjà en train de lire une vidéo, utilise ${config.prefix}add pour en ajouter une à la playlist.`).catch(logger.error);
+    if (!request || !request[0]) {
+        if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
+        return play();
+    }
+
+    try {
+        await commandAdd(message, request);
+        play();
+    }
+    catch(err) {
+        logger.error(err);
+        message.reply('Il y a eu une erreur en tentant de lire la vidéo.').catch(logger.error);
+    }
+}
+
+function commandPause(message) {
+    if (!isPlaying.status) return;
+    if (message.member.voiceChannel.id != isPlaying.where.id) return message.reply('Tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
+    if (dispatcher.paused) dispatcher.resume();
+    else dispatcher.pause();
+}
+
+function commandStop(message) {
+    if (!isPlaying.status) return;
+    if (message.member.voiceChannel.id != isPlaying.where.id) return message.reply('Tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
+    wasStopped = true;
+    dispatcher.end();
+}
+
+function commandPlaylist(message) {
+    if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
+
+    const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
+    const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
+
+    const embedContent = {
+        color: 0x9b0f29,
+        author: {
+            name: 'Liste de lecture',
+            icon_url: 'attachment://youtubeIcon.png',
+        },
+        description: '',
+        fields: [],
+        timestamp: new Date(),
+        footer: {
+            text: 'Derpy v' + process.env.npm_package_version,
+            icon_url: 'attachment://area51.png',
+        },
+    };
+
+    playlist.forEach(item => {
+        embedContent.fields.push(
+            {
+                name: item.title,
+                value: `\`\`\`\nMembre: ${item.who.username}\nCanal: ${item.where.name}\`\`\``,
+                //inline: true,
+            });
+    });
+    message.channel.send({ files: [area51, youtubeIcon], embed: embedContent });
+}
+
+// This will follow the trolls who launch a music and leave the channel
+client.on('voiceStateUpdate', (oldMember, newMember) => {
+    if (!isPlaying.status) return;
+    if (isPlaying.who.id != newMember.id) return;
+    if (oldMember.voiceChannelID != newMember.voiceChannelID) {
+        if (!config.moduleConfig.music.allowedVoiceChannels.includes(newMember.voiceChannelID)) {
+            dispatcher.end();
+            client.guilds.get(config.guildID).channels.get(config.channelID).send('Bien tenté, mais non.').catch(logger.error);
+        }
+        else {
+            isPlaying.where = newMember.voiceChannel;
+            newMember.voiceChannel.join();
+        }
+    }
+});
+
+exports.commandPlay = commandPlay;
+exports.commandAdd = commandAdd;
+exports.commandPause = commandPause;
+exports.commandStop = commandStop;
+exports.commandPlaylist = commandPlaylist;
+
+logger.debug('Module music loaded');

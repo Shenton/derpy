@@ -1,3 +1,4 @@
+// npm modules
 const Discord = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -31,6 +32,7 @@ client.once('ready', () => {
     require('./modules/response');
     require('./modules/rss');
     require('./modules/reddit');
+    require('./modules/mp3');
 
     const restarted = db.getData('/restart/restarted');
     if (restarted) {
@@ -42,7 +44,7 @@ client.once('ready', () => {
 });
 
 // Require and declare the commands
-const commandFiles = fs.readdirSync(path.join(rootDir, 'src', 'commands')).filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync(path.join(rootDir, 'src/commands')).filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);

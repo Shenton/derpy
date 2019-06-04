@@ -6,7 +6,12 @@ const { Attachment } = require('discord.js');
 const htmlspecialchars = require('html-specialchars');
 
 // Derpy globals
-const { config, logger, rootDir, client } = require('../../app');
+const { config, logger, rootDir, client, getSafe } = require('../../app');
+
+const moduleName = 'music';
+const allowedGuild = getSafe(() => config.moduleConfig[moduleName].guildID, config.guildID);
+const allowedChannel = getSafe(() => config.moduleConfig[moduleName].channelID, config.channelID);
+const { maxVideoDuration, allowedVoiceChannels, maxPlaylistSize } = config.moduleConfig.music;
 
 // Declare objects
 const youtube = new Youtube(config.moduleConfig.music.youtubeApiKey);
@@ -138,7 +143,7 @@ async function getVideoObject(message, request) {
         const video = await youtube.getVideo(url);
         if (video) {
             if (video.raw.snippet.liveBroadcastContent === 'live') return { valid: false, url: 'Je ne lirais pas un live, espèce de troll.' };
-            if (video.durationSeconds > config.moduleConfig.music.maxVideoDuration) return { valid: false, url: 'Je ne lirais pas une vidéo aussi longue, espèce de troll.' };
+            if (video.durationSeconds > maxVideoDuration) return { valid: false, url: 'Je ne lirais pas une vidéo aussi longue, espèce de troll.' };
 
             const title = htmlspecialchars.unescape(video.title);
             return { valid: true, url: video.url, title: title };
@@ -171,7 +176,7 @@ function play(message, where, source, who) {
             return message.channel.send(`Tu n'es plus dans un canal vocal <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                 .catch(logger.error);
         }
-        if (!config.moduleConfig.music.allowedVoiceChannels.includes(member.voiceChannelID)) {
+        if (!allowedVoiceChannels.includes(member.voiceChannelID)) {
             return message.channel.send(`Tu n'es plus dans un canal vocal autorisé <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                 .catch(logger.error);
         }
@@ -197,6 +202,15 @@ function play(message, where, source, who) {
             isPlaying.status = false;
             wasStopped = false;
         });
+        dispatcher.on('error', (err) => {
+            isPlaying.where.leave();
+            isPlaying.status = false;
+            wasStopped = false;
+            logger.error(err);
+        });
+        dispatcher.on('debug', (debug) => {
+            logger.debug(debug);
+        });
     });
 }
 
@@ -207,7 +221,7 @@ async function commandAdd(message, request) {
     const { voiceChannel } = message.member;
 
     if (!voiceChannel) return message.reply('Il faut être dans un canal vocal, tard!').catch(logger.error);
-    if (!config.moduleConfig.music.allowedVoiceChannels.includes(voiceChannel.id)) {
+    if (!allowedVoiceChannels.includes(voiceChannel.id)) {
         return message.reply('Je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
             .catch(logger.error);
     }
@@ -216,7 +230,7 @@ async function commandAdd(message, request) {
     try {
         const video = await getVideoObject(message, request);
         if (video.valid) {
-            if (playlist.length >= config.moduleConfig.music.maxPlaylistSize) return message.reply('La playlist est pleine.').catch(logger.error);
+            if (playlist.length >= maxPlaylistSize) return message.reply('La playlist est pleine.').catch(logger.error);
             playlist.push({ source: video.url, where: voiceChannel, who: message.author, title: video.title });
             message.reply(`Vidéo ${video.title} ajoutée à la playlist`).catch(logger.error);
         }
@@ -248,7 +262,7 @@ async function commandPlay(message, request) {
     if (request[0].length > 80) return message.reply('Nombre de charactères autorisé pour une URL dépassé (80).').catch(logger.error);
 
     if (!voiceChannel) return message.reply('Il faut être dans un canal vocal, tard!').catch(logger.error);
-    if (!config.moduleConfig.music.allowedVoiceChannels.includes(voiceChannel.id)) {
+    if (!allowedVoiceChannels.includes(voiceChannel.id)) {
         return message.reply('Je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
             .catch(logger.error);
     }
@@ -344,10 +358,10 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
     // Check if the member left the channel
     if (oldMember.voiceChannelID != newMember.voiceChannelID) {
         // If the member did not move to an authorized channel, this will also handle a vocal disconnection
-        if (!config.moduleConfig.music.allowedVoiceChannels.includes(newMember.voiceChannelID)) {
+        if (!allowedVoiceChannels.includes(newMember.voiceChannelID)) {
             // Stop the music, taunt the troll
             dispatcher.end();
-            client.guilds.get(config.guildID).channels.get(config.channelID).send(`Bien tenté <@${isPlaying.who.id}>, mais non.`)
+            client.guilds.get(allowedGuild).channels.get(allowedChannel).send(`Bien tenté <@${isPlaying.who.id}>, mais non.`)
                 .catch(logger.error);
         }
         else {

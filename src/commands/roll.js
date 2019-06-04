@@ -22,7 +22,9 @@ module.exports = {
     execute(message, args) {
         const min = Number(args[0]) || 1;
         const max = Number(args[1]) || 100;
-        message.channel.send(getRoll(min, max))
+
+        const roll = getRoll(min, max);
+        message.channel.send(`<@${message.author.id}> rolled: ${roll}`)
             .catch(logger.error);
     },
 };

@@ -95,6 +95,7 @@ async function getVideoObject(message, request) {
 
                 if (searchExitResponses.includes(messageObject.first().content)) {
                     embedObject.delete();
+                    messageObject.first().delete();
                     isSearching = false;
                     return { valid: false, url: 'Recherche annulée.' };
                 }
@@ -103,11 +104,13 @@ async function getVideoObject(message, request) {
 
                     if (!index) {
                         embedObject.delete();
+                        messageObject.first().delete();
                         isSearching = false;
                         return { valid: false, url: 'Il faut répondre avec un chiffre.' };
                     }
                     else {
                         embedObject.delete();
+                        messageObject.first().delete();
                         isSearching = false;
                         url = videos[index - 1].url;
                     }

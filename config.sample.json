@@ -1,0 +1,51 @@
+{
+    "discordToken": "",
+    "ownerID": "000000000000000000",
+    "prefix": "!",
+    "guildID": "000000000000000000",
+    "channelID": "000000000000000000",
+    "allowedRoles": "Some Role,Another Role",
+    "moduleConfig": {
+        "reddit": {
+            "appID": "",
+            "appSecret": "",
+            "channelID": "000000000000000000"
+        },
+        "rss": {
+            "channelID": "000000000000000000"
+        },
+        "pubg": {
+            "apiKey": "",
+            "shard": "steam",
+            "players": "Ibiza,Kaymind,Shroud",
+            "channelID": "000000000000000000"
+        },
+        "music": {
+            "youtubeApiKey": "",
+            "allowedVoiceChannels": ["000000000000000000","000000000000000000"],
+            "maxVideoDuration": 600,
+            "maxPlaylistSize": 20
+        }
+    },
+    "commandConfig": {
+        "match": {
+            "channelID": "000000000000000000"
+        },
+        "full": {
+            "channelID": "000000000000000000"
+        }
+    },
+    "rss": {
+        "nofrag": {
+            "feed": "https://nofrag.com/feed/",
+            "url": "https://nofrag.com/",
+            "description": "L'actualité des simulateurs de meurtres",
+            "img": "nofrag.jpeg"
+        }
+    },
+    "reddit": {
+        "imageSubreddit": [
+            { "name": "pics", "listing": "hot", "limit": 50 }
+        ]
+    }
+}

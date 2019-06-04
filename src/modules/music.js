@@ -12,7 +12,7 @@ const { config, logger, rootDir, client } = require('../../app');
 const youtube = new Youtube(config.moduleConfig.music.youtubeApiKey);
 
 // Module variables
-const playlist = [];
+let playlist = [];
 let isPlaying = {
     status: false,
     where: {},
@@ -312,6 +312,12 @@ function commandPlaylist(message) {
     message.channel.send({ files: [area51, youtubeIcon], embed: embedContent });
 }
 
+function commandClear(message) {
+    if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
+    playlist = [];
+    message.reply('La playlist a été effacée.').catch(logger.error);
+}
+
 // This will follow the trolls who launch a music and leave the channel
 client.on('voiceStateUpdate', (oldMember, newMember) => {
     // Not playing, nothing to do
@@ -349,5 +355,6 @@ exports.commandAdd = commandAdd;
 exports.commandPause = commandPause;
 exports.commandStop = commandStop;
 exports.commandPlaylist = commandPlaylist;
+exports.commandClear = commandClear;
 
 logger.debug('Module music loaded');

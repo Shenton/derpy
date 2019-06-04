@@ -15,7 +15,7 @@ module.exports = {
     allowedGuild: allowedGuild,
     allowedChannel: allowedChannel,
     allowedRoles: allowedRoles,
-    cooldown: 30,
+    cooldown: 10,
     description: 'Joue une vidéo youtube',
     execute(message, args) {
         commandPlay(message, args);

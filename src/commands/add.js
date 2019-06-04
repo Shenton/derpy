@@ -15,7 +15,7 @@ module.exports = {
     allowedGuild: allowedGuild,
     allowedChannel: allowedChannel,
     allowedRoles: allowedRoles,
-    cooldown: 30,
+    cooldown: 10,
     description: 'Ajoute une vidéo youtube à la playlist',
     execute(message, args) {
         commandAdd(message, args);

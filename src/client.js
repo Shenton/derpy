@@ -112,6 +112,7 @@ client.on('message', message => {
     // Execute the command
     try {
         command.execute(message, args);
+        message.delete();
     }
     catch (err) {
         logger.error(err);

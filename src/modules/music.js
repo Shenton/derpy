@@ -15,24 +15,28 @@ const youtube = new Youtube(config.moduleConfig.music.youtubeApiKey);
 const playlist = [];
 let isPlaying = {
     status: false,
-    where: '',
-    who: '',
+    where: {},
+    who: {},
 };
 let dispatcher = {};
 let isSearching = false;
 const searchExitResponses = ['exit', 'nope', 'sortie'];
 let wasStopped = false;
 
-function isURL(url) {
-    return /^(?:\w+:)?\/\/([^\s.]+\.\S{2}[:?\d]*)\S*$/.test(url);
+// Test if the string is an URL.
+function isURL(string) {
+    return /^(?:\w+:)?\/\/([^\s.]+\.\S{2}[:?\d]*)\S*$/.test(string);
 }
-function testURL(url) {
-    return /(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/.test(url);
+// Test if the string is a youtube URL, we are calling the youtube API with this.
+function testURL(string) {
+    return /(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/.test(string);
 }
+// Test if the string contains unwanted characters, we are calling the youtube API with this.
 function testSearch(string) {
-    return /^[a-zA-Z0-9_-\s]+$/.test(string);
+    return /^[a-zA-Z0-9\s-|]+$/.test(string);
 }
 
+// Query the youtube API, and return an object { valid: <true|false>, url: <video object|what went wrong>}
 async function getVideoObject(message, request) {
     let url;
 
@@ -124,6 +128,7 @@ async function getVideoObject(message, request) {
         }
     }
 
+    // url should not be empty, but just in case. Prevent unnecessary call to the youtube API.
     if (!url) return { valid: false };
 
     try {
@@ -145,10 +150,30 @@ async function getVideoObject(message, request) {
     }
 }
 
-function play() {
-    const item = playlist.shift();
-    if (!item) return;
-    const { where, source, who } = item;
+function play(message, where, source, who) {
+    let playOnce = false;
+
+    // It was called by the command play, just play this video.
+    if (where) {
+        playOnce = true;
+    }
+    else {
+        const item = playlist.shift();
+        if (!item) return;
+        ({ where, source, who } = item);
+
+        // Check if the member who asked a video is still in the same voice channel
+        const member = where.guild.members.get(who.id);
+        if (!member.voiceChannel) {
+            return message.channel.send(`Tu n'es plus dans un canal vocal <@${who.id}>, ta vidéo a été retiré de la playlist.`)
+                .catch(logger.error);
+        }
+        if (!config.moduleConfig.music.allowedVoiceChannels.includes(member.voiceChannelID)) {
+            return message.channel.send(`Tu n'es plus dans un canal vocal autorisé <@${who.id}>, ta vidéo a été retiré de la playlist.`)
+                .catch(logger.error);
+        }
+        if (member.voiceChannelID != where.id) where = member.voiceChannel;
+    }
 
     where.join().then(connection => {
         const stream = ytdl(source, { filter: 'audioonly' });
@@ -161,8 +186,8 @@ function play() {
             };
         });
         dispatcher.on('end', () => {
-            if (!wasStopped && playlist.length > 0) {
-                play();
+            if (!playOnce && !wasStopped && playlist.length > 0) {
+                play(message);
                 return;
             }
             isPlaying.where.leave();
@@ -179,12 +204,16 @@ async function commandAdd(message, request) {
     const { voiceChannel } = message.member;
 
     if (!voiceChannel) return message.reply('Il faut être dans un canal vocal, tard!').catch(logger.error);
-    if (!config.moduleConfig.music.allowedVoiceChannels.includes(voiceChannel.id)) return message.reply('Je ne suis pas autorisé à ouvrir ma tronche dans ce canal.').catch(logger.error);
+    if (!config.moduleConfig.music.allowedVoiceChannels.includes(voiceChannel.id)) {
+        return message.reply('Je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
+            .catch(logger.error);
+    }
 
+    // Add the video
     try {
         const video = await getVideoObject(message, request);
         if (video.valid) {
-            if (playlist.length >= config.moduleConfig.music.maxPlaylistSize) return message.reply('La playlist est pleine.');
+            if (playlist.length >= config.moduleConfig.music.maxPlaylistSize) return message.reply('La playlist est pleine.').catch(logger.error);
             playlist.push({ source: video.url, where: voiceChannel, who: message.author, title: video.title });
             message.reply(`Vidéo ${video.title} ajoutée à la playlist`).catch(logger.error);
         }
@@ -199,15 +228,37 @@ async function commandAdd(message, request) {
 }
 
 async function commandPlay(message, request) {
-    if (isPlaying.status) return message.reply(`Je suis déjà en train de lire une vidéo, utilise ${config.prefix}add pour en ajouter une à la playlist.`).catch(logger.error);
-    if (!request || !request[0]) {
-        if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
-        return play();
+    // The command is not authorized when we are already playing a video
+    if (isPlaying.status) {
+        return message.reply(`Je suis déjà en train de lire une vidéo, utilise ${config.prefix}add pour en ajouter une à la playlist.`)
+            .catch(logger.error);
     }
 
+    const { voiceChannel } = message.member;
+
+    // Empty args, the member want to play the playlist
+    if (!request || !request[0]) {
+        if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
+        return play(message);
+    }
+
+    if (request[0].length > 80) return message.reply('Nombre de charactères autorisé pour une URL dépassé (80).').catch(logger.error);
+
+    if (!voiceChannel) return message.reply('Il faut être dans un canal vocal, tard!').catch(logger.error);
+    if (!config.moduleConfig.music.allowedVoiceChannels.includes(voiceChannel.id)) {
+        return message.reply('Je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
+            .catch(logger.error);
+    }
+
+    // Play the video
     try {
-        await commandAdd(message, request);
-        play();
+        const video = await getVideoObject(message, request);
+        if (video.valid) {
+            play(message, voiceChannel, video.url, message.author);
+        }
+        else if (video.url) {
+            message.reply(video.url);
+        }
     }
     catch(err) {
         logger.error(err);
@@ -268,7 +319,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 
     // The bot was moved
     if (newMember.id == client.user.id && oldMember.voiceChannelID != newMember.voiceChannelID) {
-        // Get the voice channel of the member who initiated the command, and join
+        // Get the the member who initiated the command, and join his voice channel
         const member = newMember.guild.members.get(isPlaying.who.id);
         member.voiceChannel.join();
     }
@@ -278,12 +329,15 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 
     // Check if the member left the channel
     if (oldMember.voiceChannelID != newMember.voiceChannelID) {
+        // If the member did not move to an authorized channel, this will also handle a vocal disconnection
         if (!config.moduleConfig.music.allowedVoiceChannels.includes(newMember.voiceChannelID)) {
+            // Stop the music, taunt the troll
             dispatcher.end();
-            client.guilds.get(config.guildID).channels.get(config.channelID).send('Bien tenté, mais non.')
+            client.guilds.get(config.guildID).channels.get(config.channelID).send(`Bien tenté <@${isPlaying.who.id}>, mais non.`)
                 .catch(logger.error);
         }
         else {
+            // Follow the troll
             isPlaying.where = newMember.voiceChannel;
             newMember.voiceChannel.join();
         }

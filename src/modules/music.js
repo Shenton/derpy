@@ -315,6 +315,11 @@ function commandPlaylist(message) {
     message.channel.send({ files: [area51, youtubeIcon], embed: embedContent });
 }
 
+function commandNext(message) {
+    if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
+    dispatcher.end();
+}
+
 function commandClear(message) {
     if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
     playlist = [];
@@ -358,6 +363,7 @@ exports.commandAdd = commandAdd;
 exports.commandPause = commandPause;
 exports.commandStop = commandStop;
 exports.commandPlaylist = commandPlaylist;
+exports.commandNext = commandNext;
 exports.commandClear = commandClear;
 
 logger.debug('Module music loaded');

@@ -13,7 +13,12 @@ class pubgClass {
         this.apiKey = apiKey;
         this.shard = shard;
         this.players = players;
-        this.playersArray = players.split(',');
+        this.playersFormated = [];
+
+        // Slice the players array into 6 comma separated player names
+        for (let i = 0, len = players.length; i < len; i += 6) {
+            this.playersFormated.push(players.slice(i, i + 6).join());
+        }
 
         axios = axiosModule.create({
             baseURL: `https://api.pubg.com/shards/${shard}/`,
@@ -36,16 +41,18 @@ class pubgClass {
 
     async getPlayersLastMatch() {
         try {
-            const res = await axios(`players?filter[playerNames]=${this.players}`);
-            if (res.status > 400) {
-                return (httpErrors[res.status]) ? httpErrors[res.status] : res.status;
-            }
-
             const out = {};
-            res.data.data.forEach(player => {
-                // If the player did not play for a long time the last match did not exists
-                out[player.attributes.name] = player.relationships.matches.data[0] ? player.relationships.matches.data[0].id : null;
-            });
+
+            await Promise.all(this.playersFormated.map(async players => {
+                const res = await axios(`players?filter[playerNames]=${players}`);
+
+                if (res.status > 400) return (httpErrors[res.status]) ? httpErrors[res.status] : res.status;
+
+                res.data.data.forEach(player => {
+                    // If the player did not play for a long time the last match did not exists
+                    out[player.attributes.name] = player.relationships.matches.data[0] ? player.relationships.matches.data[0].id : null;
+                });
+            }));
 
             return out;
         }
@@ -69,7 +76,7 @@ class pubgClass {
             out['players'] = {};
 
             res.data.included.forEach(element => {
-                if (element.type == 'participant' && this.playersArray.includes(element.attributes.stats.name)) {
+                if (element.type == 'participant' && this.players.includes(element.attributes.stats.name)) {
                     out.players[element.attributes.stats.name] = {
                         'DBNOs': element.attributes.stats.DBNOs,
                         'assists': element.attributes.stats.assists,

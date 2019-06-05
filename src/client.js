@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const JsonDB = require('node-json-db');
 
-const { client, config, logger, rootDir } = require('../app');
+const { client, config, logger, rootDir, guildID } = require('../app');
 
 const db = new JsonDB(path.join(rootDir, 'data/db/derpy'), true, true);
 try {
@@ -52,6 +52,9 @@ for (const file of commandFiles) {
 
 // Commands handling
 client.on('message', message => {
+    // This bot is designed to only serve one guild
+    if (message.guild.id != guildID) return;
+
     // Is a command (start with prefix), is not a bot
     if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
@@ -65,13 +68,8 @@ client.on('message', message => {
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
     if (!command) return;
 
-    // Can the command be executed on this guild
-    if (!command.allowedGuild) command.allowedGuild = config.guildID;
-    if (message.guild.id != command.allowedGuild) return;
-
     // Can the command be executed on this channel
-    if (!command.allowedChannel) command.allowedChannel = config.channelID;
-    if (message.channel.id != command.allowedChannel) return;
+    if (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) return;
 
     // Is the command owner only
     if (command.ownerOnly && message.author.id != config.ownerID) {
@@ -81,10 +79,14 @@ client.on('message', message => {
 
     // Do the member has role access
     let hasRoleAccess = false;
-    if (!command.allowedRoles) command.allowedRoles = config.allowedRoles.split(',');
-    command.allowedRoles.forEach(allowedRole => {
-        if (message.member.roles.array().find(role => role.name === allowedRole)) hasRoleAccess = true;
-    });
+    if (command.allowedRoles) {
+        message.member.roles.array().forEach(role => {
+            if (command.allowedRoles.includes(role)) hasRoleAccess = true;
+        });
+    }
+    else {
+        hasRoleAccess = true;
+    }
     if (!hasRoleAccess) return;
 
     /**

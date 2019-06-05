@@ -2,21 +2,18 @@
 const { config, getSafe } = require('../../app');
 
 const commandName = 'pause';
-const allowedGuild = getSafe(() => config.commandConfig[commandName].guildID, false);
-const allowedChannel = getSafe(() => config.commandConfig[commandName].channelID, false);
-const allowedRolesString = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
-const allowedRoles = allowedRolesString ? allowedRolesString.split(',') : false;
+const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);
+const allowedRoles = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
 
 const { commandPause } = require('../modules/music');
 
 module.exports = {
     name: commandName,
     //aliases: ['jouer', 'lire', 'p'],
-    allowedGuild: allowedGuild,
-    allowedChannel: allowedChannel,
+    allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
     cooldown: 5,
-    description: 'Joue une vidéo youtube',
+    description: 'Pause la musique',
     execute(message) {
         commandPause(message);
     },

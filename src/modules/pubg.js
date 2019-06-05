@@ -8,11 +8,9 @@ const axiosModule = require('axios');
 const { Attachment } = require('discord.js');
 
 // Derpy globals
-const { client, config, logger, rootDir, getSafe } = require('../../app');
+const { client, config, logger, rootDir, guildID } = require('../../app');
 
-const moduleName = 'pubg';
-const allowedGuild = getSafe(() => config.moduleConfig[moduleName].guildID, config.guildID);
-const allowedChannel = getSafe(() => config.moduleConfig[moduleName].channelID, config.channelID);
+const { channelID } = config.moduleConfig.pubg;
 
 // local class
 const pubgClass = require('../class/pubg');
@@ -46,7 +44,7 @@ const shortHumanizer = humanizeDuration.humanizer({
 });
 
 // Create the database structure if empty
-pubg.players.split(',').forEach(player => {
+pubg.players.forEach(player => {
     try {
         db.getData(`/players/${player}/lastMatch`);
     }
@@ -174,7 +172,7 @@ function displayMatch(id, message) {
             .catch(logger.error);
     }
     else {
-        client.guilds.get(allowedGuild).channels.get(allowedChannel).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
+        client.guilds.get(guildID).channels.get(channelID).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
             .catch(logger.error);
     }
 }
@@ -266,7 +264,7 @@ function displayMatchShort(id, message) {
             .catch(logger.error);
     }
     else {
-        client.guilds.get(allowedGuild).channels.get(allowedChannel).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
+        client.guilds.get(guildID).channels.get(channelID).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
             .catch(logger.error);
     }
 }
@@ -406,7 +404,7 @@ function displayFullMatch(messageObj) {
 }
 
 if (process.env.NODE_ENV === 'production') updatePlayersLastMatch();
-setInterval(updatePlayersLastMatch, 20 * 1000);
+setInterval(updatePlayersLastMatch, config.moduleConfig.pubg.updateInterval);
 logger.info('Starting pubg interval');
 
 exports.displayLastMatch = displayLastMatch;

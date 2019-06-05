@@ -3,11 +3,9 @@ const path = require('path');
 const jsonfile = require('jsonfile');
 
 // Derpy globals
-const { client, config, rootDir, getSafe, logger } = require('../../app');
+const { client, config, rootDir, getSafe, logger, guildID } = require('../../app');
 
-const moduleName = 'response';
-const allowedGuild = getSafe(() => config.moduleConfig[moduleName].guildID, config.guildID);
-const allowedChannel = getSafe(() => config.moduleConfig[moduleName].channelID, config.channelID);
+const allowedChannels = getSafe(() => config.moduleConfig.response.allowedChannels, false);
 
 const responses = jsonfile.readFileSync(path.join(rootDir, 'assets/json/response.json'));
 const exactResponses = responses.exact;
@@ -25,9 +23,9 @@ for (const trigger in containResponses) {
 client.on('message', message => {
     if (message.author.bot) return;
 
-    if (message.guild.id != allowedGuild) return;
+    if (message.guild.id != guildID) return;
 
-    if (message.channel.id != allowedChannel) return;
+    if (allowedChannels && !allowedChannels.includes(message.channel.id)) return;
 
     const content = message.content.toLowerCase();
     let response;

@@ -2,10 +2,8 @@
 const { config, getSafe, logger } = require('../../app');
 
 const commandName = 'neige';
-const allowedGuild = getSafe(() => config.commandConfig[commandName].guildID, false);
-const allowedChannel = getSafe(() => config.commandConfig[commandName].channelID, false);
-const allowedRolesString = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
-const allowedRoles = allowedRolesString ? allowedRolesString.split(',') : false;
+const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);
+const allowedRoles = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
 
 // Return a random neige
 const letters = 'abcdefghijklmnopqrstuvwxyz';
@@ -24,10 +22,9 @@ function getNeige() {
 module.exports = {
     name: commandName,
     //aliases: ['rand', 'r'],
-    allowedGuild: allowedGuild,
-    allowedChannel: allowedChannel,
+    allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
-    description: 'Roll un nombre au hasard',
+    description: 'Mets du Reums dans le bot',
     execute(message) {
         message.channel.send(getNeige())
             .catch(logger.error);

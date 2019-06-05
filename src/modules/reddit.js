@@ -5,11 +5,10 @@ const moment = require('moment');
 const { Attachment } = require('discord.js');
 
 // Derpy globals
-const { client, config, logger, rootDir, getSafe } = require('../../app');
+const { client, config, logger, rootDir, guildID } = require('../../app');
 
-const moduleName = 'reddit';
-const allowedGuild = getSafe(() => config.moduleConfig[moduleName].guildID, config.guildID);
-const allowedChannel = getSafe(() => config.moduleConfig[moduleName].channelID, config.channelID);
+const allowedChannel = config.moduleConfig.reddit.channelID;
+const { imageSubreddit } = config.moduleConfig.reddit;
 
 // Declare objects
 const snooper = new Snooper({
@@ -49,11 +48,11 @@ function displayImagePost(post) {
         },
     };
 
-    client.guilds.get(allowedGuild).channels.get(allowedChannel).send({ files: [area51, redditIcon], embed: embedContent })
+    client.guilds.get(guildID).channels.get(allowedChannel).send({ files: [area51, redditIcon], embed: embedContent })
         .catch(logger.error);
 }
 
-config.reddit.imageSubreddit.forEach(sub => {
+imageSubreddit.forEach(sub => {
     snooper.watcher.getListingWatcher(sub.name, {
         listing: sub.listing,
         limit: sub.limit,

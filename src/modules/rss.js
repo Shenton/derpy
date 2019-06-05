@@ -5,11 +5,9 @@ const Parser = require('rss-parser');
 const { Attachment } = require('discord.js');
 
 // Derpy globals
-const { client, config, logger, rootDir, getSafe } = require('../../app');
+const { client, config, logger, rootDir, getSafe, guildID } = require('../../app');
 
-const moduleName = 'rss';
-const allowedGuild = getSafe(() => config.moduleConfig[moduleName].guildID, config.guildID);
-const allowedChannel = getSafe(() => config.moduleConfig[moduleName].channelID, config.channelID);
+const allowedChannel = getSafe(() => config.moduleConfig.rss.channelID, config.channelID);
 
 // Declare objects
 const db = new JsonDB(path.join(rootDir, 'data/db/rss'), true, true);
@@ -57,7 +55,7 @@ function displayFeed(origin, originURL, originDescription, originLogo, title, ur
         );
     }
 
-    client.guilds.get(allowedGuild).channels.get(allowedChannel).send({ files: [area51, logo], embed: embedContent })
+    client.guilds.get(guildID).channels.get(allowedChannel).send({ files: [area51, logo], embed: embedContent })
         .catch(logger.error);
 }
 

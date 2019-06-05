@@ -2,21 +2,18 @@
 const { config, getSafe } = require('../../app');
 
 const commandName = 'add';
-const allowedGuild = getSafe(() => config.commandConfig[commandName].guildID, false);
-const allowedChannel = getSafe(() => config.commandConfig[commandName].channelID, false);
-const allowedRolesString = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
-const allowedRoles = allowedRolesString ? allowedRolesString.split(',') : false;
+const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);
+const allowedRoles = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
 
 const { commandAdd } = require('../modules/music');
 
 module.exports = {
     name: commandName,
     aliases: ['ajouter', 'a'],
-    allowedGuild: allowedGuild,
-    allowedChannel: allowedChannel,
+    allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
     cooldown: 10,
-    description: 'Ajoute une vidéo youtube à la playlist',
+    description: 'Ajoute une musique à la playlist',
     execute(message, args) {
         commandAdd(message, args);
     },

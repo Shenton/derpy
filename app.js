@@ -49,7 +49,7 @@ if (process.env.NODE_ENV === 'development') {
             format.label({ label: 'Derpy' }),
             format.timestamp({ format: 'HH:mm:ss' }),
             format.errors({ stack: true }),
-            format.splat(),
+            //format.splat(),
             format.colorize(),
             myFormat,
         ),
@@ -96,6 +96,8 @@ function getSafe(fn, value) {
 // Export what will be used globaly
 // Variables
 exports.rootDir = rootDir;
+exports.guildID = config.guildID;
+exports.channelID = config.channelID;
 
 // Objects
 exports.logger = logger;

@@ -4,20 +4,32 @@
     "prefix": "!",
     "guildID": "000000000000000000",
     "channelID": "000000000000000000",
-    "allowedRoles": "Some Role,Another Role",
+    "allowedRoles": ["Role","AnotherRole"],
     "moduleConfig": {
         "reddit": {
             "appID": "",
             "appSecret": "",
-            "channelID": "000000000000000000"
+            "channelID": "000000000000000000",
+            "imageSubreddit": [
+                { "name": "pics", "listing": "hot", "limit": 50 }
+            ]
         },
         "rss": {
-            "channelID": "000000000000000000"
+            "channelID": "000000000000000000",
+            "feeds": {
+                "nofrag": {
+                    "feed": "https://nofrag.com/feed/",
+                    "url": "https://nofrag.com/",
+                    "description": "L'actualité des simulateurs de meurtres",
+                    "img": "nofrag.jpeg"
+                }
+            }
         },
         "pubg": {
             "apiKey": "",
             "shard": "steam",
-            "players": "Ibiza,Kaymind,Shroud",
+            "updateInterval": 20000,
+            "players": ["Ibiza","Kaymind","Shroud"],
             "channelID": "000000000000000000"
         },
         "music": {
@@ -25,27 +37,17 @@
             "allowedVoiceChannels": ["000000000000000000","000000000000000000"],
             "maxVideoDuration": 600,
             "maxPlaylistSize": 20
+        },
+        "mp3": {
+            "allowedVoiceChannels": ["000000000000000000","000000000000000000","000000000000000000"]
         }
     },
     "commandConfig": {
         "match": {
-            "channelID": "000000000000000000"
+            "allowedChannels": ["000000000000000000"]
         },
         "full": {
-            "channelID": "000000000000000000"
+            "allowedChannels": ["000000000000000000","000000000000000000"]
         }
-    },
-    "rss": {
-        "nofrag": {
-            "feed": "https://nofrag.com/feed/",
-            "url": "https://nofrag.com/",
-            "description": "L'actualité des simulateurs de meurtres",
-            "img": "nofrag.jpeg"
-        }
-    },
-    "reddit": {
-        "imageSubreddit": [
-            { "name": "pics", "listing": "hot", "limit": 50 }
-        ]
     }
 }

@@ -6,11 +6,8 @@ const { Attachment } = require('discord.js');
 const htmlspecialchars = require('html-specialchars');
 
 // Derpy globals
-const { config, logger, rootDir, client, getSafe } = require('../../app');
+const { config, logger, rootDir, client, guildID, channelID } = require('../../app');
 
-const moduleName = 'music';
-const allowedGuild = getSafe(() => config.moduleConfig[moduleName].guildID, config.guildID);
-const allowedChannel = getSafe(() => config.moduleConfig[moduleName].channelID, config.channelID);
 const { maxVideoDuration, allowedVoiceChannels, maxPlaylistSize } = config.moduleConfig.music;
 
 // Declare objects
@@ -361,7 +358,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
         if (!allowedVoiceChannels.includes(newMember.voiceChannelID)) {
             // Stop the music, taunt the troll
             dispatcher.end();
-            client.guilds.get(allowedGuild).channels.get(allowedChannel).send(`Bien tenté <@${isPlaying.who.id}>, mais non.`)
+            client.guilds.get(guildID).channels.get(channelID).send(`Bien tenté <@${isPlaying.who.id}>, mais non.`)
                 .catch(logger.error);
         }
         else {

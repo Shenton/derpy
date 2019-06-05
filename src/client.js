@@ -119,6 +119,7 @@ client.on('message', message => {
         message.delete();
     }
     catch (err) {
+        message.delete();
         logger.error(err);
         message.reply('Il y a eu une erreur avec l\'exécution de cette commande.')
             .catch(logger.error);

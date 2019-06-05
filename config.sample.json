@@ -16,6 +16,7 @@
         },
         "rss": {
             "channelID": "000000000000000000",
+            "updateInterval": 300000,
             "feeds": {
                 "nofrag": {
                     "feed": "https://nofrag.com/feed/",

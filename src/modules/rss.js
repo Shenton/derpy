@@ -5,21 +5,25 @@ const Parser = require('rss-parser');
 const { Attachment } = require('discord.js');
 
 // Derpy globals
-const { client, config, logger, rootDir, getSafe, guildID } = require('../../app');
+const { client, config, logger, rootDir, guildID } = require('../../app');
 
-const allowedChannel = getSafe(() => config.moduleConfig.rss.channelID, config.channelID);
+// Variables
+const { feeds, channelID } = config.moduleConfig.rss;
+const lastFeeds = {};
 
 // Declare objects
 const db = new JsonDB(path.join(rootDir, 'data/db/rss'), true, true);
 const parser = new Parser();
 
 // Create the database structure if empty
-for (const origin in config.rss) {
+for (const origin in feeds) {
     try {
-        db.getData(`/rss/${origin}/lastFeed`);
+        const tryLastFeeds = db.getData(`/feeds/${origin}/lastFeeds`);
+        lastFeeds[origin] = tryLastFeeds;
     }
     catch(err) {
-        db.push(`/rss/${origin}/lastFeed`, '');
+        db.push(`/feeds/${origin}/lastFeeds`, []);
+        lastFeeds[origin] = [];
         logger.debug(err);
     }
 }
@@ -55,33 +59,30 @@ function displayFeed(origin, originURL, originDescription, originLogo, title, ur
         );
     }
 
-    client.guilds.get(guildID).channels.get(allowedChannel).send({ files: [area51, logo], embed: embedContent })
+    client.guilds.get(guildID).channels.get(channelID).send({ files: [area51, logo], embed: embedContent })
         .catch(logger.error);
 }
 
 async function updateRssFeeds() {
-    for (const origin in config.rss) {
-        const lastFeed = db.getData(`/rss/${origin}/lastFeed`);
-        const content = await parser.parseURL(config.rss[origin].feed);
-        let count = 0;
-
-        content.items.forEach(item => {
-            if (lastFeed === item.link) content.items.splice(count, 1000);
-            count++;
-        });
+    for (const origin in feeds) {
+        const content = await parser.parseURL(feeds[origin].feed);
 
         if (content.items.length) {
-            db.push(`/rss/${origin}/lastFeed`, content.items[0].link);
-
             content.items.reverse().forEach(item => {
-                displayFeed(origin, config.rss[origin].url, config.rss[origin].description, config.rss[origin].img, item.title, item.link, item.contentSnippet);
+                if (!lastFeeds[origin].includes(item.link)) {
+                    displayFeed(origin, feeds[origin].url, feeds[origin].description, feeds[origin].img, item.title, item.link, item.contentSnippet);
+                    lastFeeds[origin].push(item.link);
+                }
             });
         }
+
+        lastFeeds[origin] = lastFeeds[origin].slice(0, 49);
+        db.push(`/feeds/${origin}/lastFeeds`, lastFeeds[origin]);
     }
 }
 
 if (process.env.NODE_ENV === 'production') updateRssFeeds();
-setInterval(updateRssFeeds, 20 * 60 * 1000);
+setInterval(updateRssFeeds, config.moduleConfig.rss.updateInterval);
 logger.info('Starting rss interval');
 
 logger.debug('Module rss loaded');

@@ -44,22 +44,22 @@ async function getVideoObject(message, request) {
 
     if (isURL(request[0])) {
         if (testURL(request[0])) url = request[0];
-        else return { valid: false, url: 'URL non valide, seule les vidéos youtube sont supportées.' };
+        else return { valid: false, url: 'l\'URL n\'est pas valide, seule les vidéos youtube sont supportées.' };
     }
     else {
         const search = request.join(' ');
 
-        if (!search || search.length === 0) return { valid: false, url: 'Si il n\'y a rien à chercher, je ne risque pas de trouver.' };
-        if (search.length > 50) return { valid: false, url: 'Nombre de charactères autorisé pour une recherche dépassé (50).' };
-        if (!testSearch(search)) return { valid: false, url: 'La recherche contient des charactères non autorisés.' };
+        if (!search || search.length === 0) return { valid: false, url: 'si il n\'y a rien à chercher, je ne risque pas de trouver.' };
+        if (search.length > 50) return { valid: false, url: 'le nombre de charactères autorisé pour une recherche est dépassé (50).' };
+        if (!testSearch(search)) return { valid: false, url: 'la recherche contient des charactères non autorisés.' };
 
         try {
-            if (isSearching) return { valid: false, url: 'Je suis déjà en train de rechercher une vidéo, attends ton tour.' };
+            if (isSearching) return { valid: false, url: 'je suis déjà en train de rechercher une vidéo, attends ton tour.' };
             isSearching = true;
 
             const videos = await youtube.searchVideos(search);
 
-            if (videos.length === 0) return { valid: false, url: 'Aucune vidéo trouvée.' };
+            if (videos.length === 0) return { valid: false, url: 'je n\'ai rien trouvé.' };
 
             const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
             const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
@@ -99,7 +99,7 @@ async function getVideoObject(message, request) {
                     embedObject.delete();
                     messageObject.first().delete();
                     isSearching = false;
-                    return { valid: false, url: 'Recherche annulée.' };
+                    return { valid: false, url: 'la recherche est annulée.' };
                 }
                 else {
                     const index = Number(messageObject.first().content);
@@ -108,7 +108,7 @@ async function getVideoObject(message, request) {
                         embedObject.delete();
                         messageObject.first().delete();
                         isSearching = false;
-                        return { valid: false, url: 'Il faut répondre avec un chiffre.' };
+                        return { valid: false, url: 'il faut répondre avec un chiffre.' };
                     }
                     else {
                         embedObject.delete();
@@ -123,13 +123,13 @@ async function getVideoObject(message, request) {
                 embedObject.delete()
                     .catch(logger.error);
                 isSearching = false;
-                return { valid: false, url: 'Il y a eu une erreur avec la recherche, ou t\'es trop lent.' };
+                return { valid: false, url: 'il y a eu une erreur avec la recherche, ou t\'es trop lent.' };
             }
         }
         catch(err) {
             logger.error(err);
             isSearching = false;
-            return { valid: false, url: 'Il y a eu une erreur avec la recherche.' };
+            return { valid: false, url: 'il y a eu une erreur avec la recherche.' };
         }
     }
 
@@ -139,19 +139,19 @@ async function getVideoObject(message, request) {
     try {
         const video = await youtube.getVideo(url);
         if (video) {
-            if (video.raw.snippet.liveBroadcastContent === 'live') return { valid: false, url: 'Je ne lirais pas un live, espèce de troll.' };
-            if (video.durationSeconds > maxVideoDuration) return { valid: false, url: 'Je ne lirais pas une vidéo aussi longue, espèce de troll.' };
+            if (video.raw.snippet.liveBroadcastContent === 'live') return { valid: false, url: 'je ne lirais pas un live, espèce de troll.' };
+            if (video.durationSeconds > maxVideoDuration) return { valid: false, url: 'je ne lirais pas une vidéo aussi longue, espèce de troll.' };
 
             const title = htmlspecialchars.unescape(video.title);
             return { valid: true, url: video.url, title: title };
         }
         else {
-            return { valid: false, url: 'Vidéo non trouvée.' };
+            return { valid: false, url: 'je n\'ai rien trouvé.' };
         }
     }
     catch(err) {
         logger.error(err);
-        return { valid: false, url: 'Il y a eu une erreur en tentant de récupérer la vidéo.' };
+        return { valid: false, url: 'il y a eu une erreur en tentant de récupérer la vidéo.' };
     }
 }
 
@@ -211,25 +211,42 @@ function play(message, where, source, who) {
     });
 }
 
+function canPlayHere(message, voiceChannel) {
+    if (!voiceChannel) {
+        message.reply('il faut être dans un canal vocal, tard!').catch(logger.error);
+        return false;
+    }
+
+    if (!allowedVoiceChannels.includes(voiceChannel.id)) {
+        message.reply('je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
+            .catch(logger.error);
+        return false;
+    }
+
+    voiceChannel.members.array().forEach(member => {
+        if (member.presence.game) {
+            message.reply('quelqu\'un joue dans ce canal.').catch(logger.error);
+            return false;
+        }
+    });
+
+    return true;
+}
+
 async function commandAdd(message, request) {
-    if (!request || !request[0]) return message.reply('Si il n\'y a rien à chercher, je ne risque pas de trouver.').catch(logger.error);
-    if (request[0].length > 80) return message.reply('Nombre de charactères autorisé pour une URL dépassé (80).').catch(logger.error);
+    if (!request || !request[0]) return message.reply('si il n\'y a rien à chercher, je ne risque pas de trouver.').catch(logger.error);
+    if (request[0].length > 80) return message.reply('le nombre de charactères autorisé pour une URL dépassé (80).').catch(logger.error);
 
     const { voiceChannel } = message.member;
-
-    if (!voiceChannel) return message.reply('Il faut être dans un canal vocal, tard!').catch(logger.error);
-    if (!allowedVoiceChannels.includes(voiceChannel.id)) {
-        return message.reply('Je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
-            .catch(logger.error);
-    }
+    if (!canPlayHere(message, voiceChannel)) return;
 
     // Add the video
     try {
         const video = await getVideoObject(message, request);
         if (video.valid) {
-            if (playlist.length >= maxPlaylistSize) return message.reply('La playlist est pleine.').catch(logger.error);
+            if (playlist.length >= maxPlaylistSize) return message.reply('la playlist est pleine.').catch(logger.error);
             playlist.push({ source: video.url, where: voiceChannel, who: message.author, title: video.title });
-            message.reply(`Vidéo ${video.title} ajoutée à la playlist`).catch(logger.error);
+            message.reply(`la vidéo ${video.title} a été ajoutée à la playlist`).catch(logger.error);
         }
         else if (video.url) {
             message.reply(video.url);
@@ -237,32 +254,27 @@ async function commandAdd(message, request) {
     }
     catch(err) {
         logger.error(err);
-        message.reply('Il y a eu une erreur en tentant d\'ajouter la vidéo.').catch(logger.error);
+        message.reply('il y a eu une erreur en tentant d\'ajouter la vidéo.').catch(logger.error);
     }
 }
 
 async function commandPlay(message, request) {
     // The command is not authorized when we are already playing a video
     if (isPlaying.status) {
-        return message.reply(`Je suis déjà en train de lire une vidéo, utilise ${config.prefix}add pour en ajouter une à la playlist.`)
+        return message.reply(`je suis déjà en train de lire une vidéo, utilise ${config.prefix}add pour en ajouter une à la playlist.`)
             .catch(logger.error);
     }
-
-    const { voiceChannel } = message.member;
 
     // Empty args, the member want to play the playlist
     if (!request || !request[0]) {
-        if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
+        if (playlist.length === 0) return message.reply('la playlist est vide.').catch(logger.error);
         return play(message);
     }
 
-    if (request[0].length > 80) return message.reply('Nombre de charactères autorisé pour une URL dépassé (80).').catch(logger.error);
+    if (request[0].length > 80) return message.reply('le nombre de charactères autorisé pour une URL dépassé (80).').catch(logger.error);
 
-    if (!voiceChannel) return message.reply('Il faut être dans un canal vocal, tard!').catch(logger.error);
-    if (!allowedVoiceChannels.includes(voiceChannel.id)) {
-        return message.reply('Je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
-            .catch(logger.error);
-    }
+    const { voiceChannel } = message.member;
+    if (!canPlayHere(message, voiceChannel)) return;
 
     // Play the video
     try {
@@ -276,26 +288,26 @@ async function commandPlay(message, request) {
     }
     catch(err) {
         logger.error(err);
-        message.reply('Il y a eu une erreur en tentant de lire la vidéo.').catch(logger.error);
+        message.reply('il y a eu une erreur en tentant de lire la vidéo.').catch(logger.error);
     }
 }
 
 function commandPause(message) {
     if (!isPlaying.status) return;
-    if (message.member.voiceChannel.id != isPlaying.where.id) return message.reply('Tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
+    if (message.member.voiceChannel.id != isPlaying.where.id) return message.reply('tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
     if (dispatcher.paused) dispatcher.resume();
     else dispatcher.pause();
 }
 
 function commandStop(message) {
     if (!isPlaying.status) return;
-    if (message.member.voiceChannel.id != isPlaying.where.id) return message.reply('Tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
+    if (message.member.voiceChannel.id != isPlaying.where.id) return message.reply('tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
     wasStopped = true;
     dispatcher.end();
 }
 
 function commandPlaylist(message) {
-    if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
+    if (playlist.length === 0) return message.reply('la playlist est vide.').catch(logger.error);
 
     const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
     const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
@@ -327,14 +339,14 @@ function commandPlaylist(message) {
 }
 
 function commandNext(message) {
-    if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
+    if (playlist.length === 0) return message.reply('la playlist est vide.').catch(logger.error);
     dispatcher.end();
 }
 
 function commandClear(message) {
-    if (playlist.length === 0) return message.reply('La playlist est vide.').catch(logger.error);
+    if (playlist.length === 0) return message.reply('la playlist est vide.').catch(logger.error);
     playlist = [];
-    message.reply('La playlist a été effacée.').catch(logger.error);
+    message.reply('la playlist a été effacée.').catch(logger.error);
 }
 
 // This will follow the trolls who launch a music and leave the channel

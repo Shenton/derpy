@@ -40,11 +40,12 @@ const logger = createLogger({
 });
 // If we are in dev we want to also output the log to the console
 if (process.env.NODE_ENV === 'development') {
-    const myFormat = format.printf(({ level, message, label, timestamp }) => {
-        return `[${label}] ${timestamp} ${level}: ${message}`;
+    const myFormat = format.printf(({ level, message, label, timestamp, stack }) => {
+        return `[${label}] ${timestamp} ${level}: ${message}${stack ? `\n\x1b[30m${stack}\x1b[0m` : ''}`;
     });
     logger.add(new transports.Console({
         level: 'debug',
+        prettyPrint: true,
         format: format.combine(
             format.label({ label: 'Derpy' }),
             format.timestamp({ format: 'HH:mm:ss' }),

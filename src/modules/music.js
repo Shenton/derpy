@@ -177,6 +177,12 @@ function play(message, where, source, who) {
             return message.channel.send(`Tu n'es plus dans un canal vocal autorisé <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                 .catch(logger.error);
         }
+        member.voiceChannel.members.array().forEach(mb => {
+            if (mb.presence.game) {
+                return message.channel.send(`Quelqu'un joue dans ce canal <@${who.id}>, ta vidéo a été retiré de la playlist.`)
+                    .catch(logger.error);
+            }
+        });
         if (member.voiceChannelID != where.id) where = member.voiceChannel;
     }
 
@@ -213,7 +219,8 @@ function play(message, where, source, who) {
 
 function canPlayHere(message, voiceChannel) {
     if (!voiceChannel) {
-        message.reply('il faut être dans un canal vocal, tard!').catch(logger.error);
+        message.reply('il faut être dans un canal vocal, tard!')
+            .catch(logger.error);
         return false;
     }
 
@@ -225,7 +232,8 @@ function canPlayHere(message, voiceChannel) {
 
     voiceChannel.members.array().forEach(member => {
         if (member.presence.game) {
-            message.reply('quelqu\'un joue dans ce canal.').catch(logger.error);
+            message.reply('quelqu\'un joue dans ce canal.')
+                .catch(logger.error);
             return false;
         }
     });

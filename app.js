@@ -41,7 +41,13 @@ const logger = createLogger({
 // If we are in dev we want to also output the log to the console
 if (process.env.NODE_ENV === 'development') {
     const myFormat = format.printf(({ level, message, label, timestamp, stack }) => {
-        return `[${label}] ${timestamp} ${level}: ${message}${stack ? `\n\x1b[30m${stack}\x1b[0m` : ''}`;
+        let color = '\x1b[37m';
+
+        if (level == 'debug') color = '\x1b[36m';
+        else if (level == 'info') color = '\x1b[32m';
+        else if (level == 'error') color = '\x1b[31m';
+
+        return `[${label}] ${timestamp} ${level}: ${color + message}\x1b[0m${stack ? `\n\x1b[30m${stack}\x1b[0m` : ''}`;
     });
     logger.add(new transports.Console({
         level: 'debug',
@@ -50,8 +56,8 @@ if (process.env.NODE_ENV === 'development') {
             format.label({ label: 'Derpy' }),
             format.timestamp({ format: 'HH:mm:ss' }),
             format.errors({ stack: true }),
-            //format.splat(),
-            format.colorize(),
+            format.splat(),
+            //format.colorize(),
             myFormat,
         ),
     }));

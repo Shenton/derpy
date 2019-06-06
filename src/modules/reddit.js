@@ -7,8 +7,7 @@ const { Attachment } = require('discord.js');
 // Derpy globals
 const { client, config, logger, rootDir, guildID } = require('../../app');
 
-const allowedChannel = config.moduleConfig.reddit.channelID;
-const { imageSubreddit } = config.moduleConfig.reddit;
+const { channelID, imageSubreddit } = config.moduleConfig.reddit;
 
 // Declare objects
 const snooper = new Snooper({
@@ -48,7 +47,7 @@ function displayImagePost(post) {
         },
     };
 
-    client.guilds.get(guildID).channels.get(allowedChannel).send({ files: [area51, redditIcon], embed: embedContent })
+    client.guilds.get(guildID).channels.get(channelID).send({ files: [area51, redditIcon], embed: embedContent })
         .catch(logger.error);
 }
 

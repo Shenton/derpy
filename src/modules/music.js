@@ -4,6 +4,7 @@ const ytdl = require('ytdl-core');
 const path = require('path');
 const { Attachment } = require('discord.js');
 const htmlspecialchars = require('html-specialchars');
+const JsonDB = require('node-json-db');
 
 // Derpy globals
 const { config, logger, rootDir, client, guildID, channelID } = require('../../app');
@@ -11,6 +12,15 @@ const { maxVideoDuration, allowedVoiceChannels, maxPlaylistSize } = config.modul
 
 // Declare objects
 const youtube = new Youtube(config.moduleConfig.music.youtubeApiKey);
+const db = new JsonDB(path.join(rootDir, 'data/db/music'), true, true);
+
+try {
+    db.getData('/dispatcher/volume}');
+}
+catch (err) {
+    db.push('/dispatcher/volume}', 1);
+    logger.debug(err);
+}
 
 // Module variables
 let playlist = [];
@@ -187,7 +197,10 @@ function play(message, where, source, who) {
 
     where.join().then(connection => {
         const stream = ytdl(source, { filter: 'audioonly' });
+        let volume = db.getData('/dispatcher/volume}');
+        if (volume > 1) volume = 1;
         dispatcher = connection.playStream(stream);
+        dispatcher.setVolume(volume);
         dispatcher.on('start', () => {
             isPlaying = {
                 status: true,
@@ -295,7 +308,8 @@ async function commandPlay(message, request) {
     }
     catch(err) {
         logger.error(err);
-        message.reply('il y a eu une erreur en tentant de lire la vidéo.').catch(logger.error);
+        message.reply('il y a eu une erreur en tentant de lire la vidéo.')
+            .catch(logger.error);
     }
 }
 
@@ -356,6 +370,27 @@ function commandClear(message) {
     message.reply('la playlist a été effacée.').catch(logger.error);
 }
 
+function commandVolume(message, args) {
+    if (!args.length) {
+        const volume = db.getData('/dispatcher/volume}');
+        message.reply(`le volume est de ${volume * 100}.`)
+            .catch(logger.error);
+    }
+    else {
+        let newVolume = Number(args[0]);
+
+        if (!newVolume || newVolume < 0 || newVolume > 100 || !Number.isInteger(newVolume)) {
+            return message.reply('il faut fournir un nombre entier compris en 0 et 100.')
+                .catch(logger.error);
+        }
+
+        newVolume = newVolume / 100;
+        db.push('/dispatcher/volume}', newVolume);
+
+        if (isPlaying.status) dispatcher.setVolume(newVolume);
+    }
+}
+
 // This will follow the trolls who launch a music and leave the channel
 client.on('voiceStateUpdate', (oldMember, newMember) => {
     // Not playing, nothing to do
@@ -395,5 +430,6 @@ exports.commandStop = commandStop;
 exports.commandPlaylist = commandPlaylist;
 exports.commandNext = commandNext;
 exports.commandClear = commandClear;
+exports.commandVolume = commandVolume;
 
 logger.debug('Module music loaded');

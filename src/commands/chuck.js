@@ -3,7 +3,8 @@ const path = require('path');
 const jsonfile = require('jsonfile');
 
 // Derpy globals
-const { config, rootDir, getSafe, logger } = require('../../app');
+const { config, rootDir, logger } = require('../../app');
+const { getSafe } = require('../methods');
 
 const commandName = 'chuck';
 const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);

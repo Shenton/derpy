@@ -9,7 +9,6 @@ const { Attachment } = require('discord.js');
 
 // Derpy globals
 const { client, config, logger, rootDir, guildID } = require('../../app');
-
 const { channelID } = config.moduleConfig.pubg;
 
 // local class

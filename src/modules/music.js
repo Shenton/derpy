@@ -7,7 +7,6 @@ const htmlspecialchars = require('html-specialchars');
 
 // Derpy globals
 const { config, logger, rootDir, client, guildID, channelID } = require('../../app');
-
 const { maxVideoDuration, allowedVoiceChannels, maxPlaylistSize } = config.moduleConfig.music;
 
 // Declare objects

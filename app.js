@@ -85,17 +85,6 @@ const client = new Discord.Client();
 if (process.env.NODE_ENV === 'development') client.on('debug', logger.debug.bind(logger));
 client.on('error', logger.error.bind(logger));
 
-// Try to execute the provided function, return value if it fails
-function getSafe(fn, value) {
-    try {
-        return fn() ? fn() : value;
-    }
-    catch (err) {
-        logger.debug(err);
-        return value;
-    }
-}
-
 // Export what will be used globaly
 // Variables
 exports.rootDir = rootDir;
@@ -108,7 +97,6 @@ exports.client = client;
 exports.config = config;
 
 // Methods
-exports.getSafe = getSafe;
 exports.loadConfig = loadConfig;
 
 // Init the bot

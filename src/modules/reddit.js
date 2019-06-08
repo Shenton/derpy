@@ -6,7 +6,6 @@ const RedditWatcher = require('../class/reddit');
 
 // Derpy globals
 const { client, config, logger, rootDir, guildID } = require('../../app');
-
 const { channelID, imageSubreddit } = config.moduleConfig.reddit;
 
 function displayImagePost(post) {

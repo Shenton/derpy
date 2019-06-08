@@ -1,5 +1,6 @@
 // Derpy globals
-const { config, getSafe, logger } = require('../../app');
+const { config, logger } = require('../../app');
+const { getSafe } = require('../methods');
 
 const commandName = 'neige';
 const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);

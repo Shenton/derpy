@@ -3,8 +3,8 @@ const path = require('path');
 const jsonfile = require('jsonfile');
 
 // Derpy globals
-const { client, config, rootDir, getSafe, logger, guildID } = require('../../app');
-
+const { client, config, rootDir, logger, guildID } = require('../../app');
+const { getSafe } = require('../methods');
 const allowedChannels = getSafe(() => config.moduleConfig.response.allowedChannels, false);
 
 const responses = jsonfile.readFileSync(path.join(rootDir, 'assets/json/response.json'));

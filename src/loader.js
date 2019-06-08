@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const JsonDB = require('node-json-db');
 
-const { client, logger, rootDir } = require('../app');
+const { client, logger, rootDir, config, helpEmbed } = require('../app');
 const modulesList = [
     {
         name: 'admin',
@@ -18,11 +18,13 @@ const modulesList = [
         name: 'music',
         load: false,
         commands: true,
+        publicName: 'Musique',
     },
     {
         name: 'pubg',
         load: true,
         commands: true,
+        publicName: 'PUBG',
     },
     {
         name: 'reddit',
@@ -61,9 +63,18 @@ modulesList.forEach(mod => {
 
         if (mod.commands) {
             const commandFiles = fs.readdirSync(path.join(rootDir, 'src/commands', mod.name)).filter(file => file.endsWith('.js'));
+            const commandsList = [];
             for (const file of commandFiles) {
                 const command = require(`./commands/${mod.name}/${file}`);
                 client.commands.set(command.name, command);
+
+                const commandName = path.basename(file, '.js');
+                commandsList.push(config.prefix + commandName);
+            }
+
+            if (mod.publicName) {
+                const commandsString = commandsList.join(' ');
+                helpEmbed.fields.push({ name: mod.publicName, value: `\`${commandsString}\`` });
             }
         }
     }

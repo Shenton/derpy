@@ -90,6 +90,20 @@ client.on('error', logger.error.bind(logger));
 exports.rootDir = rootDir;
 exports.guildID = config.guildID;
 exports.channelID = config.channelID;
+exports.helpEmbed = {
+    color: 0x25701e,
+    author: {
+        name: 'Voici la liste de mes commandes',
+        icon_url: 'attachment://area51.png',
+    },
+    description: `Utilise ${config.prefix}help <nom de la command>, pour avoir plus d'informations.`,
+    fields: [],
+    timestamp: new Date(),
+    footer: {
+        text: 'Derpy v' + process.env.npm_package_version,
+        icon_url: 'attachment://area51.png',
+    },
+};
 
 // Objects
 exports.logger = logger;

@@ -16,7 +16,7 @@ module.exports = {
     cooldown: 10,
     args: true,
     //usage: '<URL de youtube|URL de soundcloud>',
-    usage: '<URL de youtube>',
+    usage: '<[URL de youtube]|[recherche]>',
     description: 'Ajoute une musique à la playlist',
     execute(message, args) {
         commandAdd(message, args);

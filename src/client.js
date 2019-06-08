@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const JsonDB = require('node-json-db');
 
-const { client, config, logger, rootDir, guildID } = require('../app');
+const { client, config, logger, rootDir, guildID, channelID, helpEmbed } = require('../app');
 
 const db = new JsonDB(path.join(rootDir, 'data/db/derpy'), true, true);
 try {
@@ -31,9 +31,7 @@ client.once('ready', () => {
 
     const restarted = db.getData('/restart/restarted');
     if (restarted) {
-        const guild = db.getData('/restart/guild');
-        const channel = db.getData('/restart/channel');
-        client.guilds.get(guild).channels.get(channel).send('Je suis de retour!')
+        client.guilds.get(guildID).channels.get(channelID).send('Je suis de retour!')
             .catch(logger.error);
         db.push('/restart/restarted', false);
     }
@@ -41,10 +39,16 @@ client.once('ready', () => {
 
 // Require and declare the commands
 const commandFiles = fs.readdirSync(path.join(rootDir, 'src/commands')).filter(file => file.endsWith('.js'));
+const commandsList = [];
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
+
+    const commandName = path.basename(file, '.js');
+    commandsList.push(config.prefix + commandName);
 }
+const commandsString = commandsList.join(' ');
+helpEmbed.fields.push({ name: 'Génériques', value: `\`${commandsString}\`` });
 
 // Commands handling
 client.on('message', message => {
@@ -135,10 +139,9 @@ client.on('message', message => {
     // Execute the command
     try {
         command.execute(message, args);
-        message.delete();
+        if (message.channel.type === 'text') message.delete();
     }
     catch (err) {
-        message.delete();
         logger.error(err);
         message.reply('il y a eu une erreur avec l\'exécution de cette commande.')
             .catch(logger.error);

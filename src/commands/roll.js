@@ -17,6 +17,7 @@ module.exports = {
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
     description: 'Roll un nombre au hasard',
+    usage: '<Sans argument roll entre 1 et 100|[Nombre] Roll entre 1 et le nombre|[Nombre] [Nombre]>',
     execute(message, args) {
         const min = Number(args[0]) || 1;
         const max = Number(args[1]) || 100;

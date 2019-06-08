@@ -30,13 +30,10 @@ const logger = createLogger({
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
         format.errors({ stack: true }),
         format.splat(),
-        format.json(),
+        format.json()
     ),
     defaultMeta: { service: 'Derpy' },
-    transports: [
-        errorTransport,
-        combinedTransport,
-    ],
+    transports: [errorTransport, combinedTransport],
 });
 // If we are in dev we want to also output the log to the console
 if (process.env.NODE_ENV === 'development') {
@@ -57,8 +54,7 @@ if (process.env.NODE_ENV === 'development') {
             format.timestamp({ format: 'HH:mm:ss' }),
             format.errors({ stack: true }),
             format.splat(),
-            //format.colorize(),
-            myFormat,
+            myFormat
         ),
     }));
 }

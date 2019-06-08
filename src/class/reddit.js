@@ -1,7 +1,7 @@
-const axiosModule = require('axios');
+const Axios = require('axios');
 const EventEmitter = require('events');
 
-const axios = axiosModule.create({
+const axios = Axios.create({
     baseURL: 'https://www.reddit.com/r/',
     headers: {
         'Accept': 'application/json',
@@ -20,7 +20,7 @@ class RedditCaller extends EventEmitter {
         this.canWatch = false;
 
         this.getJson()
-            .then((data) => {
+            .then(data => {
                 if (!data) throw 'Reddit class - Data is undefined.';
                 if (typeof data !== 'object') throw `Reddit class - Data is not an object. Type: ${typeof data}`;
                 if (data.kind !== 'Listing') throw `Reddit class - Data.kind is not "Listing". Data.kind: ${data.kind}`;
@@ -31,7 +31,7 @@ class RedditCaller extends EventEmitter {
 
                 this.canWatch = true;
             })
-            .catch((err) => {
+            .catch(err => {
                 throw err;
             });
     }
@@ -40,25 +40,15 @@ class RedditCaller extends EventEmitter {
         return new Promise((resolve, reject) => {
             axios(this.url)
                 .then(res => {
-                    if (res.status == 200) {
-                        resolve(res.data);
-                    }
-                    else {
-                        reject(`Reddit class - Axios: Status: ${res.status}`);
-                    }
+                    if (res.status == 200) resolve(res.data);
+                    else reject(`Reddit class - Axios: Status: ${res.status}`);
                 })
                 .catch(err => {
                     let errorString;
 
-                    if (err.response) {
-                        errorString = `Reddit class - Axios: Status: ${err.response.status} Data: ${err.response.data}`;
-                    }
-                    else if (err.request) {
-                        errorString = `Reddit class - Axios: Request: ${err.request}`;
-                    }
-                    else {
-                        errorString = `Reddit class - Axios: Message: ${err.message}`;
-                    }
+                    if (err.response) errorString = `Reddit class - Axios: Status: ${err.response.status} Data: ${err.response.data}`;
+                    else if (err.request) errorString = `Reddit class - Axios: Request: ${err.request}`;
+                    else errorString = `Reddit class - Axios: Message: ${err.message}`;
 
                     reject(errorString);
                 });
@@ -69,7 +59,7 @@ class RedditCaller extends EventEmitter {
         if (!this.canWatch) return;
 
         this.getJson()
-            .then((data) => {
+            .then(data => {
                 if (!data) this.emit('error', 'RedditWatcher - Data is undefined.');
                 if (typeof data !== 'object') this.emit('error', `RedditWatcher - Data is not an object. Type: ${typeof data}`);
                 if (data.kind !== 'Listing') this.emit('error', `RedditWatcher - Data.kind is not "Listing". Data.kind: ${data.kind}`);
@@ -85,7 +75,7 @@ class RedditCaller extends EventEmitter {
                     }
                 }
             })
-            .catch((err) => {
+            .catch(err => {
                 this.emit('error', err);
             });
     }

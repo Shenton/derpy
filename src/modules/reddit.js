@@ -43,7 +43,7 @@ const reddit = new RedditWatcher();
 
 imageSubreddit.forEach(sub => {
     reddit.listingWatcher(sub)
-        .on('gotNew', (post) => {
+        .on('gotNew', post => {
             const urlmatch = /\.([a-zA-Z]+$)/.test(post.data.url);
             if (!post.data.stickied && post.kind === 't3' && urlmatch) {
                 displayImagePost(post.data);

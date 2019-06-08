@@ -69,12 +69,12 @@ client.on('message', message => {
             isPlaying = false;
             voiceChannel.leave();
         });
-        dispatcher.on('error', (err) => {
+        dispatcher.on('error', err => {
             isPlaying = false;
             voiceChannel.leave();
             logger.error(err);
         });
-        dispatcher.on('debug', (debug) => {
+        dispatcher.on('debug', debug => {
             logger.debug(debug);
         });
     });

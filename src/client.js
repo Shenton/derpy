@@ -10,7 +10,7 @@ const db = new JsonDB(path.join(rootDir, 'data/db/derpy'), true, true);
 try {
     db.getData('/restart/restarted');
 }
-catch(err) {
+catch (err) {
     db.push('/restart/restarted', false);
     logger.debug(err);
 }
@@ -37,7 +37,8 @@ client.once('ready', () => {
     if (restarted) {
         const guild = db.getData('/restart/guild');
         const channel = db.getData('/restart/channel');
-        client.guilds.get(guild).channels.get(channel).send('Je suis de retour!');
+        client.guilds.get(guild).channels.get(channel).send('Je suis de retour!')
+            .catch(logger.error);
         db.push('/restart/restarted', false);
     }
 });
@@ -58,29 +59,34 @@ client.on('message', message => {
     if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
     /**
-     * Set the command name and the arguments
-     * Set the command to an object
-     * Check if the command exists
-     */
+   * Set the command name and the arguments
+   * Set the command to an object
+   * Check if the command exists
+   */
     const args = message.content.slice(config.prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
-    const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+    const command = client.commands.get(commandName) ||
+        client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
     if (!command) return;
 
     // Is the command owner only
     if (command.ownerOnly && message.author.id != config.ownerID) {
         logger.warn(`User ${message.author.username} (${message.author.tag}) try to use owner command ${commandName}`);
-        return message.reply('tu ne peux pas utiliser cette commande.');
+        return message.reply('tu ne peux pas utiliser cette commande.')
+            .catch(logger.error);
     }
 
     // The command cannot be used in DM
     if (message.channel.type !== 'text' && command.guildOnly) {
-        return message.reply('cette commande ne peut pas être utilisée en privé.');
+        return message.reply('cette commande ne peut pas être utilisée en privé.')
+            .catch(logger.error);
     }
 
     // Can the command be executed on this channel
-    if (message.channel.type === 'text' && command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) {
-        return message.reply('cette commande ne peut pas être utilisée sur ce canal.');
+    if (message.channel.type === 'text' && command.allowedChannels &&
+        !command.allowedChannels.includes(message.channel.id)) {
+        return message.reply('cette commande ne peut pas être utilisée sur ce canal.')
+            .catch(logger.error);
     }
 
     // Do the member has role access
@@ -94,7 +100,8 @@ client.on('message', message => {
         hasRoleAccess = true;
     }
     if (!hasRoleAccess) {
-        return message.reply('tu ne peux pas utiliser cette commande.');
+        return message.reply('tu ne peux pas utiliser cette commande.')
+            .catch(logger.error);
     }
 
     /**
@@ -123,7 +130,8 @@ client.on('message', message => {
     if (command.args && !args.length) {
         let reply = 'cette commande a besoin d\'argument(s).';
         if (command.usage) reply += `\nUtilisation: \`${config.prefix}${command.name} ${command.usage}\``;
-        return message.reply(reply);
+        return message.reply(reply)
+            .catch(logger.error);
     }
 
     logger.info(`User ${message.author.tag} used command: ${commandName} - with args: ${args}`);

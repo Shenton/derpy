@@ -19,7 +19,7 @@ class RedditCaller extends EventEmitter {
         this.postsList = [];
         this.canWatch = false;
 
-        this.getJson(this.name, this.listing)
+        this.getJson()
             .then((data) => {
                 if (!data) throw 'Reddit class - Data is undefined.';
                 if (typeof data !== 'object') throw `Reddit class - Data is not an object. Type: ${typeof data}`;

@@ -35,6 +35,8 @@ client.once('ready', () => {
             .catch(logger.error);
         db.push('/restart/restarted', false);
     }
+
+    //client.fetchVoiceRegions().then(regions => regions.array().forEach(region => logger.debug('%o', region)));
 });
 
 // Require and declare the commands

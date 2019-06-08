@@ -3,7 +3,7 @@ const path = require('path');
 const JsonDB = require('node-json-db');
 
 // Derpy globals
-const { rootDir, config, getSafe, logger } = require('../../app');
+const { rootDir, config, getSafe, logger } = require('../../../app');
 
 const db = new JsonDB(path.join(rootDir, 'data/db/derpy'), true, true);
 

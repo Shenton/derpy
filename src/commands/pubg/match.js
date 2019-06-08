@@ -1,7 +1,7 @@
-const pubg = require('../modules/pubg');
+const pubg = require('../../modules/pubg');
 
 // Derpy globals
-const { config, getSafe } = require('../../app');
+const { config, getSafe } = require('../../../app');
 
 const commandName = 'match';
 const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);

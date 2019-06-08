@@ -1,20 +1,19 @@
-// Derpy globals
-const { config, getSafe } = require('../../app');
+const pubg = require('../../modules/pubg');
 
-const commandName = 'pause';
+// Derpy globals
+const { config, getSafe } = require('../../../app');
+
+const commandName = 'full';
 const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);
 const allowedRoles = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
 
-const { commandPause } = require('../modules/music');
-
 module.exports = {
     name: commandName,
-    //aliases: ['jouer', 'lire', 'p'],
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
-    cooldown: 5,
-    description: 'Pause la musique',
+    description: 'Affiche la totalité des informations du dernier match de pubg affiché',
+    cooldown: 10,
     execute(message) {
-        commandPause(message);
+        pubg.displayFullMatch(message);
     },
 };

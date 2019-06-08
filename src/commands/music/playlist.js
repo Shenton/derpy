@@ -1,20 +1,20 @@
 // Derpy globals
-const { config, getSafe } = require('../../app');
+const { config, getSafe } = require('../../../app');
 
-const commandName = 'clear';
+const commandName = 'playlist';
 const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);
 const allowedRoles = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
 
-const { commandClear } = require('../modules/music');
+const { commandPlaylist } = require('../../modules/music');
 
 module.exports = {
     name: commandName,
-    //aliases: ['jouer', 'lire', 'p'],
+    aliases: ['list', 'liste', 'pl'],
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
-    cooldown: 10,
-    description: 'Vide la playlist',
+    cooldown: 5,
+    description: 'Affiche la liste de lecture',
     execute(message) {
-        commandClear(message);
+        commandPlaylist(message);
     },
 };

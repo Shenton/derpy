@@ -20,18 +20,14 @@ const cooldowns = new Discord.Collection();
 
 /**
  * When the bot is connected and ready to interact with the Discord server/guild/whatever
- * Init the bot modules
+ * Call the bot modules loader
  */
 client.once('ready', () => {
     logger.info(`Logged in as ${client.user.tag}! (${client.user.id})`);
     client.user.setActivity('Hurr Durr Derp');
 
-    // Modules init
-    require('./modules/pubg');
-    require('./modules/response');
-    require('./modules/rss');
-    require('./modules/reddit');
-    require('./modules/mp3');
+    // Modules loader
+    require('./loader');
 
     const restarted = db.getData('/restart/restarted');
     if (restarted) {

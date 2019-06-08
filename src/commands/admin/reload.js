@@ -1,5 +1,5 @@
 // Derpy globals
-const { loadConfig, config, getSafe, logger } = require('../../app');
+const { loadConfig, config, getSafe, logger } = require('../../../app');
 
 const commandName = 'reload';
 const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);

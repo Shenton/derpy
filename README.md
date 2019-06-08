@@ -3,6 +3,14 @@ A simple discord bot made with love, using Node.js.
 
 This repository is mainly here to easily deploy Derpy on my server, but if someone can find any kind of use from it, go.
 
+## What it can do
+* Fetch the last PUBG match for a list of players
+* Play youtube audio
+* Fetch rss feeds (and send a message when a new entry is found)
+* Fetch reddit 'hot', 'new', 'rising', 'controversial', 'top', 'gilded' listings (and send a message when a new entry is found)
+* Respond to a member trigger message
+* And some stupid/fun/whatever you name it stuff
+
 ## Deploy Derpy
 Before anything you will need:
 * Node.js (Derpy was developed with version 10.15.3)
@@ -43,3 +51,6 @@ npm run dev
 Derpy is designed to server one guild, and it will nether change. It contains private jokes, stupid things, etc.
 
 I will not add new features if you ask me. The licence is MIT, fork it, copy it, take whatever you want from it, and create your own. But do take note that I am not a skilled developer and node/javascript is new to me.
+
+## Licence
+MIT

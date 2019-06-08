@@ -1,25 +1,13 @@
 // npm modules
 const path = require('path');
-const Snooper = require('reddit-snooper');
 const moment = require('moment');
 const { Attachment } = require('discord.js');
+const RedditWatcher = require('../class/reddit');
 
 // Derpy globals
 const { client, config, logger, rootDir, guildID } = require('../../app');
 
 const { channelID, imageSubreddit } = config.moduleConfig.reddit;
-
-// Declare objects
-const snooper = new Snooper({
-    //username: 'reddit_username',
-    //password: 'reddit password',
-    app_id: config.moduleConfig.reddit.appID,
-    api_secret: config.moduleConfig.reddit.appSecret,
-    //user_agent: 'OPTIONAL user agent for your bot',
-
-    automatic_retries: true,
-    api_requests_per_minute: 12,
-});
 
 function displayImagePost(post) {
     const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
@@ -51,19 +39,17 @@ function displayImagePost(post) {
         .catch(logger.error);
 }
 
+const reddit = new RedditWatcher();
+
 imageSubreddit.forEach(sub => {
-    snooper.watcher.getListingWatcher(sub.name, {
-        listing: sub.listing,
-        limit: sub.limit,
-    })
-        .on('item', function(post) {
-            const urlmatch = /\.([a-zA-Z]+$)/.test(post.data.url.match);
+    reddit.listingWatcher(sub)
+        .on('gotNew', (post) => {
+            const urlmatch = /\.([a-zA-Z]+$)/.test(post.data.url);
             if (!post.data.stickied && post.kind === 't3' && urlmatch) {
                 displayImagePost(post.data);
             }
-
         })
-        .on('error', logger.error.bind(logger));
+        .on('error', logger.error);
 });
 
 logger.debug('Module reddit loaded');

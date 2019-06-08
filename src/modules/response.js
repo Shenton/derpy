@@ -21,11 +21,18 @@ for (const trigger in containResponses) {
 }
 
 client.on('message', message => {
-    if (message.author.bot) return;
-
-    if (message.guild.id != guildID) return;
-
-    if (allowedChannels && !allowedChannels.includes(message.channel.id)) return;
+    /**
+     * Is the author a bot
+     * Is the channel not a text channel
+     * Is the guild not the one we are serving
+     * Is not an allowed channel
+     *
+     * then return
+     */
+    if (message.author.bot
+        || message.channel.type !== 'text'
+        || message.guild.id != guildID
+        || allowedChannels && !allowedChannels.includes(message.channel.id)) return;
 
     const content = message.content.toLowerCase();
     let response;

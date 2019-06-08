@@ -21,17 +21,20 @@ function testCommand(string) {
 }
 
 client.on('message', message => {
-    // This bot is designed to only serve one guild
-    if (message.guild.id != guildID) return;
-
-    // Is a command (start with prefix), is not a bot
-    if (!message.content.startsWith(config.prefix) || message.author.bot) return;
-
-    // Can the command be executed on this channel
-    //if (message.channel.id != allowedChannel) return;
-
-    // Is already playing
-    if (isPlaying) return;
+    /**
+     * Is the author a bot
+     * Is the channel not a text channel
+     * Is the guild not the one we are serving
+     * Is not a command (start with prefix)
+     * Is already playing
+     *
+     * then return
+     */
+    if (message.author.bot
+        || message.channel.type !== 'text'
+        || message.guild.id != guildID
+        || !message.content.startsWith(config.prefix)
+        || isPlaying) return;
 
     // Grab and test the command
     const command = message.content.slice(config.prefix.length);
@@ -46,9 +49,9 @@ client.on('message', message => {
     // The member is not in a voice channel
     if (!voiceChannel) return;
 
-    // This is not  an allowed voice channel
+    // This is not an allowed voice channel
     if (!allowedVoiceChannels.includes(voiceChannel.id)) {
-        return message.reply('Je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
+        return message.reply('je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
             .catch(logger.error);
     }
 

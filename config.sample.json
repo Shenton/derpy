@@ -4,11 +4,8 @@
     "prefix": "!",
     "guildID": "000000000000000000",
     "channelID": "000000000000000000",
-    "allowedRoles": ["Role","AnotherRole"],
     "moduleConfig": {
         "reddit": {
-            "appID": "",
-            "appSecret": "",
             "channelID": "000000000000000000",
             "imageSubreddit": [
                 { "name": "pics", "listing": "hot", "limit": 50 }

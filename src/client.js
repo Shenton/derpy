@@ -20,14 +20,13 @@ const cooldowns = new Discord.Collection();
 
 /**
  * When the bot is connected and ready to interact with the Discord server/guild/whatever
- * Call the init method of the bot modules
+ * Init the bot modules
  */
 client.once('ready', () => {
     logger.info(`Logged in as ${client.user.tag}! (${client.user.id})`);
     client.user.setActivity('Hurr Durr Derp');
 
     // Modules init
-    if (process.env.NODE_ENV === 'development') require('./modules/dev');
     require('./modules/pubg');
     require('./modules/response');
     require('./modules/rss');
@@ -53,7 +52,7 @@ for (const file of commandFiles) {
 // Commands handling
 client.on('message', message => {
     // This bot is designed to only serve one guild
-    if (message.guild.id != guildID) return;
+    if (message.channel.type === 'text' && message.guild.id != guildID) return;
 
     // Is a command (start with prefix), is not a bot
     if (!message.content.startsWith(config.prefix) || message.author.bot) return;
@@ -68,26 +67,35 @@ client.on('message', message => {
     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
     if (!command) return;
 
-    // Can the command be executed on this channel
-    if (command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) return;
-
     // Is the command owner only
     if (command.ownerOnly && message.author.id != config.ownerID) {
-        logger.warn(`User ${message.author.username} (${message.author.id}) try to use owner command ${commandName}`);
-        return;
+        logger.warn(`User ${message.author.username} (${message.author.tag}) try to use owner command ${commandName}`);
+        return message.reply('tu ne peux pas utiliser cette commande.');
+    }
+
+    // The command cannot be used in DM
+    if (message.channel.type !== 'text' && command.guildOnly) {
+        return message.reply('cette commande ne peut pas être utilisée en privé.');
+    }
+
+    // Can the command be executed on this channel
+    if (message.channel.type === 'text' && command.allowedChannels && !command.allowedChannels.includes(message.channel.id)) {
+        return message.reply('cette commande ne peut pas être utilisée sur ce canal.');
     }
 
     // Do the member has role access
     let hasRoleAccess = false;
     if (command.allowedRoles) {
         message.member.roles.array().forEach(role => {
-            if (command.allowedRoles.includes(role)) hasRoleAccess = true;
+            if (command.allowedRoles.includes(role.id)) hasRoleAccess = true;
         });
     }
     else {
         hasRoleAccess = true;
     }
-    if (!hasRoleAccess) return;
+    if (!hasRoleAccess) {
+        return message.reply('tu ne peux pas utiliser cette commande.');
+    }
 
     /**
      * Add the command to the cooldown collection object, if needed
@@ -104,14 +112,21 @@ client.on('message', message => {
         const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
         if (now < expirationTime && message.author.id != config.ownerID) {
             const timeLeft = (expirationTime - now) / 1000;
-            return message.reply(`Merci d'attendre ${timeLeft.toFixed(1)} seconde(s) avant d'utiliser "${command.name}".`)
+            return message.reply(`merci d'attendre ${timeLeft.toFixed(1)} seconde(s) avant d'utiliser "${command.name}".`)
                 .catch(logger.error);
         }
     }
     timestamps.set(message.author.id, now);
     setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
 
-    logger.info(`User ${message.author.username} (${message.author.id}) used command: ${commandName} - with args: ${args}`);
+    // Required args handling
+    if (command.args && !args.length) {
+        let reply = 'cette commande a besoin d\'argument(s).';
+        if (command.usage) reply += `\nUtilisation: \`${config.prefix}${command.name} ${command.usage}\``;
+        return message.reply(reply);
+    }
+
+    logger.info(`User ${message.author.tag} used command: ${commandName} - with args: ${args}`);
 
     // Execute the command
     try {
@@ -121,7 +136,7 @@ client.on('message', message => {
     catch (err) {
         message.delete();
         logger.error(err);
-        message.reply('Il y a eu une erreur avec l\'exécution de cette commande.')
+        message.reply('il y a eu une erreur avec l\'exécution de cette commande.')
             .catch(logger.error);
     }
 });

@@ -1,5 +1,10 @@
 const modulesList = [
     {
+        name: 'activity',
+        load: true,
+        commands: true,
+    },
+    {
         name: 'admin',
         load: false,
         commands: true,

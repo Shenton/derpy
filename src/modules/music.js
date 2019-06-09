@@ -47,29 +47,18 @@ function testSearch(string) {
     return /^[a-zA-Z0-9\s-|]+$/.test(string);
 }
 
-// Query the youtube API, and return an object { valid: <true|false>, url: <video object|what went wrong>}
-async function getVideoObject(message, request) {
-    let url;
+// Search youtube and ask the member to choose a video
+function searchYoutube(message, search) {
+    if (!search || search.length === 0) return { valid: false, response: 'si il n\'y a rien à chercher, je ne risque pas de trouver.' };
+    if (search.length > 50) return { valid: false, response: 'le nombre de charactères autorisé pour une recherche est dépassé (50).' };
+    if (!testSearch(search)) return { valid: false, response: 'la recherche contient des charactères non autorisés.' };
+    if (isSearching) return { valid: false, response: 'je suis déjà en train de rechercher une vidéo, attends ton tour.' };
 
-    if (isURL(request[0])) {
-        if (testURL(request[0])) url = request[0];
-        else return { valid: false, url: 'l\'URL n\'est pas valide, seule les vidéos youtube sont supportées.' };
-    }
-    else {
-        const search = request.join(' ');
+    isSearching = true;
 
-        if (!search || search.length === 0) return { valid: false, url: 'si il n\'y a rien à chercher, je ne risque pas de trouver.' };
-        if (search.length > 50) return { valid: false, url: 'le nombre de charactères autorisé pour une recherche est dépassé (50).' };
-        if (!testSearch(search)) return { valid: false, url: 'la recherche contient des charactères non autorisés.' };
-
-        try {
-            if (isSearching) return { valid: false, url: 'je suis déjà en train de rechercher une vidéo, attends ton tour.' };
-            isSearching = true;
-
-            const videos = await youtube.searchVideos(search);
-
-            if (videos.length === 0) return { valid: false, url: 'je n\'ai rien trouvé.' };
-
+    return youtube.searchVideos(search)
+        .then(videos => {
+            if (videos.length === 0) return { valid: false, response: 'je n\'ai rien trouvé.' };
             const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
             const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
 
@@ -98,70 +87,84 @@ async function getVideoObject(message, request) {
                     });
                 count++;
             });
-            const embedObject = await message.channel.send({ files: [area51, youtubeIcon], embed: embedContent });
+            message.channel.send({ files: [area51, youtubeIcon], embed: embedContent })
+                .then(() => {
+                    const filter = m => (/^[1-5]?$/.test(m.content) || searchExitResponses.includes(m.content)) && m.author.id == message.author.id;
+                    const awaitMessageObject = message.channel.awaitMessages(filter, filter, { max: 1, maxMatches: 1, time: 60000, errors: ['time'] })
+                        .then(collected => {
+                            if (searchExitResponses.includes(collected.first().content)) {
+                                awaitMessageObject.delete().catch(logger.error);
+                                collected.first().delete().catch(logger.error);
+                                isSearching = false;
+                                return { valid: false, response: 'la recherche est annulée.' };
+                            }
+                            else {
+                                const index = Number(collected.first().content);
 
-            try {
-                const filter = m => (/^[1-5]?$/.test(m.content) || searchExitResponses.includes(m.content)) && m.author.id == message.author.id;
-                const messageObject = await message.channel.awaitMessages(filter, { max: 1, maxMatches: 1, time: 60000, errors: ['time'] });
-
-                if (searchExitResponses.includes(messageObject.first().content)) {
-                    embedObject.delete();
-                    messageObject.first().delete();
-                    isSearching = false;
-                    return { valid: false, url: 'la recherche est annulée.' };
-                }
-                else {
-                    const index = Number(messageObject.first().content);
-
-                    if (!index) {
-                        embedObject.delete();
-                        messageObject.first().delete();
-                        isSearching = false;
-                        return { valid: false, url: 'il faut répondre avec un chiffre.' };
-                    }
-                    else {
-                        embedObject.delete();
-                        messageObject.first().delete();
-                        isSearching = false;
-                        url = videos[index - 1].url;
-                    }
-                }
-            }
-            catch(err) {
-                logger.error(err);
-                embedObject.delete()
-                    .catch(logger.error);
-                isSearching = false;
-                return { valid: false, url: 'il y a eu une erreur avec la recherche, ou t\'es trop lent.' };
-            }
-        }
-        catch(err) {
+                                if (!index) {
+                                    awaitMessageObject.delete().catch(logger.error);
+                                    collected.first().delete().catch(logger.error);
+                                    isSearching = false;
+                                    return { valid: false, response: 'il faut répondre avec un chiffre.' };
+                                }
+                                else {
+                                    awaitMessageObject.delete().catch(logger.error);
+                                    collected.first().delete().catch(logger.error);
+                                    isSearching = false;
+                                    return { valid: true, url: videos[index - 1].url };
+                                }
+                            }
+                        })
+                        .catch(() => {
+                            awaitMessageObject.delete().catch(logger.error);
+                            isSearching = false;
+                            return { valid: false, response: 't\'es trop lent.' };
+                        });
+                });
+        })
+        .catch(err =>{
             logger.error(err);
             isSearching = false;
-            return { valid: false, url: 'il y a eu une erreur avec la recherche.' };
-        }
+            return { valid: false, response: 'il y a eu une erreur avec la recherche.' };
+        });
+}
+
+// Query the youtube API, and return an object { valid: <true|false>, url: <video object|what went wrong>}
+function getVideoObject(message, request) {
+    let url;
+
+    if (isURL(request[0])) {
+        if (testURL(request[0])) url = request[0];
+        else return { valid: false, url: 'l\'URL n\'est pas valide, seule les vidéos youtube sont supportées.' };
+    }
+    else {
+        const search = request.join(' ');
+        const searchResult = searchYoutube(message, search);
+
+        if (searchResult.valid) url = searchResult.url;
+        else return searchResult;
     }
 
     // url should not be empty, but just in case. Prevent unnecessary call to the youtube API.
     if (!url) return { valid: false };
 
-    try {
-        const video = await youtube.getVideo(url);
-        if (video) {
-            if (video.raw.snippet.liveBroadcastContent === 'live') return { valid: false, url: 'je ne lirais pas un live, espèce de troll.' };
-            if (video.durationSeconds > maxVideoDuration) return { valid: false, url: 'je ne lirais pas une vidéo aussi longue, espèce de troll.' };
+    return youtube.getVideo(url)
+        .then(video => {
+            if (video) {
+                if (video.raw.snippet.liveBroadcastContent === 'live') return { valid: false, response: 'je ne lirais pas un live, espèce de troll.' };
+                if (video.durationSeconds > maxVideoDuration) return { valid: false, response: 'je ne lirais pas une vidéo aussi longue, espèce de troll.' };
 
-            const title = htmlspecialchars.unescape(video.title);
-            return { valid: true, url: video.url, title: title };
-        }
-        else {
-            return { valid: false, url: 'je n\'ai rien trouvé.' };
-        }
-    }
-    catch(err) {
-        logger.error(err);
-        return { valid: false, url: 'il y a eu une erreur en tentant de récupérer la vidéo.' };
-    }
+                const title = htmlspecialchars.unescape(video.title);
+                return { valid: true, url: video.url, title: title };
+            }
+            else {
+                return { valid: false, response: 'je n\'ai pas trouvé cette vidéo.' };
+            }
+        })
+        .catch(err => {
+            logger.error(err);
+            return { valid: false, response: 'il y a eu une erreur en tentant de récupérer la vidéo, ou tu ne sais pas faire un copier/coller.' };
+        });
 }
 
 function play(message, where, source, who) {
@@ -268,8 +271,8 @@ async function commandAdd(message, request) {
             playlist.push({ source: video.url, where: voiceChannel, who: message.author, title: video.title });
             message.reply(`la vidéo ${video.title} a été ajoutée à la playlist`).catch(logger.error);
         }
-        else if (video.url) {
-            message.reply(video.url);
+        else if (video.response) {
+            message.reply(video.response);
         }
     }
     catch(err) {
@@ -302,8 +305,8 @@ async function commandPlay(message, request) {
         if (video.valid) {
             play(message, voiceChannel, video.url, message.author);
         }
-        else if (video.url) {
-            message.reply(video.url);
+        else if (video.response) {
+            message.reply(video.response);
         }
     }
     catch(err) {

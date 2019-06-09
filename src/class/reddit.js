@@ -37,22 +37,20 @@ class RedditCaller extends EventEmitter {
     }
 
     getJson() {
-        return new Promise((resolve, reject) => {
-            axios(this.url)
-                .then(res => {
-                    if (res.status == 200) resolve(res.data);
-                    else reject(`Reddit class - Axios: Status: ${res.status}`);
-                })
-                .catch(err => {
-                    let errorString;
+        return axios(this.url)
+            .then(res => {
+                if (res.status == 200) return res.data;
+                else throw new Error(`Reddit class - Axios: Status: ${res.status}`);
+            })
+            .catch(err => {
+                let errorString;
 
-                    if (err.response) errorString = `Reddit class - Axios: Status: ${err.response.status} Data: ${err.response.data}`;
-                    else if (err.request) errorString = `Reddit class - Axios: Request: ${err.request}`;
-                    else errorString = `Reddit class - Axios: Message: ${err.message}`;
+                if (err.response) errorString = `Reddit class - Axios: Status: ${err.response.status} Data: ${err.response.data}`;
+                else if (err.request) errorString = `Reddit class - Axios: Request: ${err.request}`;
+                else errorString = `Reddit class - Axios: Message: ${err.message}`;
 
-                    reject(errorString);
-                });
-        });
+                throw new Error(`Reddit class - Axios: ${errorString}`);
+            });
     }
 
     gotNew() {
@@ -60,13 +58,13 @@ class RedditCaller extends EventEmitter {
 
         this.getJson()
             .then(data => {
-                if (!data) this.emit('error', 'RedditWatcher - Data is undefined.');
-                if (typeof data !== 'object') this.emit('error', `RedditWatcher - Data is not an object. Type: ${typeof data}`);
-                if (data.kind !== 'Listing') this.emit('error', `RedditWatcher - Data.kind is not "Listing". Data.kind: ${data.kind}`);
+                if (!data) return this.emit('error', 'RedditWatcher - Data is undefined.');
+                if (typeof data !== 'object') return this.emit('error', `RedditWatcher - Data is not an object. Type: ${typeof data}`);
+                if (data.kind !== 'Listing') return this.emit('error', `RedditWatcher - Data.kind is not "Listing". Data.kind: ${data.kind}`);
 
                 const posts = data.data.children;
 
-                for (let i = 0; i <= posts.length; i++) {
+                for (let i = 0; i <= posts.length - 1; i++) {
                     const post = posts[i];
                     if (!this.postsList.includes(post.data.permalink)) {
                         this.postsList.push(post.data.permalink);

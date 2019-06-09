@@ -48,7 +48,7 @@ npm run dev
 ```
 
 ## Diclaimer
-Derpy is designed to server one guild, and it will nether change. It contains private jokes, stupid things, etc.
+Derpy is designed to serve one guild, and it will nether change. It contains private jokes, stupid things, etc.
 
 I will not add new features if you ask me. The licence is MIT, fork it, copy it, take whatever you want from it, and create your own. But do take note that I am not a skilled developer and node/javascript is new to me.
 

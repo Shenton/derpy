@@ -3,45 +3,7 @@ const path = require('path');
 const JsonDB = require('node-json-db');
 
 const { client, logger, rootDir, config, helpEmbed } = require('../app');
-const modulesList = [
-    {
-        name: 'admin',
-        load: false,
-        commands: true,
-    },
-    {
-        name: 'mp3',
-        load: true,
-        commands: false,
-    },
-    {
-        name: 'music',
-        load: false,
-        commands: true,
-        publicName: 'Musique',
-    },
-    {
-        name: 'pubg',
-        load: true,
-        commands: true,
-        publicName: 'PUBG',
-    },
-    {
-        name: 'reddit',
-        load: true,
-        commands: false,
-    },
-    {
-        name: 'response',
-        load: true,
-        commands: false,
-    },
-    {
-        name: 'rss',
-        load: true,
-        commands: false,
-    },
-];
+const { modulesList } = require('./variables');
 
 const db = new JsonDB(path.join(rootDir, 'data/db/derpy'), true, true);
 

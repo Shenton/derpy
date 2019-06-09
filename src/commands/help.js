@@ -25,9 +25,10 @@ module.exports = {
         }
         else {
             const { commands } = message.client;
-            const name = args[0].toLowerCase();
-            const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name));
+            let name = args[0].toLowerCase();
+            if (name.startsWith(config.prefix)) name = name.slice(config.prefix.length);
 
+            const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name));
             if (!command) {
                 return message.reply('cette commande n\'existe pas.')
                     .catch(logger.error);

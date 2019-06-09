@@ -1,11 +1,13 @@
 // npm modules
-const Discord = require('discord.js');
+const { Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const JsonDB = require('node-json-db');
 
+// Derpy globals
 const { client, config, logger, rootDir, guildID, channelID, helpEmbed } = require('../app');
 
+// Derpy database
 const db = new JsonDB(path.join(rootDir, 'data/db/derpy'), true, true);
 try {
     db.getData('/restart/restarted');
@@ -15,31 +17,8 @@ catch (err) {
     logger.debug(err);
 }
 
-client.commands = new Discord.Collection();
-const cooldowns = new Discord.Collection();
-
-/**
- * When the bot is connected and ready to interact with the Discord server/guild/whatever
- * Call the bot modules loader
- */
-client.once('ready', () => {
-    logger.info(`Logged in as ${client.user.tag}! (${client.user.id})`);
-    client.user.setActivity('Hurr Durr Derp');
-
-    // Modules loader
-    require('./loader');
-
-    const restarted = db.getData('/restart/restarted');
-    if (restarted) {
-        client.guilds.get(guildID).channels.get(channelID).send('Je suis de retour!')
-            .catch(logger.error);
-        db.push('/restart/restarted', false);
-    }
-
-    //client.fetchVoiceRegions().then(regions => regions.array().forEach(region => logger.debug('%o', region)));
-});
-
 // Require and declare the commands
+client.commands = new Collection();
 const commandFiles = fs.readdirSync(path.join(rootDir, 'src/commands')).filter(file => file.endsWith('.js'));
 const commandsList = [];
 for (const file of commandFiles) {
@@ -53,6 +32,7 @@ const commandsString = commandsList.join(' ');
 helpEmbed.fields.push({ name: 'Génériques', value: `\`${commandsString}\`` });
 
 // Commands handling
+const cooldowns = new Collection();
 client.on('message', message => {
     // This bot is designed to only serve one guild
     if (message.channel.type === 'text' && message.guild.id != guildID) return;
@@ -61,10 +41,10 @@ client.on('message', message => {
     if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
     /**
-   * Set the command name and the arguments
-   * Set the command to an object
-   * Check if the command exists
-   */
+     * Set the command name and the arguments
+     * Set the command to an object
+     * Check if the command exists
+     */
     const args = message.content.slice(config.prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
     const command = client.commands.get(commandName) ||
@@ -112,7 +92,7 @@ client.on('message', message => {
      * Add the member to the cooldown collection if the command can be executed
      */
     if (!cooldowns.has(command.name)) {
-        cooldowns.set(command.name, new Discord.Collection());
+        cooldowns.set(command.name, new Collection());
     }
     const now = Date.now();
     const timestamps = cooldowns.get(command.name);
@@ -150,5 +130,24 @@ client.on('message', message => {
     }
 });
 
-// Log our bot in using the token from https://discordapp.com/developers/applications/me
+/**
+ * When the bot is connected and ready to interact with the Discord server/guild/whatever
+ * Call the bot modules loader
+ */
+client.once('ready', () => {
+    logger.info(`Logged in as ${client.user.tag}! (${client.user.id})`);
+    client.user.setActivity('Hurr Durr Derp');
+
+    // Modules loader
+    require('./loader');
+
+    const restarted = db.getData('/restart/restarted');
+    if (restarted) {
+        client.guilds.get(guildID).channels.get(channelID).send('Je suis de retour!')
+            .catch(logger.error);
+        db.push('/restart/restarted', false);
+    }
+});
+
+// Log Derpy to Discord
 client.login(config.discordToken);

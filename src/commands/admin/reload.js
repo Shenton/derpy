@@ -1,15 +1,8 @@
 // Derpy globals
-const { loadConfig, config, logger } = require('../../../app');
-const { getSafe } = require('../../methods');
-
-const commandName = 'reload';
-const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);
-const allowedRoles = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
+const { loadConfig, logger } = require('../../../app');
 
 module.exports = {
-    name: commandName,
-    allowedChannel: allowedChannels,
-    allowedRoles: allowedRoles,
+    name: 'reload',
     ownerOnly: true,
     description: 'Recharge la configuration du bot',
     execute(message) {

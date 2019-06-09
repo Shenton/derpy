@@ -16,11 +16,24 @@ function getSafe(fn, value) {
     }
 }
 
-function restartDerpy() {
+function restartDerpy(messageObject, message) {
     db.push('/restart/restarted', true);
-    client.guilds.get(guildID).channels.get(channelID).send('Bye!')
-        .then(process.exit())
-        .catch(logger.error);
+    if (message) {
+        if (messageObject) {
+            messageObject.channel.send(message)
+                .catch(logger.error);
+        }
+        else {
+            client.guilds.get(guildID).channels.get(channelID).send(message)
+                .catch(logger.error);
+        }
+    }
+    else {
+        client.guilds.get(guildID).channels.get(channelID).send('Bye!')
+            .catch(logger.error);
+    }
+
+    setTimeout(() => process.exit(), 3000);
 }
 
 exports.getSafe = getSafe;

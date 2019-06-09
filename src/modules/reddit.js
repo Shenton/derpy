@@ -48,7 +48,7 @@ imageSubreddit.forEach(sub => {
                 displayImagePost(post.data);
             }
         })
-        .on('error', logger.error);
+        .on('error', logger.error.bind(logger));
 });
 
 logger.debug('Module reddit loaded');

@@ -66,8 +66,8 @@ class RedditCaller extends EventEmitter {
 
                 const posts = data.data.children;
 
-                for (const index in posts) {
-                    const post = posts[index];
+                for (let i = 0; i <= posts.length; i++) {
+                    const post = posts[i];
                     if (!this.postsList.includes(post.data.permalink)) {
                         this.postsList.push(post.data.permalink);
                         this.emit('gotNew', post);

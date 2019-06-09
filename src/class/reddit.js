@@ -25,9 +25,7 @@ class RedditCaller extends EventEmitter {
                 if (typeof data !== 'object') throw `Reddit class - Data is not an object. Type: ${typeof data}`;
                 if (data.kind !== 'Listing') throw `Reddit class - Data.kind is not "Listing". Data.kind: ${data.kind}`;
 
-                data.data.children.forEach(post => {
-                    this.postsList.push(post.data.permalink);
-                });
+                this.postsList = data.data.children.map(p => p.data.permalink);
 
                 this.canWatch = true;
             })
@@ -67,7 +65,7 @@ class RedditCaller extends EventEmitter {
                 for (let i = 0; i <= posts.length - 1; i++) {
                     const post = posts[i];
                     if (!this.postsList.includes(post.data.permalink)) {
-                        this.postsList.push(post.data.permalink);
+                        this.postsList = posts.map(p => p.data.permalink);
                         this.emit('gotNew', post);
                         break;
                     }

@@ -85,7 +85,7 @@ const client = new Discord.Client();
 if (process.env.NODE_ENV === 'development') client.on('debug', logger.debug.bind(logger));
 client.on('error', logger.error.bind(logger));
 
-// Export what will be used globaly
+// Exports that will be used globaly
 // Variables
 exports.rootDir = rootDir;
 exports.guildID = config.guildID;

@@ -118,20 +118,29 @@ function displayMatch(id, message) {
     let count = 0;
     const playersCount = Object.keys(match.players).length;
 
+    let totalDamage = 0;
+    let totalKills = 0;
+    let totalHeadshots = 0;
+    let totalDBNOs = 0;
+
     for (const player in match.players) {
         const data = match.players[player];
+        const damage = Math.round(data.damageDealt);
         const timeSurvived = humanizeDuration(Math.round(data.timeSurvived) * 1000, { language: 'fr' });
-
         const rideDistance = humanizeMeters(data.rideDistance);
         const walkDistance = humanizeMeters(data.walkDistance);
         const swimDistance = humanizeMeters(data.swimDistance);
-
         const longestKill = humanizeMeters(data.longestKill);
+
+        totalDamage += damage;
+        totalKills += data.kills;
+        totalHeadshots += data.headshotKills;
+        totalDBNOs += data.DBNOs;
 
         embedContent.fields.push(
             {
                 name: 'Joueur',
-                value: `\`\`\`css\n${player} [${Math.round(data.damageDealt)} dégats]\`\`\``,
+                value: `\`\`\`css\n${player} [${damage} dégats]\`\`\``,
                 inline: true,
             },
             {
@@ -155,6 +164,7 @@ function displayMatch(id, message) {
             }
         );
 
+        // this is a blank kine separator between players
         count++;
         if (count != playersCount) {
             embedContent.fields.push(
@@ -165,6 +175,17 @@ function displayMatch(id, message) {
             );
         }
     }
+
+    embedContent.fields.push(
+        {
+            name: '\u200b',
+            value: '\u200b',
+        },
+        {
+            name: 'Totaux',
+            value: `\`\`\`css\n[${totalDamage} dégats]\nFrags: ${totalKills} (${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
+        },
+    );
 
     if (message) {
         message.channel.send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
@@ -178,7 +199,6 @@ function displayMatch(id, message) {
 
 function displayMatchShort(id, message) {
     const match = db.getData(`/matches/${id}`);
-
     const matchTime = humanizeDuration(match.duration * 1000, { language: 'fr' });
     const matchDate = moment(match.time).locale('fr').format('LLLL');
 
@@ -215,19 +235,29 @@ function displayMatchShort(id, message) {
         },
     };
 
-    let count = 0;
-    const playersCount = Object.keys(match.players).length;
+    // let count = 0;
+    // const playersCount = Object.keys(match.players).length;
+
+    let totalDamage = 0;
+    let totalKills = 0;
+    let totalHeadshots = 0;
+    let totalDBNOs = 0;
 
     for (const player in match.players) {
         const data = match.players[player];
+        const damage = Math.round(data.damageDealt);
         const timeSurvived = shortHumanizer(Math.round(data.timeSurvived) * 1000);
-
         const longestKill = humanizeMeters(data.longestKill, true);
+
+        totalDamage += damage;
+        totalKills += data.kills;
+        totalHeadshots += data.headshotKills;
+        totalDBNOs += data.DBNOs;
 
         embedContent.fields.push(
             {
                 name: 'Joueur',
-                value: `\`\`\`css\n${player} [${Math.round(data.damageDealt)} dégats]\`\`\``,
+                value: `\`\`\`css\n${player} [${damage} dégats]\`\`\``,
                 inline: true,
             },
             {
@@ -247,16 +277,23 @@ function displayMatchShort(id, message) {
             }
         );
 
-        count++;
-        if (count != playersCount) {
-            embedContent.fields.push(
-                {
-                    name: '\u200b',
-                    value: '\u200b',
-                }
-            );
-        }
+        // count++;
+        // if (count != playersCount) {
+        //     embedContent.fields.push(
+        //         {
+        //             name: '\u200b',
+        //             value: '\u200b',
+        //         }
+        //     );
+        // }
     }
+
+    embedContent.fields.push(
+        {
+            name: 'Totaux',
+            value: `\`\`\`css\n[${totalDamage} dégats]\nFrags: ${totalKills} (${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
+        },
+    );
 
     if (message) {
         message.channel.send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
@@ -388,7 +425,8 @@ function displayLastMatch(messageObj) {
 
     const filteredMatches = [...new Set(matches)];
     filteredMatches.forEach(match => {
-        if (match) displayMatch(match, messageObj);
+        //if (match) displayMatch(match, messageObj);
+        if (match) displayMatchShort(match, messageObj);
     });
 }
 

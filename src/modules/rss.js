@@ -63,25 +63,28 @@ function displayFeed(origin, originURL, originDescription, originLogo, title, ur
         .catch(logger.error);
 }
 
-async function updateRssFeeds() {
+function updateRssFeeds() {
     for (const origin in feeds) {
-        const content = await parser.parseURL(feeds[origin].feed);
-
-        if (content.items.length) {
-            content.items.reverse().forEach(item => {
-                if (!lastFeeds[origin].includes(item.link)) {
-                    displayFeed(origin, feeds[origin].url, feeds[origin].description, feeds[origin].img, item.title, item.link, item.contentSnippet);
-                    lastFeeds[origin].push(item.link);
+        parser.parseURL(feeds[origin].feed)
+            .then(content => {
+                if (content.items.length) {
+                    content.items.reverse().forEach(item => {
+                        if (!lastFeeds[origin].includes(item.link)) {
+                            displayFeed(origin, feeds[origin].url, feeds[origin].description, feeds[origin].img, item.title, item.link, item.contentSnippet);
+                            lastFeeds[origin].push(item.link);
+                        }
+                    });
                 }
-            });
-        }
 
-        lastFeeds[origin] = lastFeeds[origin].slice(0, 49);
-        db.push(`/feeds/${origin}/lastFeeds`, lastFeeds[origin]);
+                while (lastFeeds[origin].length > 50) lastFeeds[origin].shift();
+                db.push(`/feeds/${origin}/lastFeeds`, lastFeeds[origin]);
+            })
+            .catch(logger.error);
     }
 }
 
 if (process.env.NODE_ENV === 'production') updateRssFeeds();
+updateRssFeeds();
 setInterval(updateRssFeeds, config.moduleConfig.rss.updateInterval);
 logger.info('Starting rss interval');
 

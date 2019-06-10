@@ -64,7 +64,7 @@ You can start Derpy in development mode by running:
 npm run dev
 ```
 
-## Diclaimer
+## Disclaimer
 Derpy is designed to serve one guild, and it will nether change. It contains private jokes, stupid things, etc.
 
 I will not add new features if you ask me. The licence is MIT, fork it, copy it, take whatever you want from it, and create your own. But do take note that I am not a skilled developer and node/javascript is new to me.

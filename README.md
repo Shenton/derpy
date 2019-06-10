@@ -9,7 +9,7 @@ This repository is mainly here to easily deploy Derpy on my server, but if someo
 * Fetch rss feeds (and send a message when a new entry is found)
 * Fetch reddit 'hot', 'new', 'rising', 'controversial', 'top', 'gilded' listings (and send a message when a new entry is found)
 * Respond to a member trigger message
-* And some stupid/fun/whatever you name it stuff
+* And some stupid/fun/whatever-you-name-it stuff
 
 ## Deploy Derpy
 Before anything you will need:
@@ -20,16 +20,33 @@ Before anything you will need:
 * A PUBG api key
 * A YouTube api key
 
-At this point you should take a look at the sample config file, rename/copy it to config.json and/or config-dev.json and edit it.
+### Linux
+On Linux it is pretty straightforward, this should get you there (on Debian 9)
+```bash
+sudo apt install python2.7 ffmpeg
+```
+For Node.js it is up to you, I personally create a new user for each app and use [nvm](https://github.com/nvm-sh/nvm).
 
-To get channels and members ID, activate the developer mode from the Discord application settings and use the context menu on them.
+### Windows
+On Windows you should install Node.js globally, and google how to install FFmpeg.  
+For Python you should use "windows-build-tools", open a console (Windows 10: shift+right-click on an explorer window => PowerShell).
+```bash
+npm i -g windows-build-tools
+```
 
+### Installing Derpy
+Assuming you got Git installed:
 ```bash
 mkdir derpy
 cd derpy
 git clone https://github.com/Shenton/derpy.git .
 npm i
 ```
+At this point you should take a look at the sample config file, rename/copy it to config.json and/or config-dev.json and edit it.
+
+To get channels and members ID, activate the developer mode from the Discord application settings and use the context menu on them.
+
+
 You can activate the log rotation of pm2 by running:
 ```bash
 npm run pm2logrotate

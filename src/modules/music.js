@@ -170,7 +170,8 @@ function getVideoObject(message, request) {
 function play(message, where, source, who) {
     let playOnce = false;
 
-    // It was called by the command play, just play this video.
+    // If it was called by the command play, just play this video.
+    // Else play the next item of the playlist
     if (where) {
         playOnce = true;
     }
@@ -179,7 +180,7 @@ function play(message, where, source, who) {
         if (!item) return;
         ({ where, source, who } = item);
 
-        // Check if the member who asked a video is still in the same voice channel
+        // Check if we can play the video in the voice channel
         const member = where.guild.members.get(who.id);
         if (!member.voiceChannel) {
             return message.channel.send(`Tu n'es plus dans un canal vocal <@${who.id}>, ta vidéo a été retiré de la playlist.`)
@@ -189,12 +190,14 @@ function play(message, where, source, who) {
             return message.channel.send(`Tu n'es plus dans un canal vocal autorisé <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                 .catch(logger.error);
         }
-        member.voiceChannel.members.array().forEach(mb => {
-            if (mb.presence.game) {
+        const members = member.voiceChannel.members.array();
+        for (let i = 0; i < members.length; i++) {
+            const m = members[i];
+            if (m.presence.game) {
                 return message.channel.send(`Quelqu'un joue dans ce canal <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                     .catch(logger.error);
             }
-        });
+        }
         if (member.voiceChannelID != where.id) where = member.voiceChannel;
     }
 
@@ -245,13 +248,15 @@ function canPlayHere(message, voiceChannel) {
         return false;
     }
 
-    voiceChannel.members.array().forEach(member => {
+    const members = voiceChannel.members.array();
+    for (let i = 0; i < members.length; i++) {
+        const member = members[i];
         if (member.presence.game) {
             message.reply('quelqu\'un joue dans ce canal.')
                 .catch(logger.error);
             return false;
         }
-    });
+    }
 
     return true;
 }

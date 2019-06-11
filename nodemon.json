@@ -1,4 +1,5 @@
 {
+    "ignore": ["web/*"],
     "verbose": true,
     "ext": "js"
 }

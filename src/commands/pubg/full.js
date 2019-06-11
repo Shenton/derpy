@@ -12,6 +12,7 @@ module.exports = {
     name: commandName,
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    guildOnly: true,
     description: 'Affiche la totalité des informations du dernier match de pubg affiché',
     cooldown: 10,
     execute(message) {

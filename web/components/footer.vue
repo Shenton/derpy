@@ -1,37 +1,30 @@
 <template>
-    <footer>
-        <hr>
-        <div class="row">
-            <div class="col">
-                <p>
-                    <nuxt-link to="//github.com/Shenton"><i class="fab fa-github"></i> GitHub</nuxt-link>
-                    <nuxt-link to="//discord.gg/DcBQmJ3"><i class="fab fa-discord"></i> Discord</nuxt-link>
-                </p>
-            </div>
-            <div class="col text-right">
-                <p><i class="far fa-copyright fa-rotate-180"></i> {{theYear}} shenton.fr</p>
-            </div>
+<div class="container">
+    <div class="columns is-flex">
+        <div class="column is-half">
+            <p>
+                <a href="https://github.com/Shenton/derpy"><i class="fab fa-github"></i>&nbsp;GitHub</a>
+                <a href="https//discord.gg/DcBQmJ3"><i class="fab fa-discord"></i>&nbsp;Discord</a>
+            </p>
         </div>
-    </footer>
+        <div class="column has-text-right">
+            <p>Derpy v{{ derpyVersion }}, <i class="far fa-copyright fa-rotate-180"></i> {{ theYear }} shenton.fr</p>
+        </div>
+    </div>
+</div>
 </template>
 
 <script>
 export default {
     data() {
         return {
-            theYear: '2019'
+            theYear: new Date().getFullYear(),
+            derpyVersion: process.env.npm_package_version,
         };
     },
     created() {
-        
     },
     computed: {
-        faGithub() {
-            return faGithub;
-        },
-        faDiscord() {
-            return faDiscord;
-        },
     },
 };
 </script>

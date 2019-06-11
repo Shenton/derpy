@@ -13,6 +13,7 @@ module.exports = {
     aliases: ['list', 'liste', 'pl'],
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    guildOnly: true,
     cooldown: 5,
     description: 'Affiche la liste de lecture',
     execute(message) {

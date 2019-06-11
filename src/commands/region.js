@@ -14,6 +14,7 @@ module.exports = {
     name: commandName,
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    guildOnly: true,
     description: 'Liste les régions ou change de région',
     usage: '<Sans argument liste les régions|[region] change pour cette région>',
     async execute(message, args) {

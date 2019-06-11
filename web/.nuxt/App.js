@@ -6,7 +6,7 @@ import _6f6c098b from '..\\layouts\\default.vue'
 const layouts = { "_default": _6f6c098b }
 
 export default {
-  head: {"titleTemplate":"%s - Derpy","meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Meta description"}],"link":[{"rel":"stylesheet","href":"https:\u002F\u002Fstackpath.bootstrapcdn.com\u002Fbootswatch\u002F4.3.1\u002Fdarkly\u002Fbootstrap.min.css"},{"rel":"favicon","href":"favicon.ico"}],"script":[{"src":"https:\u002F\u002Fkit.fontawesome.com\u002F2a418142fb.js","defer":true},{"src":"https:\u002F\u002Fcode.jquery.com\u002Fjquery-3.3.1.slim.min.js","defer":true},{"src":"https:\u002F\u002Fcdnjs.cloudflare.com\u002Fajax\u002Flibs\u002Fpopper.js\u002F1.14.7\u002Fumd\u002Fpopper.min.js","defer":true},{"src":"https:\u002F\u002Fstackpath.bootstrapcdn.com\u002Fbootstrap\u002F4.3.1\u002Fjs\u002Fbootstrap.min.js","defer":true}],"style":[]},
+  head: {"titleTemplate":"%s - Derpy","meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"hid":"description","name":"description","content":"Meta description"}],"link":[{"rel":"stylesheet","href":"https:\u002F\u002Funpkg.com\u002Fbulmaswatch\u002Fdarkly\u002Fbulmaswatch.min.css"},{"rel":"favicon","href":"favicon.ico"}],"script":[{"src":"https:\u002F\u002Fkit.fontawesome.com\u002F2a418142fb.js","defer":true},{"src":"https:\u002F\u002Fcode.jquery.com\u002Fjquery-3.4.1.min.js","defer":true},{"src":"~\u002Fassets\u002Fjs\u002Fmain.js","defer":true}],"style":[]},
 
   render(h, props) {
     const loadingEl = h('NuxtLoading', { ref: 'loading' })

@@ -13,6 +13,7 @@ module.exports = {
     aliases: ['ajouter', 'a'],
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    guildOnly: true,
     cooldown: 10,
     args: true,
     //usage: '<URL de youtube|URL de soundcloud>',

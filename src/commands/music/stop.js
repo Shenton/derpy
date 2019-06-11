@@ -13,6 +13,7 @@ module.exports = {
     aliases: ['arret', 's'],
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    guildOnly: true,
     description: 'Stop la lecture de la musique',
     execute(message) {
         commandStop(message);

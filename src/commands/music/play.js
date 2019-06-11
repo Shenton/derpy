@@ -13,6 +13,7 @@ module.exports = {
     aliases: ['jouer', 'lire', 'p'],
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    guildOnly: true,
     cooldown: 10,
     description: 'Joue une musique',
     usage: '<Sans argument joue la playlist|[URL de youtube]|[recherche]>',

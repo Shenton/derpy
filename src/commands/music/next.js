@@ -13,6 +13,7 @@ module.exports = {
     aliases: ['suivant', 'n'],
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    guildOnly: true,
     cooldown: 10,
     description: 'Joue la prochaine musique de la playlist',
     execute(message) {

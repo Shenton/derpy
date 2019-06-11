@@ -13,6 +13,7 @@ module.exports = {
     //aliases: ['jouer', 'lire', 'p'],
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    guildOnly: true,
     cooldown: 5,
     description: 'Pause la musique',
     execute(message) {

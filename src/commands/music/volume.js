@@ -13,6 +13,7 @@ module.exports = {
     aliases: ['vol', 'son'],
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    guildOnly: true,
     cooldown: 5,
     description: 'Ajuste le volume du bot',
     usage: '<Sans argument affiche le volume|[0-100]>',

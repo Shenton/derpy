@@ -12,6 +12,7 @@ module.exports = {
     name: commandName,
     allowedChannel: allowedChannels,
     allowedRoles: allowedRoles,
+    cooldown: 60,
     description: 'Change l\'activité du bot au hasard',
     execute() {
         setNewActivity();

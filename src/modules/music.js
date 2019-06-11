@@ -193,7 +193,7 @@ function play(message, where, source, who) {
         const members = member.voiceChannel.members.array();
         for (let i = 0; i < members.length; i++) {
             const m = members[i];
-            if (m.presence.game) {
+            if (!m.user.bot && m.presence.game) {
                 return message.channel.send(`Quelqu'un joue dans ce canal <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                     .catch(logger.error);
             }
@@ -251,7 +251,7 @@ function canPlayHere(message, voiceChannel) {
     const members = voiceChannel.members.array();
     for (let i = 0; i < members.length; i++) {
         const member = members[i];
-        if (member.presence.game) {
+        if (!member.user.bot && member.presence.game) {
             message.reply('quelqu\'un joue dans ce canal.')
                 .catch(logger.error);
             return false;

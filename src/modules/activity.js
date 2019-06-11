@@ -12,6 +12,9 @@ const activities = [
     'Ricochet',
     'left 4 Dead 2',
     'Goat Simulator',
+    'Bluestacks',
+    'Euro Truck Simulator 2',
+    'Fortnite',
 ];
 
 function setNewActivity() {

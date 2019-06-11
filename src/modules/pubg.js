@@ -183,7 +183,7 @@ function displayMatch(id, message) {
         },
         {
             name: 'Totaux',
-            value: `\`\`\`css\n[${totalDamage} dégats]\nFrags: ${totalKills} (${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
+            value: `\`\`\`css\n[${totalDamage} dégats]\nFrags: ${totalKills} (HS: ${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
         },
     );
 
@@ -235,9 +235,6 @@ function displayMatchShort(id, message) {
         },
     };
 
-    // let count = 0;
-    // const playersCount = Object.keys(match.players).length;
-
     let totalDamage = 0;
     let totalKills = 0;
     let totalHeadshots = 0;
@@ -276,22 +273,12 @@ function displayMatchShort(id, message) {
                 inline: true,
             }
         );
-
-        // count++;
-        // if (count != playersCount) {
-        //     embedContent.fields.push(
-        //         {
-        //             name: '\u200b',
-        //             value: '\u200b',
-        //         }
-        //     );
-        // }
     }
 
     embedContent.fields.push(
         {
             name: 'Totaux',
-            value: `\`\`\`css\n[${totalDamage} dégats]\nFrags: ${totalKills} (${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
+            value: `\`\`\`css\n[${totalDamage} dégats]\nFrags: ${totalKills} (HS: ${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
         },
     );
 

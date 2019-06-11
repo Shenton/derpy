@@ -115,3 +115,6 @@ exports.loadConfig = loadConfig;
 
 // Init the bot
 require('./src/client');
+
+// Init the web server
+if (process.env.NODE_ENV === 'development') require('./web/server');

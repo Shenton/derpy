@@ -4,7 +4,7 @@
         <div class="container">
             <div class="navbar-brand">
                 <a class="navbar-item" href="/">
-                    <img src="~/assets/img/header-icon.png" width="30" height="30">
+                    <img src="/img/alien-icon.png" width="28" height="28">
                 </a>
 
                 <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbar">
@@ -16,23 +16,49 @@
 
             <div id="navbar" class="navbar-menu">
                 <div class="navbar-start">
-                    <a class="navbar-item">Home</a>
-                    <a class="navbar-item">Documentation</a>
-                    <div class="navbar-item has-dropdown is-hoverable">
-                        <a class="navbar-link">More</a>
+                    <nuxt-link class="navbar-item" to="/">Accueil</nuxt-link>
+                    <div v-if="$store.state.auth.hasAccess" class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">Modules</a>
                         <div class="navbar-dropdown">
-                            <a class="navbar-item">About</a>
-                            <a class="navbar-item">Jobs</a>
-                            <a class="navbar-item">Contact</a>
-                            <hr class="navbar-divider">
-                            <a class="navbar-item">Report an issue</a>
+                            <nuxt-link class="navbar-item" to="/module/response">Accueil</nuxt-link>
+                            <!--<hr class="navbar-divider">-->
+                        </div>
+                    </div>
+                    <div v-if="$store.state.auth.isOwner" class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">Administration</a>
+                        <div class="navbar-dropdown">
+                            <nuxt-link class="navbar-item" to="/module/response">Membres</nuxt-link>
+                            <!--<hr class="navbar-divider">-->
                         </div>
                     </div>
                 </div>
                 <div class="navbar-end">
                     <div class="navbar-item">
-                        <div class="buttons">
-                            <a class="button is-light">Log in</a>
+                        <div v-if="$store.state.auth.isAuth" class="dropdown is-right">
+                            <div class="dropdown-trigger">
+                                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu-discord">
+                                    <figure class="image is-32x32">
+                                        <img class="is-rounded" :src="$store.state.auth.avatar">
+                                    </figure>
+                                    <span class="icon is-small">
+                                        <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            </div>
+                            <div class="dropdown-menu" id="dropdown-menu-discord" role="menu">
+                                <div class="dropdown-content">
+                                    <div class="dropdown-item">
+                                        <p><strong><span class="has-text-info">{{ $store.state.auth.name }}</span></strong><span class="has-text-grey">#{{ $store.state.auth.discriminator }}</span></p>
+                                    </div>
+                                    <hr class="dropdown-divider">
+                                    <div class="dropdown-item">
+                                        <a href="/api/auth/logout" class="dropdown-item">Déconnexion</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="buttons">
+                            <a href="/api/auth/login" class="button is-light">Connexion</a>
                         </div>
                     </div>
                 </div>
@@ -44,12 +70,14 @@
 
 <script>
 export default {
-
 }
 </script>
 
 <style>
 .navbar-padding-bottom {
     padding-bottom: 20px;
+}
+.navbar {
+    border-radius: 0 !important;
 }
 </style>

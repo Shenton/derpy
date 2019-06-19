@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import { interopDefault } from './utils'
 
+const _659aacbb = () => interopDefault(import('..\\pages\\module\\response.vue' /* webpackChunkName: "pages_module_response" */))
 const _16b246b4 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
 
 Vue.use(Router)
@@ -79,6 +80,10 @@ export function createRouter() {
     scrollBehavior,
 
     routes: [{
+      path: "/module/response",
+      component: _659aacbb,
+      name: "module-response"
+    }, {
       path: "/",
       component: _16b246b4,
       name: "index"

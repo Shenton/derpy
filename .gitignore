@@ -1,6 +1,10 @@
 log
 /config.json
 /config-dev.json
-data
 node_modules
 /package-lock.json
+bot/data
+bot/node_modules
+bot/package-lock.json
+web/node_modules
+web/package-lock.json

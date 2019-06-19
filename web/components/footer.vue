@@ -4,7 +4,7 @@
         <div class="column is-half">
             <p>
                 <a href="https://github.com/Shenton/derpy"><i class="fab fa-github"></i>&nbsp;GitHub</a>
-                <a href="https//discord.gg/DcBQmJ3"><i class="fab fa-discord"></i>&nbsp;Discord</a>
+                <a href="https://discord.gg/DcBQmJ3"><i class="fab fa-discord"></i>&nbsp;Discord</a>
             </p>
         </div>
         <div class="column has-text-right">
@@ -19,12 +19,8 @@ export default {
     data() {
         return {
             theYear: new Date().getFullYear(),
-            derpyVersion: process.env.npm_package_version,
+            derpyVersion: process.env.version,
         };
-    },
-    created() {
-    },
-    computed: {
     },
 };
 </script>

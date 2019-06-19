@@ -1,27 +1,38 @@
+const { baseURL } = require('./config').api;
+
 module.exports = {
+    srcDir: __dirname,
+    rootDir: __dirname,
+    modulesDir: ['../node_modules'],
+    modules: [
+        '@nuxtjs/axios',
+    ],
+    axios: {
+        baseURL: baseURL,
+    },
+    plugins: [
+        '~/plugins/client/bulma.client.js',
+    ],
+    env: {
+        version: process.env.npm_package_version,
+    },
     head: {
-        titleTemplate: '%s - Derpy',
+        title: 'Derpy',
         meta: [
             { charset: 'utf-8' },
             { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-
-            // hid is used as unique identifier. Do not use `vmid` for it as it will not work
-            { hid: 'description', name: 'description', content: 'Meta description' },
+            { hid: 'description', name: 'description', content: 'Derpy the Dicord bot front-end' },
         ],
         link: [
             { rel: 'stylesheet', href: 'https://unpkg.com/bulmaswatch/darkly/bulmaswatch.min.css' },
-            { rel: 'favicon', href: 'favicon.ico' },
+            { rel: 'favicon', href: '/img/alien-icon.png' },
         ],
         script: [
             { src: 'https://kit.fontawesome.com/2a418142fb.js', defer: true },
             { src: 'https://code.jquery.com/jquery-3.4.1.min.js', defer: true },
-            { src: '~/assets/js/main.js', defer: true },
         ],
     },
     router: {
         esModule: false,
     },
-    srcDir: __dirname,
-    rootDir: __dirname,
-    modulesDir: ['../node_modules'],
 };

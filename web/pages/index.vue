@@ -8,27 +8,35 @@
             </div>
         </div>
     </div>
-    <div class="box">
-        <div class="columns is-flex">
-            <div class="column is-half">
-                <p>Actuellement je m'occupe de la guilde {{ currentGuild }}.</p>
-            </div>
-            <div class="column">
+    <section  class="section">
+        <div class="container">
+        <div class="box">
+            <div class="columns is-flex">
+                <div class="column is-half">
+                    <!--<p>Actuellement je m'occupe de la guilde {{ currentGuild }}.</p>-->
+                    <p>{{ $store.state.auth.name }}<br></p>
+                </div>
+                <div class="column">
+                </div>
             </div>
         </div>
     </div>
+    </section>
 </section>
 </template>
 
 <script>
-//const { getGuild } = require('../methods');
-
 export default {
-    name: "Home",
     data() {
         return {
-            //currentGuild: getGuild(),
+            title: 'Accueil',
+            currentGuild: 'Non diponible',
         };
+    },
+    head () {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        }
     },
     created() {
         

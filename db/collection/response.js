@@ -32,18 +32,25 @@ async function get(query) {
 }
 
 // Add
-async function add(trigger, response, type) {
-    const query = new Response({
+async function add(trigger, res, type) {
+    const response = new Response({
         trigger: trigger,
-        response: response,
+        response: res,
         type: type,
         enabled: true,
     });
 
     try {
-        await query.save();
-        logger.info(`collection => response => add: Added response: ${response} with trigger: ${trigger} and type: ${type}`);
-        return true;
+        const newResponse = await response.save();
+
+        if(newResponse === response) {
+            logger.info(`collection => response => add: Added response: ${res} with trigger: ${trigger} and type: ${type}`);
+            return true;
+        }
+        else {
+            logger.error('collection => response => add => save failed: newUser / user mismatch');
+            return false;
+        }
     }
     catch(err) {
         logger.error('collection => response => add => save: ', err);
@@ -63,6 +70,6 @@ async function update(filter, doc) {
     }
 }
 
-exports.getResponseLean = get;
+exports.getResponse = get;
 exports.addResponse = add;
 exports.updateResponse = update;

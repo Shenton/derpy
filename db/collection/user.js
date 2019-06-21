@@ -104,7 +104,7 @@ async function update(filter, doc) {
         return data;
     }
     catch(err) {
-        logger.error('Collections => User => updateUser: ', err);
+        logger.error('collections => user => updateUser: ', err);
         return false;
     }
 }

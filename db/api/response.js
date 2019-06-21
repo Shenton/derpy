@@ -1,50 +1,48 @@
 const { logger } = require('../logger');
 const validator = require('../validator');
 
-const { addResponse, getResponseLean, updateResponse } = require('../collection/response');
+const { addResponse, getResponse, updateResponse } = require('../collection/response');
 
-function get() {
-    const query = getResponseLean({});
+async function get() {
+    const data = await getResponse({});
 
-    if (!query) return { success: false, errors: ['Internal API error'] };
+    if (!data) return { success: false, status: 500, errors: ['Internal API error'] };
 
-    query.then(data => {
-        if (data) return { success: true, data: data };
-        else return { success: false, errors: ['Data not found'] };
-    });
+    if (data.length) return { success: true, status: 200, data: data };
+    else return { success: false, status: 404, errors: ['Data not found'] };
 }
 
-function add(data) {
+async function add(data) {
     const badRequest = [];
 
     if (!data.trigger || !data.response || !data.type) {
         logger.error('api => response => Add: Missing parameter.');
 
-        return { success: false, errors: ['Missing parameters'] };
+        return { success: false, status: 400, errors: ['Missing parameters'] };
     }
 
     if (!validator.response(data.trigger)) badRequest.push('"trigger" is not valid');
     if (!validator.response(data.response)) badRequest.push('"response" is not valid');
     if (data.type !== 'exact' && data.type !== 'contain') badRequest.push('"type" is not valid');
 
-    if (badRequest.length) return { success: false, errors: badRequest };
+    if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
-    const success = addResponse(data.trigger, data.response, data.type);
+    const success = await addResponse(data.trigger, data.response, data.type);
 
-    if (success) return { success: true };
-    else return { success: false, errors: ['Internal API error'] };
+    if (success) return { success: true, status: 200 };
+    else return { success: false, status: 500, errors: ['Internal API error'] };
 }
 
-function update(id, data) {
-    if (!id) return { success: false, errors: ['"id" is missing'] };
-    if (!validator.mongoID(id)) return { success: false, errors: ['"id" is invalid'] };
+async function update(id, data) {
+    if (!id) return { success: false, status: 400, errors: ['"id" is missing'] };
+    if (!validator.mongoID(id)) return { success: false, status: 400, errors: ['"id" is invalid'] };
 
     const badRequest = [];
 
     if (!data || !data.trigger || !data.response || !data.type) {
         logger.error('api => response => update: Missing parameter.');
 
-        return { success: false, errors: ['Missing parameters'] };
+        return { success: false, status: 400, errors: ['Missing parameters'] };
     }
 
     const doc = {};
@@ -61,12 +59,12 @@ function update(id, data) {
     if (!validator.isBoolean(data.enabled)) badRequest.push('"enabled" is not valid');
     else doc.enabled = data.enabled;
 
-    if (badRequest.length) return { success: false, errors: badRequest };
+    if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
-    const success = updateResponse({ memberID: id }, doc);
+    const success = await updateResponse({ memberID: id }, doc);
 
-    if (success) return { success: true };
-    else return { success: false, errors: ['Internal API error'] };
+    if (success) return { success: true, status: 200 };
+    else return { success: false, status: 500, errors: ['Internal API error'] };
 }
 
 module.exports.getResponse = get;

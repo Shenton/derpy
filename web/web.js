@@ -6,7 +6,6 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const cookieParser = require('cookie-parser');
 
 const { port, sessionSecret, authSecret } = require('./config').webServer;
-const { setDiscordSession } = require('./api/discord');
 
 const app = require('express')();
 
@@ -14,6 +13,9 @@ const app = require('express')();
 const { logger, morganInfo, morganError } = require('./logger');
 app.use(morganInfo);
 app.use(morganError);
+
+//db
+const { getOneUser } = require('../db/api/user');
 
 // We instantiate Nuxt.js with the options
 const nuxtConfig = require('./nuxt.config.js');
@@ -56,15 +58,33 @@ app.use(session(sess));
 // Set the discord session object
 app.use(async function(req, res, next) {
     if (!req.signedCookies.uuid) return next();
+
     const uniqueID = req.signedCookies.uuid;
+
     if (!uniqueID) return next();
-    if (!req.session.discordAuth) await setDiscordSession(req, uniqueID);
+
+    if (!req.session.discordAuth) {
+        const query = await getOneUser({ uniqueID: uniqueID });
+
+        if (!query.success) return logger.error('web main => discord session: ' + query.errors.join(', '));
+
+        req.session.discordAuth = {
+            memberID: query.data.memberID,
+            isOwner: query.data.isOwner,
+            hasAccess: query.data.hasAccess,
+            username: query.data.username,
+            discriminator: query.data.discriminator,
+            avatar: query.data.avatar,
+        };
+
+        req.session.save();
+    }
     next();
 });
 
-// Frontend APIs
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/discord', require('./routes/discord'));
+// APIs
+app.use('/api/auth', require('./api/routes/auth'));
+app.use('/api/discord', require('./api/routes/discord'));
 
 // Render every route with Nuxt.js
 app.use(nuxt.render);

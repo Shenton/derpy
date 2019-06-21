@@ -1,6 +1,6 @@
 const { fork } = require('child_process');
 
-const forkMe = ['api', 'bot', 'web'];
+const forkMe = ['bot', 'web'];
 
 class ForkMe {
     constructor(name) {

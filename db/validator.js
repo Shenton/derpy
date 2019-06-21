@@ -36,4 +36,18 @@ validator.uuidv4 = (uuid) => {
     return /^[A-F\d]{8}-[A-F\d]{4}-4[A-F\d]{3}-[89AB][A-F\d]{3}-[A-F\d]{12}$/i.test(uuid);
 };
 
+validator.response = (string) => {
+    if (/<|>|```/.test(string)) return false;
+    return true;
+};
+
+validator.isBoolean = (bool) => {
+    if (typeof bool !== 'boolean') return false;
+    return true;
+};
+
+validator.mongoID = (id) => {
+    return /^[a-zA-Z0-9]{24}$/.test(id);
+};
+
 module.exports = validator;

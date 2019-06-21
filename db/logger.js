@@ -1,5 +1,4 @@
 const { createLogger, format, transports } = require('winston');
-const morgan = require('morgan');
 const path = require('path');
 require('winston-daily-rotate-file');
 
@@ -27,17 +26,6 @@ combinedTransport.on('rotate', function(oldFilename, newFilename) {
     logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
 });
 
-const accessTransport = new transports.DailyRotateFile({
-    filename: path.join('..', 'log', 'api-access-%DATE%.log'),
-    datePattern: 'DD-MM-YYYY',
-    zippedArchive: true,
-    maxSize: '10m',
-    maxFiles: '30d',
-});
-accessTransport.on('rotate', function(oldFilename, newFilename) {
-    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
-});
-
 // Creating loggers
 const logger = createLogger({
     level: 'info',
@@ -47,20 +35,8 @@ const logger = createLogger({
         format.splat(),
         format.json()
     ),
-    defaultMeta: { service: 'api' },
+    defaultMeta: { service: 'db' },
     transports: [errorTransport, combinedTransport],
-});
-
-const accessLogger = createLogger({
-    level: 'info',
-    format: format.combine(
-        format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
-        format.errors({ stack: true }),
-        format.splat(),
-        format.json()
-    ),
-    defaultMeta: { service: 'api-access' },
-    transports: [accessTransport],
 });
 
 // If we are in dev we want to also output the log to the console
@@ -80,19 +56,7 @@ if (process.env.NODE_ENV === 'development') {
         level: 'debug',
         prettyPrint: true,
         format: format.combine(
-            format.label({ label: 'api' }),
-            format.timestamp({ format: 'HH:mm:ss' }),
-            format.errors({ stack: true }),
-            format.splat(),
-            myFormat
-        ),
-    }));
-
-    accessLogger.add(new transports.Console({
-        level: 'debug',
-        prettyPrint: true,
-        format: format.combine(
-            format.label({ label: 'api-access' }),
+            format.label({ label: 'db' }),
             format.timestamp({ format: 'HH:mm:ss' }),
             format.errors({ stack: true }),
             format.splat(),
@@ -101,31 +65,4 @@ if (process.env.NODE_ENV === 'development') {
     }));
 }
 
-// Morgan
-accessLogger.streamInfo = {
-    write: function(message) {
-        accessLogger.info(message);
-    },
-};
-const morganInfo = morgan('combined', {
-    skip: function(req, res) {
-        return res.statusCode >= 400;
-    },
-    stream: accessLogger.streamInfo,
-});
-
-accessLogger.streamError = {
-    write: function(message) {
-        accessLogger.error(message);
-    },
-};
-const morganError = morgan('combined', {
-    skip: function(req, res) {
-        return res.statusCode < 400;
-    },
-    stream: accessLogger.streamError,
-});
-
 exports.logger = logger;
-exports.morganInfo = morganInfo;
-exports.morganError = morganError;

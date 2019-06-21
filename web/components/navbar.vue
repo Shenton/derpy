@@ -20,7 +20,7 @@
                     <div v-if="$store.state.auth.hasAccess" class="navbar-item has-dropdown is-hoverable">
                         <a class="navbar-link">Modules</a>
                         <div class="navbar-dropdown">
-                            <nuxt-link class="navbar-item" to="/module/response">Accueil</nuxt-link>
+                            <nuxt-link class="navbar-item" to="/module/response">Response</nuxt-link>
                             <!--<hr class="navbar-divider">-->
                         </div>
                     </div>

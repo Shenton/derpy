@@ -2,9 +2,9 @@ const mongoose = require('../mongo');
 const Schema = mongoose.Schema;
 const uuidv4 = require('uuid/v4');
 
-const { ownerID } = require('../config');
-
 const { logger } = require('../logger');
+
+const { ownerID } = require('../config');
 
 const userSchema = new Schema({
     memberID: {
@@ -35,54 +35,35 @@ async function getNewUUID() {
     const uuid = uuidv4();
 
     try {
-        const query = await User.findOne({ uniqueID: uuid }).select('uniqueID').lean();
+        const data = await User.find({ uniqueID: uuid }).select('uniqueID').lean();
 
-        query.then(data => {
-            if (data) return getNewUUID();
-            else return uuid;
-        });
+        if (data.length) return getNewUUID();
+        else return uuid;
     }
     catch(err) {
-        logger.error('Collections => User => getNewUUID: ', err);
+        logger.error('collection => user => getNewUUID: ', err);
         return false;
     }
 }
 
 // Get
-async function getUserLean(query) {
+async function get(query) {
     try {
-        const data = await User.findOne(query).lean();
+        const data = await User.find(query).lean();
         return data;
     }
     catch(err) {
-        logger.error('Collections => User => getUserLean: ', err);
-        return false;
-    }
-}
-
-async function getUUID(conditions) {
-    try {
-        const data = await User.findOne(conditions, 'uniqueID').lean();
-        return data;
-    }
-    catch(err) {
-        logger.error('Collections => User => getUUI: ', err);
+        logger.error('collection => user => get: ', err);
         return false;
     }
 }
 
 // Add
-async function addUser(memberID, username, discriminator, avatar, accessToken, tokenType, expires, refreshToken) {
-    let uniqueID = uuidv4();
+async function add(memberID, username, discriminator, avatar, accessToken, tokenType, expires, refreshToken) {
     const isOwner = memberID === ownerID ? true : false;
     const hasAccess = false;
 
-    uniqueID = getNewUUID();
-
-    if (!uniqueID) {
-        logger.error('Collections => User => Adduser: Cannot get a new uuid');
-        return false;
-    }
+    const uniqueID = await getNewUUID();
 
     const user = new User({
         memberID: memberID,
@@ -99,18 +80,25 @@ async function addUser(memberID, username, discriminator, avatar, accessToken, t
     });
 
     try {
-        await user.save();
-        logger.info(`Collections => User => Adduser: Added user: ${username} with id: ${memberID} and uuid: ${uniqueID}`);
-        return uniqueID;
+        const newUser = await user.save();
+
+        if (newUser === user) {
+            logger.info(`collection => user => add: Added user: ${username} with id: ${memberID} and uuid: ${uniqueID}`);
+            return uniqueID;
+        }
+        else {
+            logger.error('collection => user => add => save failed: newUser / user mismatch');
+            return false;
+        }
     }
     catch(err) {
-        logger.error('Collections => User => Adduser => save: ', err);
+        logger.error('collection => user => add => save: ', err);
         return false;
     }
 }
 
 // Update
-async function updateUser(filter, doc) {
+async function update(filter, doc) {
     try {
         const data = await User.updateOne(filter, doc);
         return data;
@@ -121,7 +109,6 @@ async function updateUser(filter, doc) {
     }
 }
 
-exports.addUser = addUser;
-exports.getUserLean = getUserLean;
-exports.updateUser = updateUser;
-exports.getUUID = getUUID;
+exports.getUser = get;
+exports.addUser = add;
+exports.updateUser = update;

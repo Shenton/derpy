@@ -15,6 +15,11 @@ const responseSchema = new Schema({
     },
     type: String,
     enabled: Boolean,
+    revision: Number,
+});
+
+responseSchema.pre('updateOne', function() {
+    this.updateOne({}, { $inc: { revision: 1 } });
 });
 
 const Response = mongoose.model('Response', responseSchema);
@@ -38,6 +43,7 @@ async function add(trigger, res, type) {
         response: res,
         type: type,
         enabled: true,
+        revision: 0,
     });
 
     try {
@@ -45,16 +51,17 @@ async function add(trigger, res, type) {
 
         if(newResponse === response) {
             logger.info(`collection => response => add: Added response: ${res} with trigger: ${trigger} and type: ${type}`);
-            return true;
+            return 200;
         }
         else {
             logger.error('collection => response => add => save failed: newUser / user mismatch');
-            return false;
+            return 500;
         }
     }
     catch(err) {
-        logger.error('collection => response => add => save: ', err);
-        return false;
+        logger.error('collection => response => add: error: ', err);
+        if (err.name === 'MongoError' && err.code === 11000) return 409;
+        return 500;
     }
 }
 
@@ -62,10 +69,25 @@ async function add(trigger, res, type) {
 async function update(filter, doc) {
     try {
         const data = await Response.updateOne(filter, doc);
+        logger.debug('collection => response => update: filter: %o - doc: %o', filter, doc);
         return data;
     }
     catch(err) {
-        logger.error('collection => response => update: ', err);
+        logger.error('collection => response => update: error: ', err);
+        return false;
+    }
+}
+
+// Delete
+async function del(filter) {
+    try {
+        const data = await Response.deleteOne(filter);
+        logger.debug('DELETE: %o', data);
+        logger.debug('collection => response => delete: filter: %o', filter);
+        return data;
+    }
+    catch(err) {
+        logger.error('collection => response => delete: error: ', err);
         return false;
     }
 }
@@ -73,3 +95,4 @@ async function update(filter, doc) {
 exports.getResponse = get;
 exports.addResponse = add;
 exports.updateResponse = update;
+exports.deleteResponse = del;

@@ -1,71 +1,37 @@
 <template>
-<div class="navbar-padding-bottom">
-    <nav class="navbar" role="navigation" aria-label="main navigation">
-        <div class="container">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="/">
-                    <img src="/img/alien-icon.png" width="28" height="28">
-                </a>
+<b-navbar toggleable="lg" type="dark" variant="primary">
+    <b-container>
+        <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
-                <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbar">
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                    <span aria-hidden="true"></span>
-                </a>
-            </div>
-
-            <div id="navbar" class="navbar-menu">
-                <div class="navbar-start">
-                    <nuxt-link class="navbar-item" to="/">Accueil</nuxt-link>
-                    <div v-if="$store.state.auth.hasAccess" class="navbar-item has-dropdown is-hoverable">
-                        <a class="navbar-link">Modules</a>
-                        <div class="navbar-dropdown">
-                            <nuxt-link class="navbar-item" to="/module/response">Response</nuxt-link>
-                            <!--<hr class="navbar-divider">-->
-                        </div>
-                    </div>
-                    <div v-if="$store.state.auth.isOwner" class="navbar-item has-dropdown is-hoverable">
-                        <a class="navbar-link">Administration</a>
-                        <div class="navbar-dropdown">
-                            <nuxt-link class="navbar-item" to="/module/response">Membres</nuxt-link>
-                            <!--<hr class="navbar-divider">-->
-                        </div>
-                    </div>
-                </div>
-                <div class="navbar-end">
-                    <div class="navbar-item">
-                        <div v-if="$store.state.auth.isAuth" class="dropdown is-right">
-                            <div class="dropdown-trigger">
-                                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu-discord">
-                                    <figure class="image is-32x32">
-                                        <img class="is-rounded" :src="$store.state.auth.avatar">
-                                    </figure>
-                                    <span class="icon is-small">
-                                        <i class="fas fa-angle-down" aria-hidden="true"></i>
-                                    </span>
-                                </button>
-                            </div>
-                            <div class="dropdown-menu" id="dropdown-menu-discord" role="menu">
-                                <div class="dropdown-content">
-                                    <div class="dropdown-item">
-                                        <p><strong><span class="has-text-info">{{ $store.state.auth.name }}</span></strong><span class="has-text-grey">#{{ $store.state.auth.discriminator }}</span></p>
-                                    </div>
-                                    <hr class="dropdown-divider">
-                                    <div class="dropdown-item">
-                                        <a href="/api/auth/logout" class="dropdown-item">Déconnexion</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else class="buttons">
-                            <a href="/api/auth/login" class="button is-light">Connexion</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-</div>
+        <b-collapse id="nav-collapse" is-nav>
+            <b-navbar-brand to="/">
+                <img src="/img/alien-icon.png" width="32" height="32">
+            </b-navbar-brand>
+            <b-navbar-nav>
+                <b-nav-item to="/">Accueil</b-nav-item>
+                <b-nav-item-dropdown v-if="$store.state.auth.hasAccess" text="Modules">
+                    <b-dropdown-item to="/module/response">Response</b-dropdown-item>
+                </b-nav-item-dropdown>
+                <b-nav-item-dropdown v-if="$store.state.auth.isOwner" text="Administration">
+                    <b-dropdown-item to="#">Membres</b-dropdown-item>
+                </b-nav-item-dropdown>
+            </b-navbar-nav>
+        </b-collapse>
+        <b-dropdown v-if="$store.state.auth.isAuth" variant="primary" right>
+            <template slot="button-content">
+                <img class="rounded" :src="$store.state.auth.avatar" width="32" height="32">
+            </template>
+            <b-dropdown-text>
+                <strong><span class="text-primary">{{ $store.state.auth.name }}</span></strong><span class="text-secondary">#{{ $store.state.auth.discriminator }}</span>
+            </b-dropdown-text>
+            <b-dropdown-divider></b-dropdown-divider>
+            <b-dropdown-item href="/api/auth/logout">Déconnexion</b-dropdown-item>
+        </b-dropdown>
+        <b-button v-else v-b-popover.hover.bottom="'Connexion avec Discord'" variant="secondary" href="/api/auth/login">
+            Connexion&nbsp;&nbsp;<i class="fab fa-discord"></i>
+        </b-button>
+    </b-container>
+</b-navbar>
 </template>
 
 <script>
@@ -74,10 +40,5 @@ export default {
 </script>
 
 <style>
-.navbar-padding-bottom {
-    padding-bottom: 20px;
-}
-.navbar {
-    border-radius: 0 !important;
-}
+
 </style>

@@ -1,0 +1,124 @@
+// Bootstrap variables
+
+// Color system
+
+// Darkly colors
+$white:    #fff !default;
+$gray-100: #f8f9fa !default;
+$gray-200: #ebebeb !default;
+$gray-300: #dee2e6 !default;
+$gray-400: #ced4da !default;
+$gray-500: #adb5bd !default;
+$gray-600: #999 !default;
+$gray-700: #444 !default;
+$gray-800: #303030 !default;
+$gray-900: #222 !default;
+$black:    #000 !default;
+
+// Darkly colors
+$blue:    #375a7f !default;
+$indigo:  #6610f2 !default;
+$purple:  #6f42c1 !default;
+$pink:    #e83e8c !default;
+$red:     #E74C3C !default;
+$orange:  #fd7e14 !default;
+$yellow:  #F39C12 !default;
+$green:   #00bc8c !default;
+$teal:    #20c997 !default;
+$cyan:    #3498DB !default;
+
+$primary:       $blue !default;
+$secondary:     $gray-800 !default;
+$success:       $green !default;
+$info:          $cyan !default;
+$warning:       $yellow !default;
+$danger:        $red !default;
+$light:         $gray-500 !default;
+$dark:          $gray-800 !default;
+
+$theme-colors: () !default;
+$theme-colors: map-merge(
+  (
+    "primary":      $primary,
+    "secondary":    $secondary,
+    "success":      $success,
+    "info":         $info,
+    "warning":      $warning,
+    "danger":       $danger,
+    "light":        $light,
+    "dark":         $dark,
+    "darker":       $gray-900
+  ),
+  $theme-colors
+);
+
+// Options
+$enable-shadows: true !default;
+
+// Body
+$body-bg:       $gray-900 !default;
+$body-color:    $gray-300 !default;
+
+// Links
+$link-color: $success !default;
+
+// Components
+$border-color: $gray-600 !default;
+
+// Typography
+// Darkly font
+$web-font-path: "https://fonts.googleapis.com/css?family=Lato:400,700,400italic" !default;
+@import url($web-font-path);
+$font-family-sans-serif: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !default;
+
+// Tables
+$table-bg-level:        0 !default;
+$table-border-level:    0 !default;
+
+// Buttons
+$btn-box-shadow: 0 !default;
+
+// Forms
+$input-bg:              $gray-700 !default;
+$input-disabled-bg:     $gray-900 !default;
+$input-color:           $body-color !default;
+$input-border-color:    $border-color !default;
+
+// Dropdowns
+$dropdown-color:            $body-color !default;
+$dropdown-bg:               $body-bg !default;
+$dropdown-divider-bg:       $border-color !default;
+$dropdown-link-color:       $success !default;
+$dropdown-link-hover-color: darken($success, 5%) !default;
+$dropdown-link-hover-bg:    $primary !default;
+
+// Pagination
+$pagination-bg:                     $gray-700 !default;
+$pagination-disabled-color:         $gray-700 !default;
+$pagination-disabled-bg:            $gray-900 !default;
+$pagination-border-color:           $border-color !default;
+$pagination-hover-border-color:     $pagination-border-color !default;
+$pagination-active-border-color:    $pagination-border-color !default;
+$pagination-disabled-border-color:  $pagination-border-color !default;
+
+// Popovers
+$popover-bg:            $gray-800 !default;
+//$popover-header-color:  $headings-color !default;
+
+// Toasts
+$toast-header-background-color: $gray-900 !default;
+$toast-background-color:        rgba($toast-header-background-color, .85) !default;
+
+// Alerts
+$alert-bg-level:        0 !default;
+$alert-border-level:    0 !default;
+$alert-color-level:     0 !default;
+
+@import "bootstrap/scss/bootstrap.scss";
+@import "bootstrap-vue/src/index.scss";
+
+.toast {
+    min-width: 200px;
+    position: relative;
+    left: 100px;
+}

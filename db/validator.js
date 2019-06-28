@@ -37,6 +37,7 @@ validator.uuidv4 = (uuid) => {
 };
 
 validator.response = (string) => {
+    if (string.length > 100) return false;
     if (/<|>|```/.test(string)) return false;
     return true;
 };

@@ -1,10 +1,12 @@
 const { logger } = require('../logger');
 const validator = require('../validator');
 
-const { addResponse, getResponse, updateResponse } = require('../collection/response');
+const { addResponse, getResponse, updateResponse, deleteResponse } = require('../collection/response');
 
-async function get() {
-    const data = await getResponse({});
+async function get(query) {
+    if (!query) query = {};
+
+    const data = await getResponse(query);
 
     if (!data) return { success: false, status: 500, errors: ['Internal API error'] };
 
@@ -29,7 +31,8 @@ async function add(data) {
 
     const success = await addResponse(data.trigger, data.response, data.type);
 
-    if (success) return { success: true, status: 200 };
+    if (success === 200) return { success: true, status: 200 };
+    else if (success === 409) return { success: false, status: 409, errors: ['Already exists'] };
     else return { success: false, status: 500, errors: ['Internal API error'] };
 }
 
@@ -39,7 +42,7 @@ async function update(id, data) {
 
     const badRequest = [];
 
-    if (!data || !data.trigger || !data.response || !data.type) {
+    if (!data && !data.trigger && !data.response && !data.type) {
         logger.error('api => response => update: Missing parameter.');
 
         return { success: false, status: 400, errors: ['Missing parameters'] };
@@ -47,21 +50,39 @@ async function update(id, data) {
 
     const doc = {};
 
-    if (!validator.response(data.trigger)) badRequest.push('"trigger" is not valid');
-    else doc.trigger = data.trigger;
+    if (data.trigger) {
+        if (!validator.response(data.trigger)) badRequest.push('"trigger" is not valid');
+        else doc.trigger = data.trigger;
+    }
 
-    if (!validator.response(data.response)) badRequest.push('"response" is not valid');
-    else doc.response = data.response;
+    if (data.response) {
+        if (!validator.response(data.response)) badRequest.push('"response" is not valid');
+        else doc.response = data.response;
+    }
 
-    if (data.type !== 'exact' && data.type !== 'contain') badRequest.push('"type" is not valid');
-    else doc.type = data.type;
+    if (data.type) {
+        if (data.type !== 'exact' && data.type !== 'contain') badRequest.push('"type" is not valid');
+        else doc.type = data.type;
+    }
 
-    if (!validator.isBoolean(data.enabled)) badRequest.push('"enabled" is not valid');
-    else doc.enabled = data.enabled;
+    if (data.enabled === true || data.enabled === false) {
+        if (!validator.isBoolean(data.enabled)) badRequest.push('"enabled" is not valid');
+        else doc.enabled = data.enabled;
+    }
 
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
-    const success = await updateResponse({ memberID: id }, doc);
+    const success = await updateResponse({ _id: id }, doc);
+
+    if (success) return { success: true, status: 200, modified: success.nModified };
+    else return { success: false, status: 500, errors: ['Internal API error'] };
+}
+
+async function del(id) {
+    if (!id) return { success: false, status: 400, errors: ['"id" is missing'] };
+    if (!validator.mongoID(id)) return { success: false, status: 400, errors: ['"id" is invalid'] };
+
+    const success = await deleteResponse({ _id: id });
 
     if (success) return { success: true, status: 200 };
     else return { success: false, status: 500, errors: ['Internal API error'] };
@@ -70,3 +91,4 @@ async function update(id, data) {
 module.exports.getResponse = get;
 module.exports.addResponse = add;
 module.exports.updateResponse = update;
+module.exports.deleteResponse = del;

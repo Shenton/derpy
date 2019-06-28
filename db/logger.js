@@ -5,7 +5,7 @@ require('winston-daily-rotate-file');
 // Declare daily rotate transports objects
 const errorTransport = new transports.DailyRotateFile({
     level: 'error',
-    filename: path.join('..', 'log', 'api-error-%DATE%.log'),
+    filename: path.join('..', 'log', 'db-error-%DATE%.log'),
     datePattern: 'DD-MM-YYYY',
     zippedArchive: true,
     maxSize: '10m',
@@ -16,7 +16,7 @@ errorTransport.on('rotate', function(oldFilename, newFilename) {
 });
 
 const combinedTransport = new transports.DailyRotateFile({
-    filename: path.join('..', 'log', 'api-combined-%DATE%.log'),
+    filename: path.join('..', 'log', 'db-combined-%DATE%.log'),
     datePattern: 'DD-MM-YYYY',
     zippedArchive: true,
     maxSize: '10m',
@@ -43,11 +43,12 @@ const logger = createLogger({
 // Also defining Morgan format
 if (process.env.NODE_ENV === 'development') {
     const myFormat = format.printf(({ level, message, label, timestamp, stack }) => {
-        let color = '\x1b[37m';
+        let color = '';
 
         if (level == 'debug') color = '\x1b[36m';
         else if (level == 'info') color = '\x1b[32m';
         else if (level == 'error') color = '\x1b[31m';
+        else if (level == 'warn') color = '\x1b[33m';
 
         return `\x1b[46m[${label}]\x1b[0m ${timestamp} ${level}: ${color + message}\x1b[0m${stack ? `\n\x1b[30m${stack}\x1b[0m` : ''}`;
     });

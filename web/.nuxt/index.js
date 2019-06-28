@@ -3,7 +3,7 @@ import Meta from 'vue-meta'
 import { createRouter } from './router.js'
 import NoSsr from './components/no-ssr.js'
 import NuxtChild from './components/nuxt-child.js'
-import NuxtError from './components/nuxt-error.vue'
+import NuxtError from '..\\layouts\\error.vue'
 import Nuxt from './components/nuxt.js'
 import App from './App.js'
 import { setContext, getLocation, getRouteData, normalizeError } from './utils'
@@ -11,8 +11,9 @@ import { createStore } from './store.js'
 
 /* Plugins */
 
+import nuxt_plugin_bootstrapvue_3bdb851f from 'nuxt_plugin_bootstrapvue_3bdb851f' // Source: .\\bootstrap-vue.js (mode: 'all')
 import nuxt_plugin_axios_0b1096f0 from 'nuxt_plugin_axios_0b1096f0' // Source: .\\axios.js (mode: 'all')
-import nuxt_plugin_bulmaclient_1b86701d from 'nuxt_plugin_bulmaclient_1b86701d' // Source: ..\\plugins\\client\\bulma.client.js (mode: 'client')
+import nuxt_plugin_toast_49c09830 from 'nuxt_plugin_toast_49c09830' // Source: ..\\plugins\\toast.client (mode: 'client')
 
 // Component: <NoSsr>
 Vue.component(NoSsr.name, NoSsr)
@@ -152,12 +153,16 @@ async function createApp(ssrContext) {
 
   // Plugin execution
 
+  if (typeof nuxt_plugin_bootstrapvue_3bdb851f === 'function') {
+    await nuxt_plugin_bootstrapvue_3bdb851f(app.context, inject)
+  }
+
   if (typeof nuxt_plugin_axios_0b1096f0 === 'function') {
     await nuxt_plugin_axios_0b1096f0(app.context, inject)
   }
 
-  if (process.client && typeof nuxt_plugin_bulmaclient_1b86701d === 'function') {
-    await nuxt_plugin_bulmaclient_1b86701d(app.context, inject)
+  if (process.client && typeof nuxt_plugin_toast_49c09830 === 'function') {
+    await nuxt_plugin_toast_49c09830(app.context, inject)
   }
 
   // If server-side, wait for async component to be resolved first

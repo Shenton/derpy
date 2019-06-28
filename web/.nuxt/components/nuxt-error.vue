@@ -7,10 +7,10 @@
 
       <div class="title">{{ message }}</div>
       <p v-if="statusCode === 404" class="description">
-        <NuxtLink class="error-link" to="/">Back to the home page</NuxtLink>
+        <NuxtLink class="error-link" to="/">Retour à l'accueil</NuxtLink>
       </p>
 
-      <p class="description" v-else>An error occurred while rendering the page. Check developer tools console for details.</p>
+      <p class="description" v-else>Une erreur a eu lieu pendant le rendu de la page. Utilise la console des outils de développeur pour plus d'information</p>
 
       <div class="logo">
         <a href="https://nuxtjs.org" target="_blank" rel="noopener">Nuxt.js</a>
@@ -44,7 +44,7 @@ export default {
       return (this.error && this.error.statusCode) || 500
     },
     message() {
-      return this.error.message || `Error`
+      return this.error.message || `Erreur`
     }
   }
 }

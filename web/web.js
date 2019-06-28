@@ -60,6 +60,7 @@ app.use(async function(req, res, next) {
     if (!req.signedCookies.uuid) return next();
 
     const uniqueID = req.signedCookies.uuid;
+    logger.debug(uniqueID);
 
     if (!uniqueID) return next();
 
@@ -85,6 +86,7 @@ app.use(async function(req, res, next) {
 // APIs
 app.use('/api/auth', require('./api/routes/auth'));
 app.use('/api/discord', require('./api/routes/discord'));
+app.use('/api/response', require('./api/routes/response'));
 
 // Render every route with Nuxt.js
 app.use(nuxt.render);

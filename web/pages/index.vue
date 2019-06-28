@@ -1,36 +1,21 @@
 <template>
-<section>
-    <div class="hero is-light">
-        <div class="hero-body">
-            <div class="container">
-                <h1 class="title">Derpy</h1>
-                <h2 class="subtitle">Le bot qui Hurr Durr Derp!!</h2>
-            </div>
+<div>
+    <b-jumbotron fluid bg-variant="dark" text-variant="light" class="mt-3 pt-4 pb-4" header="Derpy" lead="Le bot qui Hurr Durr Derp!!"></b-jumbotron>
+    <b-container>
+        <div class="shadow-sm p-3 mb-5 bg-secondary rounded">
+            <p>{{ $store.state.auth.name }}<br></p>
+            <b-button @click="makeToast()" class="mb-2">Test</b-button>
         </div>
-    </div>
-    <section  class="section">
-        <div class="container">
-        <div class="box">
-            <div class="columns is-flex">
-                <div class="column is-half">
-                    <!--<p>Actuellement je m'occupe de la guilde {{ currentGuild }}.</p>-->
-                    <p>{{ $store.state.auth.name }}<br></p>
-                </div>
-                <div class="column">
-                </div>
-            </div>
-        </div>
-    </div>
-    </section>
-</section>
+    </b-container>
+</div>
 </template>
 
 <script>
 export default {
+    name: 'Accueil',
     data() {
         return {
             title: 'Accueil',
-            currentGuild: 'Non diponible',
         };
     },
     head () {
@@ -38,8 +23,15 @@ export default {
             titleTemplate: '%s - ' + this.title,
         }
     },
-    created() {
-        
+    methods: {
+        makeToast() {
+            const n = Math.floor(Math.random() * 4) + 1;
+
+            if (n == 1) this.$toast.success('Test');
+            else if (n == 2) this.$toast.warning('Test');
+            else if (n == 3) this.$toast.info('Test');
+            else if (n == 4) this.$toast.error('Test');
+        }
     },
 }
 </script>

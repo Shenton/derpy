@@ -78,7 +78,7 @@ export default async (ssrContext) => {
     return _app
   }
   const render404Page = () => {
-    app.context.error({ statusCode: 404, path: ssrContext.url, message: `This page could not be found` })
+    app.context.error({ statusCode: 404, path: ssrContext.url, message: `Page non trouvée` })
     return renderErrorPage()
   }
 

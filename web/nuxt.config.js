@@ -1,38 +1,63 @@
-const { baseURL } = require('./config').api;
+const { baseURL } = require('./config').webServer;
 
 module.exports = {
+    env: {
+        version: process.env.npm_package_version,
+    },
     srcDir: __dirname,
     rootDir: __dirname,
     modulesDir: ['../node_modules'],
     modules: [
         '@nuxtjs/axios',
+        'bootstrap-vue/nuxt',
     ],
     axios: {
-        baseURL: baseURL,
+        baseURL: baseURL + '/api/',
+    },
+    bootstrapVue: {
+        bootstrapCSS: false,
+        bootstrapVueCSS: false,
     },
     plugins: [
-        '~/plugins/client/bulma.client.js',
+        '~/plugins/toast.client',
     ],
-    env: {
-        version: process.env.npm_package_version,
+    router: {
+        esModule: false,
     },
+    css: [
+        '~/assets/scss/main.scss',
+    ],
+    // build: {
+    //     optimization: {
+    //         splitChunks: true,
+    //     },
+    // },
     head: {
         title: 'Derpy',
         meta: [
             { charset: 'utf-8' },
             { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-            { hid: 'description', name: 'description', content: 'Derpy the Dicord bot front-end' },
+            { hid: 'description', name: 'description', content: 'Front-end of Derpy the Discord bot' },
         ],
         link: [
-            { rel: 'stylesheet', href: 'https://unpkg.com/bulmaswatch/darkly/bulmaswatch.min.css' },
             { rel: 'favicon', href: '/img/alien-icon.png' },
         ],
         script: [
             { src: 'https://kit.fontawesome.com/2a418142fb.js', defer: true },
-            { src: 'https://code.jquery.com/jquery-3.4.1.min.js', defer: true },
+            {
+                src: 'https://code.jquery.com/jquery-3.4.1.min.js',
+                integrity: 'sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=',
+                crossorigin: 'anonymous',
+                defer: true,
+            },
         ],
     },
-    router: {
-        esModule: false,
+    messages: {
+        error_404: 'Page non trouvée',
+        server_error: 'Erreur serveur',
+        back_to_home: 'Retour à l\'accueil',
+        server_error_details: 'Une erreur a eu lieu et ta page ne peut pas être affichée. Si tu es le propriétaire, vérifies tes logs pour plus d\'information',
+        client_error: 'Erreur',
+        client_error_details: 'Une erreur a eu lieu pendant le rendu de la page. Utilise la console des outils de développeur pour plus d\'information',
     },
 };

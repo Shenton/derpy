@@ -38,11 +38,12 @@ const logger = createLogger({
 // If we are in dev we want to also output the log to the console
 if (process.env.NODE_ENV === 'development') {
     const myFormat = format.printf(({ level, message, label, timestamp, stack }) => {
-        let color = '\x1b[37m';
+        let color = '';
 
         if (level == 'debug') color = '\x1b[36m';
         else if (level == 'info') color = '\x1b[32m';
         else if (level == 'error') color = '\x1b[31m';
+        else if (level == 'warn') color = '\x1b[33m';
 
         return `\x1b[44m[${label}]\x1b[0m ${timestamp} ${level}: ${color + message}\x1b[0m${stack ? `\n\x1b[30m${stack}\x1b[0m` : ''}`;
     });

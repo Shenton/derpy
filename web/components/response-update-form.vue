@@ -14,7 +14,7 @@
                 </b-col>
                 <b-col>
                     <b-button type="submit" variant="primary">Modifier</b-button>
-                    <b-button v-if="$store.state.auth.isOwner" @click="submitDelete" variant="danger">Supprimer</b-button>
+                    <b-button v-if="$store.state.auth.isOwner" class="float-right" @click="submitDelete" variant="danger">Supprimer</b-button>
                 </b-col>
             </b-row>
         </b-form-group>

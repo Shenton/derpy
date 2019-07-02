@@ -1,7 +1,16 @@
 <template>
 <div>
-    <b-jumbotron fluid bg-variant="dark" text-variant="light" class="mt-3 pt-4 pb-4" header="Module: Response" lead="Définis un déclencheur, le bot postera la réponse."></b-jumbotron>
+    <b-jumbotron
+        fluid bg-variant="dark"
+        text-variant="light"
+        class="mt-3 mb-3 pt-4 pb-4"
+        header="Module: Response"
+        lead="Définis un déclencheur, le bot postera la réponse."
+    ></b-jumbotron>
     <b-container>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+    </b-container>
+    <b-container v-if="responses.length" class="pb-5">
         <b-table
             hover
             head-variant="light"
@@ -34,7 +43,7 @@
             </b-col>
         </b-row>
     </b-container>
-    <b-container class="pt-5">
+    <b-container>
         <h4>Ajouter une nouvelle réponse</h4>
         <hr class="border-primary">
         <b-form @submit="submitNew" @reset="resetNew" v-if="showNewForm">
@@ -93,11 +102,6 @@ export default {
                         width: '40%'
                     }
                 },
-                // {
-                //     key: 'type',
-                //     label: 'Type',
-                //     sortable: true,
-                // },
                 {
                     key: 'enabledCheckBox',
                     label: 'Activée',
@@ -120,15 +124,20 @@ export default {
             responseSelectOptions: [
                 { value: 'exact', text: 'Exact' },
                 { value: 'contain', text: 'Contient' },
-            ]
+            ],
         };
     },
     async asyncData({ $axios }) {
-        const data = await $axios.$get('response');
-        const responses = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
-        return { responses: responses };
+        try {
+            const data = await $axios.$get('response');
+            const responses = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
+            return { responses: responses };
+        }
+        catch(err) {}
+        
     },
     mounted() {
+        this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
         this.totalRows = this.responses.length;
     },
     methods: {
@@ -151,20 +160,11 @@ export default {
                     this.totalRows = this.responses.length;
                 }
                 catch(err) {
-                    this.$toast.error('Erreur avec la récupération des réponses');
+                    this.axiosGetErrorHandler(err);
                 }
             }
             catch(err) {
-                const code = parseInt(err.response && err.response.status)
-                if (code === 400) {
-                    this.$toast.warning('Requête invalide');
-                }
-                else if (code === 409) {
-                    this.$toast.warning('Cette réponse existe déjà');
-                }
-                else {
-                    this.$toast.error('Erreur avec l\'ajout de la réponse');
-                }
+                this.axiosErrorHandler(err, 'Erreur avec l\'ajout de la réponse');
             }
         },
         async submitUpdate(id, data) {
@@ -189,18 +189,12 @@ export default {
                         this.totalRows = this.responses.length;
                     }
                     catch(err) {
-                        this.$toast.error('Erreur avec la récupération des réponses');
+                        this.axiosGetErrorHandler(err);
                     }
                 }
             }
             catch(err) {
-                const code = parseInt(err.response && err.response.status)
-                if (code === 400) {
-                    this.$toast.warning('Requête invalide');
-                }
-                else {
-                    this.$toast.error('Erreur avec l\'édition de la réponse');
-                }
+                this.axiosErrorHandler(err, 'Erreur avec l\'édition de la réponse');
             }
         },
         async submitDelete(id) {
@@ -220,17 +214,47 @@ export default {
                     this.totalRows = this.responses.length;
                 }
                 catch(err) {
-                    this.$toast.error('Erreur avec la récupération des réponses');
+                    this.axiosGetErrorHandler(err);
                 }
             }
             catch(err) {
-                const code = parseInt(err.response && err.response.status)
-                if (code === 400) {
-                    this.$toast.warning('Requête invalide');
-                }
-                else {
-                    this.$toast.error('Erreur avec la suppression de la réponse');
-                }
+                this.axiosErrorHandler(err, 'Erreur avec la suppression de la réponse');
+            }
+        },
+        axiosErrorHandler(err, methodMessage) {
+            const code = parseInt(err.response && err.response.status);
+
+            if (code === 400) {
+                this.$toast.warning('Requête invalide');
+            }
+            else if (code === 401) {
+                this.$toast.warning('Accès non autorisé à la base de donnée');
+            }
+            else if (code === 404) {
+                this.$toast.warning('Réponse non trouvée');
+            }
+            else if (code === 409) {
+                this.$toast.warning('Cette réponse existe déjà');
+            }
+            else {
+                this.$toast.error(methodMessage);
+            }
+        },
+        axiosGetErrorHandler(err) {
+            const code = parseInt(err.response && err.response.status);
+
+            if (code === 400) {
+                this.$toast.warning('Requête invalide');
+            }
+            else if (code === 401) {
+                this.$toast.warning('Accès non autorisé à la base de donnée');
+            }
+            else if (code === 404) {
+                this.responses = [];
+                this.totalRows = this.responses.length;
+            }
+            else {
+                this.$toast.error('Erreur avec la récupération des réponses');
             }
         },
         toggleEnabled(id, enabled) {

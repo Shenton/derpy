@@ -28,7 +28,7 @@ const userSchema = new Schema({
     refreshToken: String,
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 // Helpers
 async function getNewUUID() {

@@ -19,6 +19,8 @@ void (function updateModules() {
   store.modules = store.modules || {}
 
   resolveStoreModules(require('..\\store\\auth.js'), 'auth.js')
+  resolveStoreModules(require('..\\store\\botinfo.js'), 'botinfo.js')
+  resolveStoreModules(require('..\\store\\breadcrumbs.js'), 'breadcrumbs.js')
 
   // If the environment supports hot reloading...
 
@@ -26,6 +28,8 @@ void (function updateModules() {
     // Whenever any Vuex module is updated...
     module.hot.accept([
       '..\\store\\auth.js',
+      '..\\store\\botinfo.js',
+      '..\\store\\breadcrumbs.js',
       '..\\store\\index.js',
     ], () => {
       // Update `root.modules` with the latest definitions.

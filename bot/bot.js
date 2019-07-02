@@ -1,118 +1,180 @@
 // npm modules
-const Discord = require('discord.js');
-const jsonfile = require('jsonfile');
+const { Collection } = require('discord.js');
+const fs = require('fs');
 const path = require('path');
-const { createLogger, format, transports } = require('winston');
-require('winston-daily-rotate-file');
 
-// App root directory
-const rootDir = __dirname;
+// Derpy modules
+const logger = require('./logger');
+const config = require('./config');
+const { rootDir, guildID, helpEmbed } = require('./variables');
+const { getDerpy, addDerpy, updateDerpy } = require('../db/collection/derpy');
+const { getInformation } = require('./methods');
+
+// Main Discord client
+const client = require('./client');
 
 // Logger
-const errorTransport = new transports.DailyRotateFile({
-    level: 'error',
-    filename: path.join(rootDir, '..', 'log', 'bot-error-%DATE%.log'),
-    datePattern: 'DD-MM-YYYY',
-    zippedArchive: true,
-    maxSize: '10m',
-    maxFiles: '30d',
-});
-const combinedTransport = new transports.DailyRotateFile({
-    filename: path.join(rootDir, '..', 'log', 'bot-combined-%DATE%.log'),
-    datePattern: 'DD-MM-YYYY',
-    zippedArchive: true,
-    maxSize: '10m',
-    maxFiles: '30d',
-});
-const logger = createLogger({
-    level: 'info',
-    format: format.combine(
-        format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
-        format.errors({ stack: true }),
-        format.splat(),
-        format.json()
-    ),
-    defaultMeta: { service: 'bot' },
-    transports: [errorTransport, combinedTransport],
-});
-// If we are in dev we want to also output the log to the console
-if (process.env.NODE_ENV === 'development') {
-    const myFormat = format.printf(({ level, message, label, timestamp, stack }) => {
-        let color = '';
-
-        if (level == 'debug') color = '\x1b[36m';
-        else if (level == 'info') color = '\x1b[32m';
-        else if (level == 'error') color = '\x1b[31m';
-        else if (level == 'warn') color = '\x1b[33m';
-
-        return `\x1b[44m[${label}]\x1b[0m ${timestamp} ${level}: ${color + message}\x1b[0m${stack ? `\n\x1b[30m${stack}\x1b[0m` : ''}`;
-    });
-    logger.add(new transports.Console({
-        level: 'debug',
-        prettyPrint: true,
-        format: format.combine(
-            format.label({ label: 'bot' }),
-            format.timestamp({ format: 'HH:mm:ss' }),
-            format.errors({ stack: true }),
-            format.splat(),
-            myFormat
-        ),
-    }));
-}
-errorTransport.on('rotate', function(oldFilename, newFilename) {
-    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
-});
-combinedTransport.on('rotate', function(oldFilename, newFilename) {
-    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
-});
-
-// Config object
-let config = null;
-function loadConfig() {
-    if (process.env.NODE_ENV === 'development') {
-        config = jsonfile.readFileSync(path.join(rootDir, '..', 'config-dev.json'));
-    }
-    else {
-        config = jsonfile.readFileSync(path.join(rootDir, '..', 'config.json'));
-    }
-    return true;
-}
-loadConfig();
-
-// Main Discord client instance
-const client = new Discord.Client();
-
-// Discord client logging
 if (process.env.NODE_ENV === 'development') client.on('debug', logger.debug.bind(logger));
 client.on('error', logger.error.bind(logger));
 
-// Exports that will be used globaly
-// Variables
-exports.rootDir = rootDir;
-exports.guildID = config.guildID;
-exports.channelID = config.channelID;
-exports.helpEmbed = {
-    color: 0x25701e,
-    author: {
-        name: 'Voici la liste de mes commandes',
-        icon_url: 'attachment://area51.png',
-    },
-    description: `Utilise ${config.prefix}help <nom de la command>, pour avoir plus d'informations.`,
-    fields: [],
-    timestamp: new Date(),
-    footer: {
-        text: 'Derpy v' + process.env.npm_package_version,
-        icon_url: 'attachment://area51.png',
-    },
-};
+// Require and declare the commands
+client.commands = new Collection();
+const commandFiles = fs.readdirSync(path.join(rootDir, 'commands')).filter(file => file.endsWith('.js'));
+const commandsList = [];
+for (const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
 
-// Objects
-exports.logger = logger;
-exports.client = client;
-exports.config = config;
+    const commandName = path.basename(file, '.js');
+    commandsList.push(config.prefix + commandName);
+}
+const commandsString = commandsList.join(' ');
+helpEmbed.fields.push({ name: 'Génériques', value: `\`${commandsString}\`` });
 
-// Methods
-exports.loadConfig = loadConfig;
+// Commands handling
+const cooldowns = new Collection();
+client.on('message', message => {
+    // This bot is designed to only serve one guild
+    if (message.channel.type === 'text' && message.guild.id != guildID) return;
 
-// Init the bot
-require('./src/client');
+    // Is a command (start with prefix), is not a bot
+    if (!message.content.startsWith(config.prefix) || message.author.bot) return;
+
+    /**
+     * Set the command name and the arguments
+     * Set the command to an object
+     * Check if the command exists
+     */
+    const args = message.content.slice(config.prefix.length).split(/ +/);
+    const commandName = args.shift().toLowerCase();
+    const command = client.commands.get(commandName) ||
+        client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+    if (!command) return;
+
+    // Is the command owner only
+    if (command.ownerOnly && message.author.id != config.ownerID) {
+        logger.warn(`User ${message.author.username} (${message.author.tag}) try to use owner command ${commandName}`);
+        return message.reply('tu ne peux pas utiliser cette commande.')
+            .catch(logger.error);
+    }
+
+    // The command cannot be used in DM
+    if (message.channel.type !== 'text' && command.guildOnly) {
+        return message.reply('cette commande ne peut pas être utilisée en privé.')
+            .catch(logger.error);
+    }
+
+    // Can the command be executed on this channel
+    if (message.channel.type === 'text' && command.allowedChannels &&
+        !command.allowedChannels.includes(message.channel.id)) {
+        return message.reply('cette commande ne peut pas être utilisée sur ce canal.')
+            .catch(logger.error);
+    }
+
+    // Do the member has role access
+    let hasRoleAccess = false;
+    if (command.allowedRoles) {
+        message.member.roles.array().forEach(role => {
+            if (command.allowedRoles.includes(role.id)) hasRoleAccess = true;
+        });
+    }
+    else {
+        hasRoleAccess = true;
+    }
+    if (!hasRoleAccess) {
+        return message.reply('tu ne peux pas utiliser cette commande.')
+            .catch(logger.error);
+    }
+
+    /**
+     * Add the command to the cooldown collection object, if needed
+     * Check if the member has this command in cooldown, return a message if true
+     * Add the member to the cooldown collection if the command can be executed
+     */
+    if (!cooldowns.has(command.name)) {
+        cooldowns.set(command.name, new Collection());
+    }
+    const now = Date.now();
+    const timestamps = cooldowns.get(command.name);
+    const cooldownAmount = (command.cooldown || 3) * 1000;
+    if (timestamps.has(message.author.id)) {
+        const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
+        if (now < expirationTime && message.author.id != config.ownerID) {
+            const timeLeft = (expirationTime - now) / 1000;
+            return message.reply(`merci d'attendre ${timeLeft.toFixed(1)} seconde(s) avant d'utiliser "${command.name}".`)
+                .catch(logger.error);
+        }
+    }
+    timestamps.set(message.author.id, now);
+    setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
+
+    // Required args handling
+    if (command.args && !args.length) {
+        let reply = 'cette commande a besoin d\'argument(s).';
+        if (command.usage) reply += `\nUtilisation: \`${config.prefix}${command.name} ${command.usage}\``;
+        return message.reply(reply)
+            .catch(logger.error);
+    }
+
+    logger.info(`User ${message.author.tag} used command: ${commandName} - with args: ${args}`);
+
+    // Execute the command
+    try {
+        command.execute(message, args);
+        if (message.channel.type === 'text') message.delete();
+    }
+    catch (err) {
+        logger.error(err);
+        message.reply('il y a eu une erreur avec l\'exécution de cette commande.')
+            .catch(logger.error);
+    }
+});
+
+/**
+ * When the bot is connected and ready to interact with the Discord server/guild/whatever
+ * Call the bot modules loader
+ */
+client.once('ready', () => {
+    logger.info(`Logged in as ${client.user.tag}! (${client.user.id})`);
+    client.user.setActivity('Hurr Durr Derp');
+
+    // Modules loader
+    require('./loader');
+
+    // const restarted = db.getData('/restart/restarted');
+    // if (restarted) {
+    //     client.guilds.get(guildID).channels.get(channelID).send('Je suis de retour!')
+    //         .catch(logger.error);
+    //     db.push('/restart/restarted', false);
+    // }
+
+    setbotInfo();
+});
+
+client.on('channelCreate', () => setbotInfo());
+client.on('channelDelete', () => setbotInfo());
+client.on('channelUpdate', () => setbotInfo());
+client.on('guildMemberAdd', () => setbotInfo());
+client.on('guildMemberRemove', () => setbotInfo());
+client.on('guildMemberUpdate', () => setbotInfo());
+client.on('guildUpdate', () => setbotInfo());
+client.on('roleCreate', () => setbotInfo());
+client.on('roleDelete', () => setbotInfo());
+client.on('roleUpdate', () => setbotInfo());
+
+async function setbotInfo() {
+    const info = getInformation();
+
+    try {
+        const data = await getDerpy({ name: 'information' }, null);
+
+        if (data.length) updateDerpy({ name: 'information' }, { value: info });
+        else addDerpy('information', info);
+    }
+    catch(err) {
+        logger.error('bot => client.js => getBotInfo error: ', err);
+    }
+}
+
+// Log Derpy to Discord
+client.login(config.discordToken);

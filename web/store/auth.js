@@ -4,6 +4,7 @@ export const state = () => ({
     isAuth: null,
     name: null,
     discriminator: null,
+    memberID: null,
     avatar: null,
     isOwner: null,
     hasAccess: null,
@@ -46,6 +47,15 @@ export const actions = {
             commit('setAvatar', avatar);
             commit('setIsOwner', req.session.discordAuth.isOwner);
             commit('setHasAccess', hasAccess);
+        }
+        else {
+            commit('setIsAuth', null);
+            commit('setName', null);
+            commit('setDiscriminator', null);
+            commit('setMemberID', null);
+            commit('setAvatar', null);
+            commit('setIsOwner', null);
+            commit('setHasAccess', null);
         }
     },
 };

@@ -23,7 +23,8 @@ class Timer {
     }
 }
 
-const duration = 6000;
+const toastDuration = 6000;
+const animationDuration = 400;
 
 const icons = {
     success: 'check-circle',
@@ -54,7 +55,7 @@ function getToastHTML(type, message, title) {
 </div>`;
 }
 
-function doToast(type, message, title) {
+function toast(type, message, title) {
     const html = getToastHTML(type, message, title);
     const toastObject = $(html);
 
@@ -63,31 +64,27 @@ function doToast(type, message, title) {
 
 function showToast(toastObject) {
     toastObject.appendTo('#toast-container');
-    toastObject.animate({ opacity: 1, left: '-=100' }, 500);
+    toastObject.animate({ opacity: 1, left: '-=200' }, animationDuration);
 
-    const timer = new Timer(() => hideToast(toastObject), duration);
+    const timer = new Timer(() => hideToast(toastObject), toastDuration);
 
-    toastObject.click(function() {
+    toastObject.click(() => {
         timer.stop();
         hideToast(toastObject);
     });
 
-    toastObject.hover(function() {
-        timer.pause();
-    }, function() {
-        timer.resume();
-    });
+    toastObject.hover(() => timer.pause(), () => timer.resume());
 }
 
 function hideToast(toastObject) {
-    toastObject.animate({ opacity: 0, left: '+=100' }, 500, function() {
+    toastObject.animate({ opacity: 0, left: '+=200' }, animationDuration, function() {
         this.remove();
     });
 }
 
 Vue.prototype.$toast = {
-    success: message => doToast('success', message),
-    info: message => doToast('info', message),
-    warning: message => doToast('warning', message),
-    error: message => doToast('danger', message),
+    success: message => toast('success', message),
+    info: message => toast('info', message),
+    warning: message => toast('warning', message),
+    error: message => toast('danger', message),
 };

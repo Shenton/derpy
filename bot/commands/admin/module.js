@@ -52,7 +52,7 @@ module.exports = {
                     .catch(logger.error);
             }
 
-            for (let i = 0; i <= modulesList.length; i++) {
+            for (let i = 0; i < modulesList.length; i++) {
                 const mod = modulesList[i];
                 if (moduleName === mod.name) {
                     const loadModule = newState === 'on' ? true : false;

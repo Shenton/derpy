@@ -6,6 +6,7 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const cookieParser = require('cookie-parser');
 
 const { port, sessionSecret, authSecret } = require('./config').webServer;
+const { dbConnect, dbName } = require('./config').db;
 
 const app = require('express')();
 
@@ -33,10 +34,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Session
 const store = new MongoDBStore({
-    uri: 'mongodb://localhost/derpy',
+    uri: dbConnect + dbName,
     collection: 'sessions',
 });
-store.on('error', error => logger.log(error));
+store.on('error', error => logger.error(error));
 
 const sess = {
     secret: sessionSecret,
@@ -60,14 +61,16 @@ app.use(async function(req, res, next) {
     if (!req.signedCookies.uuid) return next();
 
     const uniqueID = req.signedCookies.uuid;
-    logger.debug(uniqueID);
 
     if (!uniqueID) return next();
 
     if (!req.session.discordAuth) {
         const query = await getOneUser({ uniqueID: uniqueID });
 
-        if (!query.success) return logger.error('web main => discord session: ' + query.errors.join(', '));
+        if (!query.success) {
+            logger.error('web main => discord session: ' + query.errors.join(', '));
+            return next();
+        }
 
         req.session.discordAuth = {
             memberID: query.data.memberID,
@@ -86,6 +89,9 @@ app.use(async function(req, res, next) {
 // APIs
 app.use('/api/auth', require('./api/routes/auth'));
 app.use('/api/discord', require('./api/routes/discord'));
+app.use('/api/public', require('./api/routes/public'));
+app.use('/api/derpy', require('./api/routes/derpy'));
+app.use('/api/modules', require('./api/routes/modules'));
 app.use('/api/response', require('./api/routes/response'));
 
 // Render every route with Nuxt.js

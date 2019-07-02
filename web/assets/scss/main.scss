@@ -84,6 +84,14 @@ $input-disabled-bg:     $gray-900 !default;
 $input-color:           $body-color !default;
 $input-border-color:    $border-color !default;
 
+// navs
+$nav-tabs-link-active-bg:           $primary !default;
+$nav-tabs-link-active-color:        $body-color !default;
+$nav-tabs-border-color:             $border-color !default;
+$nav-tabs-border-radius:            0 !default;
+$nav-tabs-link-active-border-color: $border-color !default;
+$nav-tabs-link-hover-border-color:  $border-color !default;
+
 // Dropdowns
 $dropdown-color:            $body-color !default;
 $dropdown-bg:               $body-bg !default;
@@ -101,6 +109,12 @@ $pagination-hover-border-color:     $pagination-border-color !default;
 $pagination-active-border-color:    $pagination-border-color !default;
 $pagination-disabled-border-color:  $pagination-border-color !default;
 
+// Cards
+$card-border-color:         $border-color !default;
+$card-border-radius:        0 !default;
+$card-inner-border-radius:  0 !default;
+$card-bg:                   $dark !default;
+
 // Popovers
 $popover-bg:            $gray-800 !default;
 //$popover-header-color:  $headings-color !default;
@@ -114,11 +128,16 @@ $alert-bg-level:        0 !default;
 $alert-border-level:    0 !default;
 $alert-color-level:     0 !default;
 
+// Breadcrumbs
+$breadcrumb-bg:         $body-bg !default;
+$breadcrumb-padding-y:  0 !default;
+$breadcrumb-padding-x:  0 !default;
+
 @import "bootstrap/scss/bootstrap.scss";
 @import "bootstrap-vue/src/index.scss";
 
 .toast {
     min-width: 200px;
     position: relative;
-    left: 100px;
+    left: 200px;
 }

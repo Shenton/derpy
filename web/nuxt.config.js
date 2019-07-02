@@ -27,11 +27,6 @@ module.exports = {
     css: [
         '~/assets/scss/main.scss',
     ],
-    // build: {
-    //     optimization: {
-    //         splitChunks: true,
-    //     },
-    // },
     head: {
         title: 'Derpy',
         meta: [
@@ -43,7 +38,7 @@ module.exports = {
             { rel: 'favicon', href: '/img/alien-icon.png' },
         ],
         script: [
-            { src: 'https://kit.fontawesome.com/2a418142fb.js', defer: true },
+            //{ src: 'https://kit.fontawesome.com/2a418142fb.js', defer: true },
             {
                 src: 'https://code.jquery.com/jquery-3.4.1.min.js',
                 integrity: 'sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=',

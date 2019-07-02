@@ -22,7 +22,7 @@ responseSchema.pre('updateOne', function() {
     this.updateOne({}, { $inc: { revision: 1 } });
 });
 
-const Response = mongoose.model('Response', responseSchema);
+const Response = mongoose.models.Response || mongoose.model('Response', responseSchema);
 
 // Get
 async function get(query) {
@@ -31,7 +31,7 @@ async function get(query) {
         return data;
     }
     catch(err) {
-        logger.error('collection => response => getOneLean: ', err);
+        logger.error('collection => response => get: ', err);
         return false;
     }
 }
@@ -82,7 +82,6 @@ async function update(filter, doc) {
 async function del(filter) {
     try {
         const data = await Response.deleteOne(filter);
-        logger.debug('DELETE: %o', data);
         logger.debug('collection => response => delete: filter: %o', filter);
         return data;
     }

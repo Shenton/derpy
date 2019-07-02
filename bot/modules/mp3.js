@@ -2,10 +2,25 @@
 const fs = require('fs');
 const path = require('path');
 
-// Derpy globals
-const { config, logger, rootDir, client, guildID } = require('../../bot');
+// Derpy modules
+const logger = require('../logger');
+const config = require('../config');
+const client = require('../client');
+const { rootDir, guildID } = require('../variables');
+const { getModule } = require('../../db/api/modules');
 
-const { allowedVoiceChannels } = config.moduleConfig.music;
+// Database call
+let voiceChannels = [];
+async function getModuleConfig() {
+    try {
+        const query = await getModule({ name: 'mp3' }, 'voiceChannels');
+        voiceChannels = (query && query.data) ? query.data[0].voiceChannels : [];
+    }
+    catch(err) {
+        logger.error('module => mp3 => getModuleConfig: ', err);
+    }
+}
+getModuleConfig();
 
 const mp3List = [];
 let isPlaying = false;
@@ -50,7 +65,7 @@ client.on('message', message => {
     if (!voiceChannel) return;
 
     // This is not an allowed voice channel
-    if (!allowedVoiceChannels.includes(voiceChannel.id)) {
+    if (!voiceChannels.includes(voiceChannel.id)) {
         return message.reply('je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
             .catch(logger.error);
     }

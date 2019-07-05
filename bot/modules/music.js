@@ -48,8 +48,16 @@ let isPlaying = {
 };
 let dispatcher = {};
 let isSearching = false;
-const searchExitResponses = ['exit', 'nope', 'sortie'];
 let wasStopped = false;
+const emojiList = ['\u0031\u20E3', '\u0032\u20E3', '\u0033\u20E3', '\u0034\u20E3', '\u0035\u20E3', '\u0036\u20E3'];
+const emojiToIndex = {
+    '\u0031\u20E3': 0,
+    '\u0032\u20E3': 1,
+    '\u0033\u20E3': 2,
+    '\u0034\u20E3': 3,
+    '\u0035\u20E3': 4,
+    '\u0036\u20E3': 5,
+};
 
 // Test if the string is an URL.
 function isURL(string) {
@@ -74,20 +82,20 @@ async function searchYoutube(message, search) {
     isSearching = true;
 
     try {
-        const videos = await youtube.searchVideos(search);
+        const videos = await youtube.searchVideos(search, 6);
 
-        if (videos.length === 0) return { valid: false, url: 'Aucune vidéo trouvée.' };
+        if (videos.length === 0) return { valid: false, response: 'Aucune vidéo trouvée.' };
 
+        // Construct the embed
         const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
         const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
-
         const embedContent = {
             color: 0x9b0f29,
             author: {
                 name: 'Résultat de la recherche YouTube',
                 icon_url: 'attachment://youtubeIcon.png',
             },
-            description: 'Choisir la vidéos en répondant avec son numéro',
+            description: 'Utilise la réaction correspondante pour choisir la vidéo',
             fields: [],
             timestamp: new Date(),
             footer: {
@@ -96,57 +104,72 @@ async function searchYoutube(message, search) {
             },
         };
 
-        let count = 1;
-        videos.forEach(video => {
-            embedContent.fields.push(
-                {
-                    name: htmlspecialchars.unescape(video.title),
-                    value: `\`\`\`swift\nNuméro:${count}\`\`\``,
-                    //inline: true,
-                });
-            count++;
-        });
+        for (let i = 0; i < videos.length; i += 2) {
+            const video1 = videos[i];
+            const video2 = videos[i + 1];
+            const entry1 = video1 ? `\`${i + 1} - ${htmlspecialchars.unescape(video1.title)}\`` : '\u200b';
+            const entry2 = video2 ? `\`${i + 2} - ${htmlspecialchars.unescape(video2.title)}\`` : '\u200b';
+
+            embedContent.fields.push({
+                name: entry1,
+                value: entry2,
+            });
+        }
+
+        // Send the embed message
         const embedObject = await message.channel.send({ files: [area51, youtubeIcon], embed: embedContent });
 
-        try {
-            const filter = m => (/^[1-5]?$/.test(m.content) || searchExitResponses.includes(m.content)) && m.author.id == message.author.id;
-            const messageObject = await message.channel.awaitMessages(filter, { max: 1, maxMatches: 1, time: 60000, errors: ['time'] });
+        // Add the reactions to the message
+        embedObject.react('\u0031\u20E3')
+            .then(() => embedObject.react('\u0032\u20E3'))
+            .then(() => embedObject.react('\u0033\u20E3'))
+            .then(() => embedObject.react('\u0034\u20E3'))
+            .then(() => embedObject.react('\u0035\u20E3'))
+            .then(() => embedObject.react('\u0036\u20E3'))
+            .then(() => embedObject.react('❌'))
+            .catch(logger.error);
 
-            if (searchExitResponses.includes(messageObject.first().content)) {
-                embedObject.delete();
-                messageObject.first().delete();
-                isSearching = false;
-                return { valid: false, url: 'Recherche annulée.' };
+        // Await for the reaction
+        try {
+            const filter = (reaction, user) => (reaction.emoji.name === '\u0031\u20E3'
+                || reaction.emoji.name === '\u0032\u20E3'
+                || reaction.emoji.name === '\u0033\u20E3'
+                || reaction.emoji.name === '\u0034\u20E3'
+                || reaction.emoji.name === '\u0035\u20E3'
+                || reaction.emoji.name === '\u0036\u20E3'
+                || reaction.emoji.name === '❌')
+                && user.id === message.author.id;
+
+            const awaitObject = await embedObject.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] });
+            const emoji = awaitObject.first().emoji.name;
+            let response;
+
+            if (emoji === '❌') {
+                response = { valid: false, response: 'recherche annulée.' };
+            }
+            else if (emojiList.includes(emoji)) {
+                const index = emojiToIndex[emoji];
+                response = { valid: true, url: videos[index].url };
             }
             else {
-                const index = Number(messageObject.first().content);
-
-                if (!index) {
-                    embedObject.delete();
-                    messageObject.first().delete();
-                    isSearching = false;
-                    return { valid: false, url: 'Il faut répondre avec un chiffre.' };
-                }
-                else {
-                    embedObject.delete();
-                    messageObject.first().delete();
-                    isSearching = false;
-                    return { valid: true, url: videos[index - 1].url };
-                }
+                response = { valid: false, response: 'stop faire n\'importe quoi, espèce de troll.' };
             }
+
+            embedObject.delete();
+            isSearching = false;
+            return response;
         }
         catch(err) {
-            logger.error(err);
-            embedObject.delete()
-                .catch(logger.error);
+            logger.debug(err);
+            embedObject.delete().catch(logger.error);
             isSearching = false;
-            return { valid: false, url: 'Il y a eu une erreur avec la recherche, ou t\'es trop lent.' };
+            return { valid: false, response: 'il y a eu une erreur avec la recherche, ou t\'es trop lent.' };
         }
     }
     catch(err) {
         logger.error(err);
         isSearching = false;
-        return { valid: false, url: 'Il y a eu une erreur avec la recherche.' };
+        return { valid: false, response: 'Il y a eu une erreur avec la recherche.' };
     }
 }
 
@@ -190,14 +213,8 @@ async function getVideoObject(message, request) {
 }
 
 function play(message, where, source, who) {
-    let playOnce = false;
-
-    // If it was called by the command play, just play this video.
-    // Else play the next item of the playlist
-    if (where) {
-        playOnce = true;
-    }
-    else {
+    // If where exists it was called by commandPlay(), ignore the playlist
+    if (!where) {
         const item = playlist.shift();
         if (!item) return;
         ({ where, source, who } = item);
@@ -236,7 +253,7 @@ function play(message, where, source, who) {
             };
         });
         dispatcher.on('end', () => {
-            if (!playOnce && !wasStopped && playlist.length > 0) {
+            if (!wasStopped && playlist.length > 0) {
                 play(message);
                 return;
             }

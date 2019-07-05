@@ -24,17 +24,20 @@ async function getModuleChannels() {
         logger.error('module => music => getModuleChannels: ', err);
     }
 }
-getModuleChannels();
 
 let maxVideoDuration = 600;
 let maxPlaylistSize = 20;
 let volume = 0.5;
 async function getModuleConfig() {
-    maxVideoDuration = await dbDerpyGet('maxVideoDuration', maxVideoDuration);
-    maxPlaylistSize = await dbDerpyGet('maxPlaylistSize', maxPlaylistSize);
-    volume = await dbDerpyGet('volume', volume);
+    try {
+        maxVideoDuration = await dbDerpyGet('maxVideoDuration', maxVideoDuration);
+        maxPlaylistSize = await dbDerpyGet('maxPlaylistSize', maxPlaylistSize);
+        volume = await dbDerpyGet('volume', volume);
+    }
+    catch(err) {
+        logger.error('module => music => getModuleConfig: ', err);
+    }
 }
-getModuleConfig();
 
 // Declare objects
 const youtube = new Youtube(config.youtubeApiKey);
@@ -467,6 +470,14 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
     }
 });
 
+process.on('message', async message => {
+    if (typeof message !== 'object') return;
+    if (!message.message) return;
+
+    if (message.message === 'music:channels') await getModuleChannels();
+    else if (message.message === 'music:config') await getModuleConfig();
+});
+
 exports.commandPlay = commandPlay;
 exports.commandAdd = commandAdd;
 exports.commandPause = commandPause;
@@ -475,5 +486,8 @@ exports.commandPlaylist = commandPlaylist;
 exports.commandNext = commandNext;
 exports.commandClear = commandClear;
 exports.commandVolume = commandVolume;
+
+exports.getModuleChannels = getModuleChannels;
+exports.getModuleConfig = getModuleConfig;
 
 logger.debug('Module music loaded');

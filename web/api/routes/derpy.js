@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 const { logger } = require('../../logger');
 
-const { getDerpy } = require('../../../db/api/derpy');
+const { getDerpy, updateDerpy } = require('../../../db/api/derpy');
 
 function hasAccess(req, method) {
     if (!req.session) {
@@ -22,32 +22,6 @@ function hasAccess(req, method) {
     return true;
 }
 
-// System calls
-router.get('/restart', async function(req, res) {
-    const access = hasAccess(req, 'get');
-
-    if (!access) {
-        res.status(401);
-        return res.send('Unauthorized');
-    }
-
-    const timer = setTimeout(() => {
-        res.status(500).send('Error');
-    }, 60000);
-
-    process.send({ app: 'web', message: 'restart' });
-    process.once('message', message => {
-        if (typeof message !== 'object') return;
-        if (!message.message) return;
-
-        if (message.message === 'ready') {
-            clearTimeout(timer);
-            res.status(200).send('Derpy ready');
-        }
-    });
-});
-
-// DB calls
 router.get('/:name', async function(req, res) {
     const access = hasAccess(req, 'get');
 
@@ -56,12 +30,35 @@ router.get('/:name', async function(req, res) {
         return res.send('Unauthorized');
     }
 
-    const data = await getDerpy(req.params.name);
+    console.log(req.params.name)
+    const query = await getDerpy(req.params.name);
 
-    res.status(data.status);
+    res.status(query.status);
 
-    if (data.success) res.json(data.data);
-    else res.json(data.errors);
+    if (query.success) res.json(query.data);
+    else res.json(query.errors);
+});
+
+router.patch('/:name', async function(req, res) {
+    const access = hasAccess(req, 'patch');
+
+    if (!access) {
+        res.status(401);
+        return res.send('Unauthorized');
+    }
+
+    const query = await updateDerpy(req.params.name, req.body);
+
+    res.status(query.status);
+
+    if (query.success) {
+        res.json({ modified: query.modified });
+        logger.info(`User: ${req.session.discordAuth.username} edited response: %o`, req.body);
+        process.send({ app: 'web', message: 'music:config' });
+    }
+    else {
+        res.json(query.errors);
+    }
 });
 
 module.exports = router;

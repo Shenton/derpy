@@ -1,3 +1,4 @@
+const logger = require('../logger');
 const client = require('../client');
 
 const activities = [
@@ -28,3 +29,8 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 exports.setNewActivity = setNewActivity;
+
+//exports.getModuleChannels = getModuleChannels;
+//exports.getModuleConfig = getModuleConfig;
+
+logger.debug('Module activity loaded');

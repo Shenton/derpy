@@ -89,6 +89,9 @@ app.use(async function(req, res, next) {
 // APIs
 app.use('/api/auth', require('./api/routes/auth'));
 app.use('/api/discord', require('./api/routes/discord'));
+app.use('/api/system', require('./api/routes/system'));
+
+// DB APIs
 app.use('/api/public', require('./api/routes/public'));
 app.use('/api/derpy', require('./api/routes/derpy'));
 app.use('/api/modules', require('./api/routes/modules'));

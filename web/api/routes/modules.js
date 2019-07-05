@@ -50,8 +50,14 @@ router.patch('/:name', async function(req, res) {
 
     res.status(data.status);
 
-    if (data.success) res.json({ modified: data.modified });
-    else res.json(data.errors);
+    if (data.success) {
+        res.json({ modified: data.modified });
+        logger.info(`User: ${req.session.discordAuth.username} edited module: %o`, req.params.name);
+        process.send({ app: 'web', message: req.params.name + ':channels' });
+    }
+    else {
+        res.json(data.errors);
+    }
 });
 
 module.exports = router;

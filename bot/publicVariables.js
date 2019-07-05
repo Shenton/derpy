@@ -36,7 +36,7 @@ const modulesList = [
     },
     {
         name: 'music',
-        load: false,
+        load: true,
         commands: true,
         publicName: 'Musique',
         channels: 8,

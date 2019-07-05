@@ -56,8 +56,14 @@ export default {
         if (!store.state.auth.isAuth) return redirect('/');
         if (!store.state.auth.hasAccess) return redirect('/');
     },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        }
+    },
     data() {
         return {
+            title: 'Modules',
             modulesData: [],
             fields: [
                 {
@@ -135,7 +141,7 @@ export default {
         async restartDerpy() {
             try {
                 this.restarting = true;
-                const res = await this.$axios.$get('derpy/restart');
+                const res = await this.$axios.$get('system/restart');
                 this.restarting = false;
                 this.restartVariant = 'success';
                 setTimeout(() => this.restartVariant = 'primary', 3000);

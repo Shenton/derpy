@@ -122,7 +122,7 @@ async function dbDerpyGet(name, defaultValue) {
             return defaultValue;
         }
 
-        const value = query.data.value;
+        const value = query.data[0].value;
 
         if (value) return value;
         else return defaultValue;
@@ -134,7 +134,7 @@ async function dbDerpyGet(name, defaultValue) {
 
 async function dbDerpyUpdate(name, value) {
     try {
-        const query = await updateDerpy(name, value);
+        const query = await updateDerpy(name, { value: value });
 
         if (query.success) return true;
         else return false;

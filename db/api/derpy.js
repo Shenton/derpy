@@ -33,16 +33,21 @@ async function add(name, data) {
 }
 
 async function update(name, data) {
-    if (!name) return { success: false, status: 400, errors: ['"name" is missing'] };
-    if (!validator.letters(name)) return { success: false, status: 400, errors: ['"name" is invalid'] };
+    if (!name) {
+        logger.error('api => derpy => update: "name" is missing.');
+        return { success: false, status: 400, errors: ['"name" is missing'] };
+    }
+    if (!validator.letters(name)) {
+        logger.error('api => derpy => update: "name" is invalid.');
+        return { success: false, status: 400, errors: ['"name" is invalid'] };
+    }
 
     if (!data) {
         logger.error('api => derpy => update: Missing parameter.');
-
         return { success: false, status: 400, errors: ['Missing parameters'] };
     }
 
-    const success = await updateDerpy({ name: name }, { value: data });
+    const success = await updateDerpy({ name: name }, { value: data.value });
 
     if (success) return { success: true, status: 200, modified: success.nModified };
     else return { success: false, status: 500, errors: ['Internal API error'] };

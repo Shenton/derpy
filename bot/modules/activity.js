@@ -1,4 +1,4 @@
-const { client } = require('../../bot');
+const client = require('../client');
 
 const activities = [
     'Star Citizen',
@@ -24,11 +24,7 @@ function setNewActivity() {
 
 setInterval(() => {
     const rand = Math.random();
-
-    if (rand > 0.4 && rand < 0.6) {
-        setNewActivity();
-    }
-
+    if (rand > 0.4 && rand < 0.6) setNewActivity();
 }, 5 * 60 * 1000);
 
 exports.setNewActivity = setNewActivity;

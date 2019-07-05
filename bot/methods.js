@@ -1,7 +1,8 @@
 const logger = require('./logger');
 const client = require('./client');
-const config = require('./config');
+//const config = require('./config');
 const { guildID, channelID } = require('./variables');
+const { getDerpy, updateDerpy, addDerpy } = require('../db/api/derpy');
 
 // Try to execute the provided function, return value if it fails
 function getSafe(fn, value) {
@@ -36,7 +37,7 @@ function restartDerpy(messageObject, message) {
 
 function getInformation() {
     const output = {};
-    const guild = client.guilds.get(config.guildID);
+    const guild = client.guilds.get(guildID);
 
     if (guild && guild.available) {
         const channels = guild.channels.array();
@@ -112,6 +113,39 @@ function getInformation() {
     return output;
 }
 
+async function dbDerpyGet(name, defaultValue) {
+    try {
+        const query = await getDerpy(name);
+
+        if (query.status === 404) {
+            await addDerpy(name, defaultValue);
+            return defaultValue;
+        }
+
+        const value = query.data.value;
+
+        if (value) return value;
+        else return defaultValue;
+    }
+    catch(err) {
+        logger.error('methods => dbDerpyGet: ', err);
+    }
+}
+
+async function dbDerpyUpdate(name, value) {
+    try {
+        const query = await updateDerpy(name, value);
+
+        if (query.success) return true;
+        else return false;
+    }
+    catch(err) {
+        logger.error('methods => dbDerpyUpdate: ', err);
+    }
+}
+
 exports.getSafe = getSafe;
 exports.restartDerpy = restartDerpy;
 exports.getInformation = getInformation;
+exports.dbDerpyGet = dbDerpyGet;
+exports.dbDerpyUpdate = dbDerpyUpdate;

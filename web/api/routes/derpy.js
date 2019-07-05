@@ -22,6 +22,32 @@ function hasAccess(req, method) {
     return true;
 }
 
+// System calls
+router.get('/restart', async function(req, res) {
+    const access = hasAccess(req, 'get');
+
+    if (!access) {
+        res.status(401);
+        return res.send('Unauthorized');
+    }
+
+    const timer = setTimeout(() => {
+        res.status(500).send('Error');
+    }, 60000);
+
+    process.send({ app: 'web', message: 'restart' });
+    process.once('message', message => {
+        if (typeof message !== 'object') return;
+        if (!message.message) return;
+
+        if (message.message === 'ready') {
+            clearTimeout(timer);
+            res.status(200).send('Derpy ready');
+        }
+    });
+});
+
+// DB calls
 router.get('/:name', async function(req, res) {
     const access = hasAccess(req, 'get');
 

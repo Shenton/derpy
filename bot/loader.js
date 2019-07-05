@@ -13,10 +13,12 @@ modulesList.forEach(async mod => {
         const query = await getModule({ name: mod.name }, 'enabled');
         const load = (query && query.data) ? query.data[0].enabled : false;
 
-        logger.debug(`LOAD ${mod.name}: %o`, load);
-
         if (load) {
-            if (mod.load) require(`./modules/${mod.name}`);
+            if (mod.load) {
+                const { getModuleChannels, getModuleConfig } = require(`./modules/${mod.name}`);
+                if (getModuleChannels) await getModuleChannels();
+                if (getModuleConfig) await getModuleConfig();
+            }
 
             if (mod.commands) {
                 const commandFiles = fs.readdirSync(path.join(rootDir, 'commands', mod.name)).filter(file => file.endsWith('.js'));

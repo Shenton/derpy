@@ -78,11 +78,4 @@ validator.moduleName = (name) => {
     return /^[a-zA-Z0-9]{3,10}$/.test(name);
 };
 
-validator.derpyName = (name) => {
-    if (typeof name !== 'string') return false;
-    const names = ['information'];
-    if (!names.includes(name)) return false;
-    return true;
-};
-
 module.exports = validator;

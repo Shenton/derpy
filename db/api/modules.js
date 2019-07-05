@@ -72,7 +72,7 @@ async function update(name, data) {
 
     const doc = {};
 
-    if (data.enabled) {
+    if (data.enabled === true || data.enabled === false) {
         if (!validator.isBoolean(data.enabled)) badRequest.push('"enabled" is not valid');
         else doc.enabled = data.enabled;
     }

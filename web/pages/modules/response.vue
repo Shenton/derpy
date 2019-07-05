@@ -155,16 +155,16 @@ export default {
                 this.resetNew();
 
                 try {
-                    const data = await this.$axios.get('response');
-                    this.responses = data.data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
+                    const data = await this.$axios.$get('response');
+                    this.responses = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
                     this.totalRows = this.responses.length;
                 }
                 catch(err) {
-                    this.axiosGetErrorHandler(err);
+                    this.$axiosGetErrorHandler(err);
                 }
             }
             catch(err) {
-                this.axiosErrorHandler(err, 'Erreur avec l\'ajout de la réponse');
+                this.axiosPostError(err, 'Erreur avec l\'ajout de la réponse');
             }
         },
         async submitUpdate(id, data) {
@@ -184,24 +184,24 @@ export default {
                     this.$toast.success('Réponse modifiée');
 
                     try {
-                        const data = await this.$axios.get('response');
-                        this.responses = data.data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
+                        const data = await this.$axios.$get('response');
+                        this.responses = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
                         this.totalRows = this.responses.length;
                     }
                     catch(err) {
-                        this.axiosGetErrorHandler(err);
+                        this.$axiosGetErrorHandler(err);
                     }
                 }
             }
             catch(err) {
-                this.axiosErrorHandler(err, 'Erreur avec l\'édition de la réponse');
+                this.axiosPostError(err, 'Erreur avec l\'édition de la réponse');
             }
         },
         async submitDelete(id) {
             this.hideRowDetails();
 
             try {
-                const res = await this.$axios({
+                await this.$axios({
                     method: 'delete',
                     url: 'response/' + id,
                 });
@@ -214,48 +214,15 @@ export default {
                     this.totalRows = this.responses.length;
                 }
                 catch(err) {
-                    this.axiosGetErrorHandler(err);
+                    this.$axiosGetErrorHandler(err);
                 }
             }
             catch(err) {
-                this.axiosErrorHandler(err, 'Erreur avec la suppression de la réponse');
+                this.axiosPostError(err, 'Erreur avec la suppression de la réponse');
             }
         },
-        axiosErrorHandler(err, methodMessage) {
-            const code = parseInt(err.response && err.response.status);
-
-            if (code === 400) {
-                this.$toast.warning('Requête invalide');
-            }
-            else if (code === 401) {
-                this.$toast.warning('Accès non autorisé à la base de donnée');
-            }
-            else if (code === 404) {
-                this.$toast.warning('Réponse non trouvée');
-            }
-            else if (code === 409) {
-                this.$toast.warning('Cette réponse existe déjà');
-            }
-            else {
-                this.$toast.error(methodMessage);
-            }
-        },
-        axiosGetErrorHandler(err) {
-            const code = parseInt(err.response && err.response.status);
-
-            if (code === 400) {
-                this.$toast.warning('Requête invalide');
-            }
-            else if (code === 401) {
-                this.$toast.warning('Accès non autorisé à la base de donnée');
-            }
-            else if (code === 404) {
-                this.responses = [];
-                this.totalRows = this.responses.length;
-            }
-            else {
-                this.$toast.error('Erreur avec la récupération des réponses');
-            }
+        axiosPostError(err, methodMessage) {
+            this.$axiosPostErrorHandler(err, 'Réponse non trouvée', 'Cette réponse existe déjà', methodMessage);
         },
         toggleEnabled(id, enabled) {
             if (enabled) this.submitUpdate(id, { enabled: false });

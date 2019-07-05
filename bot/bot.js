@@ -148,7 +148,11 @@ client.once('ready', () => {
     //     db.push('/restart/restarted', false);
     // }
 
+    // Populate the database with the bot information
     setbotInfo();
+
+    // Send a process message when ready
+    process.send({ app: 'bot', message: 'ready' });
 });
 
 client.on('channelCreate', () => setbotInfo());
@@ -166,7 +170,7 @@ async function setbotInfo() {
     const info = getInformation();
 
     try {
-        const data = await getDerpy({ name: 'information' }, null);
+        const data = await getDerpy({ name: 'information' });
 
         if (data.length) updateDerpy({ name: 'information' }, { value: info });
         else addDerpy('information', info);
@@ -175,6 +179,15 @@ async function setbotInfo() {
         logger.error('bot => client.js => getBotInfo error: ', err);
     }
 }
+
+// Restart process message
+process.on('message', message => {
+    if (typeof message !== 'object') return;
+    if (!message.message) return;
+
+    if (message.message === 'restart') process.exit(1);
+    else if (message.message === 'fullrestart') process.exit(0);
+});
 
 // Log Derpy to Discord
 client.login(config.discordToken);

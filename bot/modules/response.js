@@ -1,23 +1,53 @@
-// npm modules
-const path = require('path');
-const jsonfile = require('jsonfile');
+// Derpy modules
+const logger = require('../logger');
+const config = require('../config');
+const client = require('../client');
+const { guildID } = require('../variables');
+const { getModule } = require('../../db/api/modules');
+const { getResponse } = require('../../db/api/response');
 
-// Derpy globals
-const { client, config, rootDir, logger, guildID } = require('../../bot');
-const { getSafe } = require('../methods');
-const allowedChannels = getSafe(() => config.moduleConfig.response.allowedChannels, false);
-
-const responses = jsonfile.readFileSync(path.join(rootDir, 'assets/json/response.json'));
-const exactResponses = responses.exact;
-const containResponses = responses.contain;
-
-const exact = [];
-for (const trigger in exactResponses) {
-    exact.push(trigger);
+// Database calls
+let textChannels = [];
+async function getModuleChannels() {
+    try {
+        const query = await getModule({ name: 'music' }, 'textChannels');
+        textChannels = (query && query.data) ? query.data[0].textChannels : [];
+    }
+    catch(err) {
+        logger.error('module => response => getModuleChannels: ', err);
+    }
 }
+
+const exactResponses = {};
+const containResponses = {};
+const exact = [];
 const contain = [];
-for (const trigger in containResponses) {
-    contain.push(trigger);
+async function getModuleConfig() {
+    try {
+        const query = await getResponse();
+
+        if (!query.success) return;
+
+        for (let i = 0; i < query.data.length; i++) {
+            const item = query.data[i];
+            const enabled = item.enabled;
+            const type = item.type;
+            const trigger = item.trigger.toLowerCase();
+            const response = item.response;
+
+            if (enabled && type === 'exact') {
+                exactResponses[trigger] = response;
+                exact.push(trigger);
+            }
+            else if (enabled && type === 'contain') {
+                containResponses[trigger] = response;
+                contain.push(trigger);
+            }
+        }
+    }
+    catch(err) {
+        logger.error('module => response => getModuleConfig: ', err);
+    }
 }
 
 client.on('message', message => {
@@ -32,7 +62,7 @@ client.on('message', message => {
     if (message.author.bot
         || message.channel.type !== 'text'
         || message.guild.id != guildID
-        || allowedChannels && !allowedChannels.includes(message.channel.id)) return;
+        || textChannels.length && !textChannels.includes(message.channel.id)) return;
 
     const content = message.content.toLowerCase();
     let response;
@@ -57,5 +87,16 @@ client.on('message', message => {
     message.channel.send(response)
         .catch(logger.error);
 });
+
+process.on('message', async message => {
+    if (typeof message !== 'object') return;
+    if (!message.message) return;
+
+    if (message.message === 'response:channels') await getModuleChannels();
+    else if (message.message === 'response:config') await getModuleConfig();
+});
+
+exports.getModuleChannels = getModuleChannels;
+exports.getModuleConfig = getModuleConfig;
 
 logger.debug('Module response loaded');

@@ -14,6 +14,8 @@ import { createStore } from './store.js'
 import nuxt_plugin_bootstrapvue_3bdb851f from 'nuxt_plugin_bootstrapvue_3bdb851f' // Source: .\\bootstrap-vue.js (mode: 'all')
 import nuxt_plugin_axios_0b1096f0 from 'nuxt_plugin_axios_0b1096f0' // Source: .\\axios.js (mode: 'all')
 import nuxt_plugin_toast_49c09830 from 'nuxt_plugin_toast_49c09830' // Source: ..\\plugins\\toast.client (mode: 'client')
+import nuxt_plugin_scrolltotop_5c8a628c from 'nuxt_plugin_scrolltotop_5c8a628c' // Source: ..\\plugins\\scroll-to-top.client (mode: 'client')
+import nuxt_plugin_axioserrorhandler_9f845f90 from 'nuxt_plugin_axioserrorhandler_9f845f90' // Source: ..\\plugins\\axios-error-handler (mode: 'all')
 
 // Component: <NoSsr>
 Vue.component(NoSsr.name, NoSsr)
@@ -163,6 +165,14 @@ async function createApp(ssrContext) {
 
   if (process.client && typeof nuxt_plugin_toast_49c09830 === 'function') {
     await nuxt_plugin_toast_49c09830(app.context, inject)
+  }
+
+  if (process.client && typeof nuxt_plugin_scrolltotop_5c8a628c === 'function') {
+    await nuxt_plugin_scrolltotop_5c8a628c(app.context, inject)
+  }
+
+  if (typeof nuxt_plugin_axioserrorhandler_9f845f90 === 'function') {
+    await nuxt_plugin_axioserrorhandler_9f845f90(app.context, inject)
   }
 
   // If server-side, wait for async component to be resolved first

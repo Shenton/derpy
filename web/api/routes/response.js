@@ -50,8 +50,14 @@ router.post('/', async function(req, res) {
 
     res.status(data.status);
 
-    if (data.success) res.json({ success: true });
-    else res.json(data.errors);
+    if (data.success) {
+        res.json({ success: true });
+        logger.info(`User: ${req.session.discordAuth.username} added response: %o`, req.body);
+        process.send({ app: 'web', message: 'response:config' });
+    }
+    else {
+        res.json(data.errors);
+    }
 });
 
 router.patch('/:id', async function(req, res) {
@@ -66,8 +72,14 @@ router.patch('/:id', async function(req, res) {
 
     res.status(data.status);
 
-    if (data.success) res.json({ modified: data.modified });
-    else res.json(data.errors);
+    if (data.success) {
+        res.json({ modified: data.modified });
+        logger.info(`User: ${req.session.discordAuth.username} edited response: %o`, req.body);
+        process.send({ app: 'web', message: 'response:config' });
+    }
+    else {
+        res.json(data.errors);
+    }
 });
 
 router.delete('/:id', async function(req, res) {
@@ -88,8 +100,14 @@ router.delete('/:id', async function(req, res) {
 
     res.status(data.status);
 
-    if (data.success) res.json({ success: true });
-    else res.json(data.errors);
+    if (data.success) {
+        res.json({ success: true });
+        logger.info(`User: ${req.session.discordAuth.username} deleted a response`);
+        process.send({ app: 'web', message: 'response:config' });
+    }
+    else {
+        res.json(data.errors);
+    }
 });
 
 module.exports = router;

@@ -1,11 +1,9 @@
 <template>
-    <b-container class="mb-3">
+    <b-container v-if="data.channels > 0" class="mb-3">
         <h2>{{ name }}</h2>
         <hr class="border-primary">
         <b-form @submit="submitUpdate">
-            <b-form-checkbox class="mt-1 mb-2" v-model="form.enabled" name="check-button" switch>Activer le module</b-form-checkbox>
-
-            <b-card v-if="data.channels > 0" class="mb-3" no-body>
+            <b-card class="mb-3" no-body>
                 <b-tabs content-class="mt-3" fill card>
                     <b-tab title="Canal (texte)" :disabled="!channelTypes.textChannel">
                         <b-form-group label="Sélectionne sur quel canal textuel le module doit poster">
@@ -47,8 +45,10 @@
                     </b-tab>
                 </b-tabs>
             </b-card>
-                <b-button type="submit" block variant="primary">Appliquer les modifications</b-button>
-                <b-button @click="setDefaultValues()" block variant="secondary">Annuler les modifications</b-button>
+                <b-row>
+                    <b-col><b-button type="submit" block variant="primary">Appliquer les modifications</b-button></b-col>
+                    <b-col><b-button @click="setDefaultValues()" block variant="secondary">Annuler les modifications</b-button></b-col>
+                </b-row>
         </b-form>
     </b-container>
 </template>

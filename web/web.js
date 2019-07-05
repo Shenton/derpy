@@ -42,7 +42,7 @@ store.on('error', error => logger.error(error));
 const sess = {
     secret: sessionSecret,
     cookie: {
-        maxAge: 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     },
     store: store,
     resave: true,
@@ -98,13 +98,8 @@ app.use('/api/response', require('./api/routes/response'));
 app.use(nuxt.render);
 
 // Build only in dev mode with hot-reloading
-if (nuxtConfig.dev) {
-    new Builder(nuxt).build()
-        .then(listen);
-}
-else {
-    listen();
-}
+if (nuxtConfig.dev) new Builder(nuxt).build().then(listen);
+else listen();
 
 function listen() {
     app.listen(port, '0.0.0.0');

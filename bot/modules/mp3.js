@@ -11,7 +11,7 @@ const { getModule } = require('../../db/api/modules');
 
 // Database call
 let voiceChannels = [];
-async function getModuleConfig() {
+async function getModuleChannels() {
     try {
         const query = await getModule({ name: 'mp3' }, 'voiceChannels');
         voiceChannels = (query && query.data) ? query.data[0].voiceChannels : [];
@@ -20,7 +20,7 @@ async function getModuleConfig() {
         logger.error('module => mp3 => getModuleConfig: ', err);
     }
 }
-getModuleConfig();
+getModuleChannels();
 
 const mp3List = [];
 let isPlaying = false;

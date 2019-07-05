@@ -4,23 +4,40 @@ const ytdl = require('ytdl-core');
 const path = require('path');
 const { Attachment } = require('discord.js');
 const htmlspecialchars = require('html-specialchars');
-const JsonDB = require('node-json-db');
 
-// Derpy globals
-const { config, logger, rootDir, client, guildID, channelID } = require('../../bot');
-const { maxVideoDuration, allowedVoiceChannels, maxPlaylistSize } = config.moduleConfig.music;
+// Derpy modules
+const logger = require('../logger');
+const config = require('../config');
+const client = require('../client');
+const { rootDir, guildID, channelID } = require('../variables');
+const { getModule } = require('../../db/api/modules');
+const { dbDerpyGet, dbDerpyUpdate } = require('../methods');
+
+// Database calls
+let voiceChannels = [];
+async function getModuleChannels() {
+    try {
+        const query = await getModule({ name: 'music' }, 'voiceChannels');
+        voiceChannels = (query && query.data) ? query.data[0].voiceChannels : [];
+    }
+    catch(err) {
+        logger.error('module => music => getModuleChannels: ', err);
+    }
+}
+getModuleChannels();
+
+let maxVideoDuration = 600;
+let maxPlaylistSize = 20;
+let volume = 0.5;
+async function getModuleConfig() {
+    maxVideoDuration = await dbDerpyGet('maxVideoDuration', maxVideoDuration);
+    maxPlaylistSize = await dbDerpyGet('maxPlaylistSize', maxPlaylistSize);
+    volume = await dbDerpyGet('volume', volume);
+}
+getModuleConfig();
 
 // Declare objects
-const youtube = new Youtube(config.moduleConfig.music.youtubeApiKey);
-const db = new JsonDB(path.join(rootDir, 'data/db/music'), true, true);
-
-try {
-    db.getData('/dispatcher/volume}');
-}
-catch (err) {
-    db.push('/dispatcher/volume}', 1);
-    logger.debug(err);
-}
+const youtube = new Youtube(config.youtubeApiKey);
 
 // Module variables
 let playlist = [];
@@ -48,7 +65,7 @@ function testSearch(string) {
 }
 
 // Search youtube and ask the member to choose a video
-function searchYoutube(message, search) {
+async function searchYoutube(message, search) {
     if (!search || search.length === 0) return { valid: false, response: 'si il n\'y a rien à chercher, je ne risque pas de trouver.' };
     if (search.length > 50) return { valid: false, response: 'le nombre de charactères autorisé pour une recherche est dépassé (50).' };
     if (!testSearch(search)) return { valid: false, response: 'la recherche contient des charactères non autorisés.' };
@@ -56,81 +73,85 @@ function searchYoutube(message, search) {
 
     isSearching = true;
 
-    return youtube.searchVideos(search)
-        .then(videos => {
-            if (videos.length === 0) return { valid: false, response: 'je n\'ai rien trouvé.' };
-            const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
-            const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
+    try {
+        const videos = await youtube.searchVideos(search);
 
-            const embedContent = {
-                color: 0x9b0f29,
-                author: {
-                    name: 'Résultat de la recherche YouTube',
-                    icon_url: 'attachment://youtubeIcon.png',
-                },
-                description: 'Choisir la vidéos en répondant avec son numéro',
-                fields: [],
-                timestamp: new Date(),
-                footer: {
-                    text: 'Derpy v' + process.env.npm_package_version,
-                    icon_url: 'attachment://area51.png',
-                },
-            };
+        if (videos.length === 0) return { valid: false, url: 'Aucune vidéo trouvée.' };
 
-            let count = 1;
-            videos.forEach(video => {
-                embedContent.fields.push(
-                    {
-                        name: htmlspecialchars.unescape(video.title),
-                        value: `\`\`\`swift\nNuméro:${count}\`\`\``,
-                        //inline: true,
-                    });
-                count++;
-            });
-            message.channel.send({ files: [area51, youtubeIcon], embed: embedContent })
-                .then(() => {
-                    const filter = m => (/^[1-5]?$/.test(m.content) || searchExitResponses.includes(m.content)) && m.author.id == message.author.id;
-                    const awaitMessageObject = message.channel.awaitMessages(filter, filter, { max: 1, maxMatches: 1, time: 60000, errors: ['time'] })
-                        .then(collected => {
-                            if (searchExitResponses.includes(collected.first().content)) {
-                                awaitMessageObject.delete().catch(logger.error);
-                                collected.first().delete().catch(logger.error);
-                                isSearching = false;
-                                return { valid: false, response: 'la recherche est annulée.' };
-                            }
-                            else {
-                                const index = Number(collected.first().content);
+        const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
+        const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
 
-                                if (!index) {
-                                    awaitMessageObject.delete().catch(logger.error);
-                                    collected.first().delete().catch(logger.error);
-                                    isSearching = false;
-                                    return { valid: false, response: 'il faut répondre avec un chiffre.' };
-                                }
-                                else {
-                                    awaitMessageObject.delete().catch(logger.error);
-                                    collected.first().delete().catch(logger.error);
-                                    isSearching = false;
-                                    return { valid: true, url: videos[index - 1].url };
-                                }
-                            }
-                        })
-                        .catch(() => {
-                            awaitMessageObject.delete().catch(logger.error);
-                            isSearching = false;
-                            return { valid: false, response: 't\'es trop lent.' };
-                        });
+        const embedContent = {
+            color: 0x9b0f29,
+            author: {
+                name: 'Résultat de la recherche YouTube',
+                icon_url: 'attachment://youtubeIcon.png',
+            },
+            description: 'Choisir la vidéos en répondant avec son numéro',
+            fields: [],
+            timestamp: new Date(),
+            footer: {
+                text: 'Derpy v' + process.env.npm_package_version,
+                icon_url: 'attachment://area51.png',
+            },
+        };
+
+        let count = 1;
+        videos.forEach(video => {
+            embedContent.fields.push(
+                {
+                    name: htmlspecialchars.unescape(video.title),
+                    value: `\`\`\`swift\nNuméro:${count}\`\`\``,
+                    //inline: true,
                 });
-        })
-        .catch(err =>{
-            logger.error(err);
-            isSearching = false;
-            return { valid: false, response: 'il y a eu une erreur avec la recherche.' };
+            count++;
         });
+        const embedObject = await message.channel.send({ files: [area51, youtubeIcon], embed: embedContent });
+
+        try {
+            const filter = m => (/^[1-5]?$/.test(m.content) || searchExitResponses.includes(m.content)) && m.author.id == message.author.id;
+            const messageObject = await message.channel.awaitMessages(filter, { max: 1, maxMatches: 1, time: 60000, errors: ['time'] });
+
+            if (searchExitResponses.includes(messageObject.first().content)) {
+                embedObject.delete();
+                messageObject.first().delete();
+                isSearching = false;
+                return { valid: false, url: 'Recherche annulée.' };
+            }
+            else {
+                const index = Number(messageObject.first().content);
+
+                if (!index) {
+                    embedObject.delete();
+                    messageObject.first().delete();
+                    isSearching = false;
+                    return { valid: false, url: 'Il faut répondre avec un chiffre.' };
+                }
+                else {
+                    embedObject.delete();
+                    messageObject.first().delete();
+                    isSearching = false;
+                    return { valid: true, url: videos[index - 1].url };
+                }
+            }
+        }
+        catch(err) {
+            logger.error(err);
+            embedObject.delete()
+                .catch(logger.error);
+            isSearching = false;
+            return { valid: false, url: 'Il y a eu une erreur avec la recherche, ou t\'es trop lent.' };
+        }
+    }
+    catch(err) {
+        logger.error(err);
+        isSearching = false;
+        return { valid: false, url: 'Il y a eu une erreur avec la recherche.' };
+    }
 }
 
 // Query the youtube API, and return an object { valid: <true|false>, url: <video object|what went wrong>}
-function getVideoObject(message, request) {
+async function getVideoObject(message, request) {
     let url;
 
     if (isURL(request[0])) {
@@ -139,7 +160,8 @@ function getVideoObject(message, request) {
     }
     else {
         const search = request.join(' ');
-        const searchResult = searchYoutube(message, search);
+        const searchResult = await searchYoutube(message, search);
+        console.log(searchResult);
 
         if (searchResult.valid) url = searchResult.url;
         else return searchResult;
@@ -186,7 +208,7 @@ function play(message, where, source, who) {
             return message.channel.send(`Tu n'es plus dans un canal vocal <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                 .catch(logger.error);
         }
-        if (!allowedVoiceChannels.includes(member.voiceChannelID)) {
+        if (!voiceChannels.includes(member.voiceChannelID)) {
             return message.channel.send(`Tu n'es plus dans un canal vocal autorisé <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                 .catch(logger.error);
         }
@@ -203,7 +225,6 @@ function play(message, where, source, who) {
 
     where.join().then(connection => {
         const stream = ytdl(source, { filter: 'audioonly' });
-        let volume = db.getData('/dispatcher/volume}');
         if (volume > 1) volume = 1;
         dispatcher = connection.playStream(stream);
         dispatcher.setVolume(volume);
@@ -242,7 +263,7 @@ function canPlayHere(message, voiceChannel) {
         return false;
     }
 
-    if (!allowedVoiceChannels.includes(voiceChannel.id)) {
+    if (!voiceChannels.includes(voiceChannel.id)) {
         message.reply('je ne suis pas autorisé à ouvrir ma tronche dans ce canal.')
             .catch(logger.error);
         return false;
@@ -378,24 +399,22 @@ function commandClear(message) {
     message.reply('la playlist a été effacée.').catch(logger.error);
 }
 
-function commandVolume(message, args) {
+async function commandVolume(message, args) {
     if (!args.length) {
-        const volume = db.getData('/dispatcher/volume}');
         message.reply(`le volume est de ${volume * 100}.`)
             .catch(logger.error);
     }
     else {
-        let newVolume = Number(args[0]);
+        const newVolume = Number(args[0]);
 
         if (!newVolume || newVolume < 0 || newVolume > 100 || !Number.isInteger(newVolume)) {
             return message.reply('il faut fournir un nombre entier compris en 0 et 100.')
                 .catch(logger.error);
         }
 
-        newVolume = newVolume / 100;
-        db.push('/dispatcher/volume}', newVolume);
-
-        if (isPlaying.status) dispatcher.setVolume(newVolume);
+        volume = newVolume / 100;
+        if (isPlaying.status) dispatcher.setVolume(volume);
+        await dbDerpyUpdate('volume', volume);
     }
 }
 
@@ -417,7 +436,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
     // Check if the member left the channel
     if (oldMember.voiceChannelID != newMember.voiceChannelID) {
         // If the member did not move to an authorized channel, this will also handle a vocal disconnection
-        if (!allowedVoiceChannels.includes(newMember.voiceChannelID)) {
+        if (!voiceChannels.includes(newMember.voiceChannelID)) {
             // Stop the music, taunt the troll
             dispatcher.end();
             client.guilds.get(guildID).channels.get(channelID).send(`Bien tenté <@${isPlaying.who.id}>, mais non.`)

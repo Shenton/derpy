@@ -36,16 +36,16 @@ async function get(query, select) {
 
 // Add
 async function add(name, value) {
-    const mod = new Derpy({
+    const derp = new Derpy({
         name: name,
         value: value,
         revision: 0,
     });
 
     try {
-        const newEntry = await mod.save();
+        const newEntry = await derp.save();
 
-        if(newEntry === mod) {
+        if(newEntry === derp) {
             logger.info(`collection => derpy => add: ${name}`);
             return 200;
         }
@@ -67,6 +67,7 @@ async function update(filter, doc) {
         const data = await Derpy.updateOne(filter, doc);
         // Disabled ATM, spam too much
         //logger.debug('collection => derpy => update: filter: %o - doc: %o', filter, doc);
+        logger.debug(`collection => derpy => update: filter: ${filter} - doc: ${doc}`);
         return data;
     }
     catch(err) {

@@ -78,4 +78,11 @@ validator.moduleName = (name) => {
     return /^[a-zA-Z0-9]{3,10}$/.test(name);
 };
 
+validator.activity = (name) => {
+    if (typeof name !== 'string') return false;
+    if (name === '') return false;
+    if (name > 100) return false;
+    return true;
+};
+
 module.exports = validator;

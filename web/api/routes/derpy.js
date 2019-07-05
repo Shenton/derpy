@@ -30,7 +30,6 @@ router.get('/:name', async function(req, res) {
         return res.send('Unauthorized');
     }
 
-    console.log(req.params.name)
     const query = await getDerpy(req.params.name);
 
     res.status(query.status);
@@ -53,7 +52,7 @@ router.patch('/:name', async function(req, res) {
 
     if (query.success) {
         res.json({ modified: query.modified });
-        logger.info(`User: ${req.session.discordAuth.username} edited response: %o`, req.body);
+        logger.info(`User: ${req.session.discordAuth.username} edited derpy: ${req.params.name} - %o`, req.body);
         process.send({ app: 'web', message: 'music:config' });
     }
     else {

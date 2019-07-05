@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import { interopDefault } from './utils'
 
 const _6a56c3f9 = () => interopDefault(import('..\\pages\\modules\\index.vue' /* webpackChunkName: "pages_modules_index" */))
+const _174c4638 = () => interopDefault(import('..\\pages\\modules\\activity.vue' /* webpackChunkName: "pages_modules_activity" */))
 const _9c8cb068 = () => interopDefault(import('..\\pages\\modules\\music.vue' /* webpackChunkName: "pages_modules_music" */))
 const _0bff7e6a = () => interopDefault(import('..\\pages\\modules\\response.vue' /* webpackChunkName: "pages_modules_response" */))
 const _16b246b4 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
@@ -85,6 +86,10 @@ export function createRouter() {
       path: "/modules",
       component: _6a56c3f9,
       name: "modules"
+    }, {
+      path: "/modules/activity",
+      component: _174c4638,
+      name: "modules-activity"
     }, {
       path: "/modules/music",
       component: _9c8cb068,

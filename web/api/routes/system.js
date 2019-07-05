@@ -28,6 +28,8 @@ router.get('/restart', async function(req, res) {
         return res.send('Unauthorized');
     }
 
+    logger.info(`User: ${req.session.discordAuth.username} called restart`);
+
     const timer = setTimeout(() => {
         res.status(500).send('Error');
     }, 60000);

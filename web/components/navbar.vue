@@ -10,6 +10,7 @@
 
             <b-navbar-nav>
                 <b-nav-item-dropdown v-if="$store.state.auth.hasAccess" text="Modules">
+                    <b-dropdown-item to="/modules/activity">Activity</b-dropdown-item>
                     <b-dropdown-item to="/modules/music">Music</b-dropdown-item>
                     <b-dropdown-item to="/modules/response">Response</b-dropdown-item>
                     <b-dropdown-divider></b-dropdown-divider>

@@ -95,6 +95,7 @@ app.use('/api/system', require('./api/routes/system'));
 app.use('/api/public', require('./api/routes/public'));
 app.use('/api/derpy', require('./api/routes/derpy'));
 app.use('/api/modules', require('./api/routes/modules'));
+app.use('/api/activity', require('./api/routes/activity'));
 app.use('/api/response', require('./api/routes/response'));
 
 // Render every route with Nuxt.js

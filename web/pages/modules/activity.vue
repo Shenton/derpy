@@ -78,10 +78,10 @@ export default {
             fields: [
                 {
                     key: 'activity',
-                    label: 'Réponse',
+                    label: 'Activité',
                     sortable: true,
                     thStyle: {
-                        width: '40%'
+                        width: '80%'
                     }
                 },
                 {
@@ -198,7 +198,7 @@ export default {
             }
         },
         axiosPostError(err, methodMessage) {
-            this.$axiosPostErrorHandler(err, 'Réponse non trouvée', 'Cette activité existe déjà', methodMessage);
+            this.$axiosPostErrorHandler(err, 'Activité non trouvée', 'Cette activité existe déjà', methodMessage);
         },
         toggleEnabled(id, enabled) {
             if (enabled) this.submitUpdate(id, { enabled: false });

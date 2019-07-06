@@ -1,22 +1,24 @@
 const logger = require('../logger');
 const client = require('../client');
 
-const activities = [
-    'Star Citizen',
-    'Call of Duty: Black Ops IIII',
-    'Candy Crush',
-    'ATLAS',
-    'Hurr Durr Derp',
-    'la Fistinière',
-    'Diablo Immortal',
-    'Escape from Tarkov',
-    'Ricochet',
-    'left 4 Dead 2',
-    'Goat Simulator',
-    'Bluestacks',
-    'Euro Truck Simulator 2',
-    'Fortnite',
-];
+const { getActivity } = require('../../db/api/activity');
+
+const activities = [];
+async function getModuleConfig() {
+    try {
+        const query = await getActivity();
+
+        if (!query.success) return;
+
+        for (let i = 0; i < query.data.length; i++) {
+            const item = query.data[i];
+            if (item.enabled) activities.push(item.activity);
+        }
+    }
+    catch(err) {
+        logger.error('module => response => getModuleConfig: ', err);
+    }
+}
 
 function setNewActivity() {
     const activity = activities[Math.floor(Math.random() * activities.length)];
@@ -31,6 +33,6 @@ setInterval(() => {
 exports.setNewActivity = setNewActivity;
 
 //exports.getModuleChannels = getModuleChannels;
-//exports.getModuleConfig = getModuleConfig;
+exports.getModuleConfig = getModuleConfig;
 
 logger.debug('Module activity loaded');

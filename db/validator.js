@@ -85,4 +85,9 @@ validator.activity = (name) => {
     return true;
 };
 
+validator.mp3 = (name) => {
+    if (typeof name !== 'string') return false;
+    return /^[a-z0-9]{3,8}$/.test(name);
+};
+
 module.exports = validator;

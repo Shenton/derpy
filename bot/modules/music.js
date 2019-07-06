@@ -13,6 +13,26 @@ const { rootDir, guildID, channelID } = require('../variables');
 const { getModule } = require('../../db/api/modules');
 const { dbDerpyGet, dbDerpyUpdate } = require('../methods');
 
+// Module variables
+let playlist = [];
+let isPlaying = {
+    status: false,
+    where: {},
+    who: {},
+};
+let dispatcher = {};
+let isSearching = false;
+let wasStopped = false;
+const emojiList = ['\u0031\u20E3', '\u0032\u20E3', '\u0033\u20E3', '\u0034\u20E3', '\u0035\u20E3', '\u0036\u20E3'];
+const emojiToIndex = {
+    '\u0031\u20E3': 0,
+    '\u0032\u20E3': 1,
+    '\u0033\u20E3': 2,
+    '\u0034\u20E3': 3,
+    '\u0035\u20E3': 4,
+    '\u0036\u20E3': 5,
+};
+
 // Database calls
 let voiceChannels = [];
 async function getModuleChannels() {
@@ -33,6 +53,7 @@ async function getModuleConfig() {
         maxVideoDuration = await dbDerpyGet('maxVideoDuration', maxVideoDuration);
         maxPlaylistSize = await dbDerpyGet('maxPlaylistSize', maxPlaylistSize);
         volume = await dbDerpyGet('volume', volume);
+        if (isPlaying.status) dispatcher.setVolume(volume);
     }
     catch(err) {
         logger.error('module => music => getModuleConfig: ', err);
@@ -41,26 +62,6 @@ async function getModuleConfig() {
 
 // Declare objects
 const youtube = new Youtube(config.youtubeApiKey);
-
-// Module variables
-let playlist = [];
-let isPlaying = {
-    status: false,
-    where: {},
-    who: {},
-};
-let dispatcher = {};
-let isSearching = false;
-let wasStopped = false;
-const emojiList = ['\u0031\u20E3', '\u0032\u20E3', '\u0033\u20E3', '\u0034\u20E3', '\u0035\u20E3', '\u0036\u20E3'];
-const emojiToIndex = {
-    '\u0031\u20E3': 0,
-    '\u0032\u20E3': 1,
-    '\u0033\u20E3': 2,
-    '\u0034\u20E3': 3,
-    '\u0035\u20E3': 4,
-    '\u0036\u20E3': 5,
-};
 
 // Test if the string is an URL.
 function isURL(string) {

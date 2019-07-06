@@ -14,15 +14,21 @@
         <b-form @submit="submitUpdate">
             <h4>Durée maximum des vidéos: <strong class="text-primary">{{ form.maxVideoDuration }} minute{{ form.maxVideoDuration > 1 ? 's' : '' }}</strong></h4>
             <hr class="border-primary">
-            <b-form-input class="mb-5" v-model="form.maxVideoDuration" type="range" min="0" max="60"></b-form-input>
+            <b-input-group prepend="0" append="60" class="mb-5">
+                <b-form-input v-model="form.maxVideoDuration" type="range" min="0" max="60"></b-form-input>
+            </b-input-group>
 
             <h4>Nombre d'entrées maximum de la liste de lecture: <strong class="text-primary">{{ form.maxPlaylistSize }} entrée{{ form.maxPlaylistSize > 1 ? 's' : '' }}</strong></h4>
             <hr class="border-primary">
-            <b-form-input class="mb-5" v-model="form.maxPlaylistSize" type="range" min="0" max="40"></b-form-input>
+            <b-input-group prepend="0" append="40" class="mb-5">
+                <b-form-input v-model="form.maxPlaylistSize" type="range" min="0" max="40"></b-form-input>
+            </b-input-group>
 
             <h4>Volume: <strong class="text-primary">{{ form.volume }}</strong></h4>
             <hr class="border-primary">
-            <b-form-input class="mb-5" v-model="form.volume" type="range" min="0" max="100"></b-form-input>
+            <b-input-group prepend="0" append="100" class="mb-5">
+                <b-form-input v-model="form.volume" type="range" min="0" max="100"></b-form-input>
+            </b-input-group>
 
             <b-button type="submit" block variant="primary">Appliquer les modifications</b-button>
         </b-form>

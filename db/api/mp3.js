@@ -1,12 +1,12 @@
 const { logger } = require('../logger');
 const validator = require('../validator');
 
-const { addActivity, getActivity, updateActivity, deleteActivity } = require('../collection/activity');
+const { addMP3, getMP3, updateMP3, deleteMP3 } = require('../collection/mp3');
 
 async function get(query) {
     if (!query) query = {};
 
-    const data = await getActivity(query);
+    const data = await getMP3(query);
 
     if (!data) return { success: false, status: 500, errors: ['Internal API error'] };
 
@@ -17,16 +17,16 @@ async function get(query) {
 async function add(data) {
     const badRequest = [];
 
-    if (!data.activity) {
-        logger.error('api => activity => Add: Missing parameter.');
+    if (!data || !data.mp3) {
+        logger.error('api => mp3 => Add: Missing parameter.');
         return { success: false, status: 400, errors: ['Missing parameters'] };
     }
 
-    if (!validator.activity(data.activity)) badRequest.push('"activity" is not valid');
+    if (!validator.mp3(data.mp3)) badRequest.push('"mp3" is not valid');
 
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
-    const success = await addActivity(data.activity);
+    const success = await addMP3(data.mp3);
 
     if (success === 200) return { success: true, status: 200 };
     else if (success === 409) return { success: false, status: 409, errors: ['Already exists'] };
@@ -39,16 +39,16 @@ async function update(id, data) {
 
     const badRequest = [];
 
-    if (!data && !data.activity && !data.enabled) {
-        logger.error('api => activity => update: Missing parameter.');
+    if (!data && !data.mp3 && !data.enabled) {
+        logger.error('api => mp3 => update: Missing parameter.');
         return { success: false, status: 400, errors: ['Missing parameters'] };
     }
 
     const doc = {};
 
-    if (data.activity) {
-        if (!validator.activity(data.activity)) badRequest.push('"activity" is not valid');
-        else doc.activity = data.activity;
+    if (data.mp3) {
+        if (!validator.mp3(data.mp3)) badRequest.push('"mp3" is not valid');
+        else doc.mp3 = data.mp3;
     }
 
     if (data.enabled === true || data.enabled === false) {
@@ -58,7 +58,7 @@ async function update(id, data) {
 
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
-    const success = await updateActivity({ _id: id }, doc);
+    const success = await updateMP3({ _id: id }, doc);
 
     if (success) return { success: true, status: 200, modified: success.nModified };
     else return { success: false, status: 500, errors: ['Internal API error'] };
@@ -68,13 +68,13 @@ async function del(id) {
     if (!id) return { success: false, status: 400, errors: ['"id" is missing'] };
     if (!validator.mongoID(id)) return { success: false, status: 400, errors: ['"id" is invalid'] };
 
-    const success = await deleteActivity({ _id: id });
+    const success = await deleteMP3({ _id: id });
 
     if (success) return { success: true, status: 200 };
     else return { success: false, status: 500, errors: ['Internal API error'] };
 }
 
-module.exports.getActivity = get;
-module.exports.addActivity = add;
-module.exports.updateActivity = update;
-module.exports.deleteActivity = del;
+module.exports.getMP3 = get;
+module.exports.addMP3 = add;
+module.exports.updateMP3 = update;
+module.exports.deleteMP3 = del;

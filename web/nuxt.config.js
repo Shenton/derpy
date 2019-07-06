@@ -49,6 +49,9 @@ module.exports = {
             },
         ],
     },
+    htmlAttrs: {
+        lang: 'fr',
+    },
     messages: {
         error_404: 'Page non trouvée',
         server_error: 'Erreur serveur',

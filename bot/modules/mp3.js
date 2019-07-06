@@ -8,6 +8,11 @@ const config = require('../config');
 const client = require('../client');
 const { rootDir, guildID } = require('../variables');
 const { getModule } = require('../../db/api/modules');
+const { getMP3, addMP3 } = require('../../db/api/mp3');
+
+// Module variables
+const mp3List = [];
+let isPlaying = false;
 
 // Database call
 let voiceChannels = [];
@@ -17,18 +22,54 @@ async function getModuleChannels() {
         voiceChannels = (query && query.data) ? query.data[0].voiceChannels : [];
     }
     catch(err) {
-        logger.error('module => mp3 => getModuleConfig: ', err);
+        logger.error('module => mp3 => getModuleChannels: ', err);
     }
 }
-getModuleChannels();
 
-const mp3List = [];
-let isPlaying = false;
+async function getModuleConfig() {
+    try {
+        // Get the files array
+        const files = fs.readdirSync(path.join(rootDir, 'assets/mp3')).filter(file => file.endsWith('.mp3'));
 
-const files = fs.readdirSync(path.join(rootDir, 'assets/mp3')).filter(file => file.endsWith('.mp3'));
-for (const file of files) {
-    const commandName = path.basename(file, '.mp3');
-    mp3List.push(commandName);
+        // Get the DB data
+        const query = await getMP3();
+        if (!query.success && query.status !== 404) {
+            logger.error('module => mp3 => getModuleConfig: DB query failed, errors: %o', query.errors);
+            return;
+        }
+        const dbData = query.data || [];
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const commandName = path.basename(file, '.mp3');
+
+            // Does the command/mp3 exists within the DB
+            const exists = dbData.find(element => {
+                return element.mp3 === commandName;
+            });
+
+            // It exists, use it if it is enabled
+            if (exists) {
+                // Does the command/mp3 is enabled
+                const enabled = dbData.find(element => {
+                    return element.mp3 === commandName && element.enabled;
+                });
+
+                if (enabled) mp3List.push(commandName);
+            }
+            else {
+                try {
+                    await addMP3({ mp3: commandName });
+                }
+                catch(err) {
+                    logger.error('module => mp3 => getModuleConfig: ', err);
+                }
+            }
+        }
+    }
+    catch(err) {
+        logger.error('module => mp3 => getModuleConfig: ', err);
+    }
 }
 
 function testCommand(string) {
@@ -94,3 +135,16 @@ client.on('message', message => {
         });
     });
 });
+
+process.on('message', async message => {
+    if (typeof message !== 'object') return;
+    if (!message.message) return;
+
+    if (message.message === 'mp3:channels') await getModuleChannels();
+    else if (message.message === 'mp3:config') await getModuleConfig();
+});
+
+exports.getModuleChannels = getModuleChannels;
+exports.getModuleConfig = getModuleConfig;
+
+logger.debug('Module mp3 loaded');

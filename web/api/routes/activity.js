@@ -102,7 +102,7 @@ router.delete('/:id', async function(req, res) {
 
     if (data.success) {
         res.json({ success: true });
-        logger.info(`User: ${req.session.discordAuth.username} deleted a activity`);
+        logger.info(`User: ${req.session.discordAuth.username} deleted an activity`);
         process.send({ app: 'web', message: 'activity:config' });
     }
     else {

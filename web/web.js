@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const cookieParser = require('cookie-parser');
+const fileUpload = require('express-fileupload');
 
 const { port, sessionSecret, authSecret } = require('./config').webServer;
 const { dbConnect, dbName } = require('./config').db;
@@ -31,6 +32,7 @@ app.disable('x-powered-by');
 app.use(cookieParser(authSecret));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(fileUpload());
 
 // Session
 const store = new MongoDBStore({
@@ -96,6 +98,7 @@ app.use('/api/public', require('./api/routes/public'));
 app.use('/api/derpy', require('./api/routes/derpy'));
 app.use('/api/modules', require('./api/routes/modules'));
 app.use('/api/activity', require('./api/routes/activity'));
+app.use('/api/mp3', require('./api/routes/mp3'));
 app.use('/api/response', require('./api/routes/response'));
 
 // Render every route with Nuxt.js

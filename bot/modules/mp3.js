@@ -11,7 +11,7 @@ const { getModule } = require('../../db/api/modules');
 const { getMP3, addMP3 } = require('../../db/api/mp3');
 
 // Module variables
-let mp3List;
+let mp3List = [];
 let isPlaying = false;
 
 // Database call

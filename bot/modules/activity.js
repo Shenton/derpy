@@ -3,12 +3,14 @@ const client = require('../client');
 
 const { getActivity } = require('../../db/api/activity');
 
-const activities = [];
+let activities = [];
 async function getModuleConfig() {
     try {
         const query = await getActivity();
 
         if (!query.success) return;
+
+        activities = [];
 
         for (let i = 0; i < query.data.length; i++) {
             const item = query.data[i];
@@ -32,7 +34,13 @@ setInterval(() => {
 
 exports.setNewActivity = setNewActivity;
 
-//exports.getModuleChannels = getModuleChannels;
+process.on('message', async message => {
+    if (typeof message !== 'object') return;
+    if (!message.message) return;
+
+    if (message.message === 'activity:config') await getModuleConfig();
+});
+
 exports.getModuleConfig = getModuleConfig;
 
 logger.debug('Module activity loaded');

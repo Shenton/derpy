@@ -18,7 +18,7 @@ async function getModuleConfig() {
         }
     }
     catch(err) {
-        logger.error('module => response => getModuleConfig: ', err);
+        logger.error('module => activity => getModuleConfig: ', err);
     }
 }
 

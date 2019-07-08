@@ -187,6 +187,8 @@ process.on('message', message => {
 
     if (message.message === 'restart') process.exit(1);
     else if (message.message === 'fullrestart') process.exit(0);
+    // else if (message.message === 'mp3:channels') require('./modules/mp3').getModuleChannels();
+    // else if (message.message === 'mp3:config') require('./modules/mp3').getModuleConfig();
 });
 
 // Log Derpy to Discord

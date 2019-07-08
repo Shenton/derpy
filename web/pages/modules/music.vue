@@ -79,10 +79,10 @@ export default {
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
         this.form = {
-                maxVideoDuration: this.maxVideoDuration / 60,
-                maxPlaylistSize: this.maxPlaylistSize,
-                volume: this.volume * 100,
-            }
+            maxVideoDuration: this.maxVideoDuration / 60,
+            maxPlaylistSize: this.maxPlaylistSize,
+            volume: this.volume * 100,
+        }
     },
     methods: {
         async submitUpdate(event) {

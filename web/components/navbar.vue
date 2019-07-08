@@ -13,6 +13,7 @@
                     <b-dropdown-item to="/modules/activity">Activity</b-dropdown-item>
                     <b-dropdown-item to="/modules/mp3">mp3</b-dropdown-item>
                     <b-dropdown-item to="/modules/music">Music</b-dropdown-item>
+                    <b-dropdown-item to="/modules/pubg">PUBG</b-dropdown-item>
                     <b-dropdown-item to="/modules/response">Response</b-dropdown-item>
                     <b-dropdown-divider></b-dropdown-divider>
                     <b-dropdown-item to="/modules">Configuration</b-dropdown-item>

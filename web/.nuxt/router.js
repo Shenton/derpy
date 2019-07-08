@@ -6,6 +6,7 @@ const _6a56c3f9 = () => interopDefault(import('..\\pages\\modules\\index.vue' /*
 const _174c4638 = () => interopDefault(import('..\\pages\\modules\\activity.vue' /* webpackChunkName: "pages_modules_activity" */))
 const _a743ca52 = () => interopDefault(import('..\\pages\\modules\\mp3.vue' /* webpackChunkName: "pages_modules_mp3" */))
 const _9c8cb068 = () => interopDefault(import('..\\pages\\modules\\music.vue' /* webpackChunkName: "pages_modules_music" */))
+const _72be3b33 = () => interopDefault(import('..\\pages\\modules\\pubg.vue' /* webpackChunkName: "pages_modules_pubg" */))
 const _0bff7e6a = () => interopDefault(import('..\\pages\\modules\\response.vue' /* webpackChunkName: "pages_modules_response" */))
 const _16b246b4 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
 
@@ -99,6 +100,10 @@ export function createRouter() {
       path: "/modules/music",
       component: _9c8cb068,
       name: "modules-music"
+    }, {
+      path: "/modules/pubg",
+      component: _72be3b33,
+      name: "modules-pubg"
     }, {
       path: "/modules/response",
       component: _0bff7e6a,

@@ -35,7 +35,7 @@ async function get(query) {
 async function add(value) {
     const activity = new Activity({
         activity: value,
-        enabled: true,
+        enabled: false,
         revision: 0,
     });
 
@@ -47,7 +47,7 @@ async function add(value) {
             return 200;
         }
         else {
-            logger.error('collection => activity => add => save failed: newUser / user mismatch');
+            logger.error('collection => activity => add => save failed: newActivity / activity mismatch');
             return 500;
         }
     }

@@ -29,6 +29,20 @@ class pubgClass {
         });
     }
 
+    updatePlayers(players) {
+        this.players = players;
+        this.playersFormated = [];
+
+        for (let i = 0, len = players.length; i < len; i += 6) {
+            this.playersFormated.push(players.slice(i, i + 6).join());
+        }
+    }
+
+    updateShard(shard) {
+        this.shard = shard;
+        axios.defaults.baseURL = `https://api.pubg.com/shards/${shard}/`;
+    }
+
     mapName() {
         return {
             'Desert_Main': 'Miramar',

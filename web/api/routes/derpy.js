@@ -38,6 +38,14 @@ router.get('/:name', async function(req, res) {
     else res.json(query.errors);
 });
 
+const nameToModule = {
+    maxVideoDuration: 'music',
+    maxPlaylistSize: 'music',
+    volume: 'music',
+    pubgShard: 'pubg',
+    pubgCallsPerMinute: 'pubg',
+};
+
 router.patch('/:name', async function(req, res) {
     const access = hasAccess(req, 'patch');
 
@@ -46,14 +54,19 @@ router.patch('/:name', async function(req, res) {
         return res.send('Unauthorized');
     }
 
-    const query = await updateDerpy(req.params.name, req.body);
+    const name = req.params.name;
+    const query = await updateDerpy(name, req.body);
 
     res.status(query.status);
 
     if (query.success) {
         res.json({ modified: query.modified });
-        logger.info(`User: ${req.session.discordAuth.username} edited derpy: ${req.params.name} - %o`, req.body);
-        process.send({ app: 'web', message: 'music:config' });
+        logger.info(`User: ${req.session.discordAuth.username} edited derpy: ${name} - %o`, req.body);
+
+        if (nameToModule[name]) {
+            const mod = nameToModule[name];
+            process.send({ app: 'web', message: mod + ':config' });
+        }
     }
     else {
         res.json(query.errors);

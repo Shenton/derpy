@@ -90,4 +90,14 @@ validator.mp3 = (name) => {
     return /^[a-z0-9]{3,8}$/.test(name);
 };
 
+validator.player = (name) => {
+    if (typeof name !== 'string') return false;
+    return /^[a-zA-Z0-9_-]{1,30}$/.test(name);
+};
+
+validator.object = (object) => {
+    if (typeof object !== 'object') return false;
+    return true;
+};
+
 module.exports = validator;

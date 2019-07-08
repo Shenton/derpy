@@ -49,7 +49,7 @@
             </b-form-group>
 
             <b-form-group v-else>
-                <b-form-file name="newMP3" placeholder="Choisir un fichier mp3" :state="newMP3Validation" v-model="newMP3"></b-form-file>
+                <b-form-file name="newMP3" placeholder="Choisir un fichier mp3" accept=".mp3" :state="newMP3Validation" v-model="newMP3"></b-form-file>
                 <b-form-invalid-feedback :state="newMP3Validation">
                     Le fichier doit être un mp3 de 1mo max, le nom ne doit contenir que des lettres minuscules ou des chiffres et être compris entre 3 et 10 charactères.
                 </b-form-invalid-feedback>
@@ -170,6 +170,7 @@ export default {
                     this.isUploading = false
                     this.uploadProgress = 0;
                     this.uploadVariant = 'primary';
+                    this.getMP3s();
                 }, 5000);
             }
             catch(err) {

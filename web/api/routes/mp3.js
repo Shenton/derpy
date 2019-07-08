@@ -143,9 +143,10 @@ router.post('/upload', function(req, res) {
             logger.error('api => routes => mp3 => upload: ', err);
             return res.status(500).json({ success: false, errors: ['Error while uploading the file'] });
         }
-        res.json({ success: true });
-        process.send({ app: 'web', message: 'mp3:config' });
+
         logger.info(`api => routes => mp3 => upload: User: ${req.session.discordAuth.username} uploaded file: ${file.name}`);
+        process.send({ app: 'web', message: 'mp3:config' });
+        res.json({ success: true });
     });
 });
 

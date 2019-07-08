@@ -1,22 +1,211 @@
 // npm modules
 const path = require('path');
-const JsonDB = require('node-json-db');
 const humanizeDuration = require('humanize-duration');
 const moment = require('moment');
 const fs = require('fs-extra');
 const axiosModule = require('axios');
 const { Attachment } = require('discord.js');
 
-// Derpy globals
-const { client, config, logger, rootDir, guildID } = require('../../bot');
-const { channelID } = config.moduleConfig.pubg;
+// Derpy modules
+const logger = require('../logger');
+const config = require('../config');
+const client = require('../client');
+const { rootDir, guildID } = require('../variables');
+const { getModule } = require('../../db/api/modules');
+const { getPlayer, updatePlayerByPlayer } = require('../../db/api/player');
+const { getMatch, addMatch, updateMatch, deleteMatch } = require('../../db/api/match');
+const { dbDerpyGet, dbDerpyUpdate } = require('../methods');
 
-// local class
+// DB helpers
+async function getPlayersArray() {
+    try {
+        const query = await getPlayer();
+
+        if (!query.success) return [];
+
+        const data = query.data;
+        const output = [];
+        for (let i = 0; i < data.length; i++) {
+            const player = data[i].player;
+            const enabled = data[i].enabled;
+            if (enabled) output.push(player);
+        }
+
+        return output;
+    }
+    catch(err) {
+        logger.error('module => pubg => getPlayersArray: ', err);
+        return [];
+    }
+}
+
+async function getPlayersLastMatchArray() {
+    try {
+        const query = await getPlayer();
+
+        if (!query.success) return [];
+
+        const data = query.data;
+        const output = [];
+        for (let i = 0; i < data.length; i++) {
+            const lastMatch = data[i].lastMatch;
+            const enabled = data[i].enabled;
+            if (enabled) output.push(lastMatch);
+        }
+
+        return output;
+    }
+    catch(err) {
+        logger.error('module => pubg => getPlayersLastMatchArray: ', err);
+        return [];
+    }
+}
+
+async function getPlayerLastMatch(player) {
+    try {
+        const query = await getPlayer({ player: player });
+
+        if (!query.success) return false;
+
+        const lastMatch = query.data[0].lastMatch;
+        return lastMatch;
+    }
+    catch(err) {
+        logger.error('module => pubg => getPlayerLastMatch: ', err);
+        return false;
+    }
+}
+
+async function getSingleMatch(matchID) {
+    try {
+        const query = await getMatch({ matchID: matchID });
+
+        if (!query.success) return false;
+
+        const match = query.data[0].match;
+        return match;
+    }
+    catch(err) {
+        logger.error('module => pubg => getSingleMatch: ', err);
+        return false;
+    }
+}
+
+async function getMatches() {
+    try {
+        const query = await getMatch();
+
+        if (!query.success) return {};
+
+        const data = query.data;
+        const output = {};
+        for (let i = 0; i < data.length; i++) {
+            const matchID = data[i].matchID;
+            const match = data[i].match;
+            output[matchID] = match;
+        }
+
+        return output;
+    }
+    catch(err) {
+        logger.error('module => pubg => getMatches: ', err);
+        return {};
+    }
+}
+
+async function addSingleMatch(matchID, match) {
+    try {
+        const exists = await getSingleMatch(matchID);
+        let query;
+
+        if (exists) {
+            const data = { match: match };
+            query = await updateMatch(matchID, data);
+        }
+        else {
+            const data = {
+                matchID: matchID,
+                match: match,
+            };
+            query = await addMatch(data);
+        }
+
+        if (query.success) return true;
+        return false;
+    }
+    catch(err) {
+        logger.error('module => pubg => addSingleMatch: ', err);
+        return false;
+    }
+}
+
+async function updatePlayerLastMatch(player, matchID) {
+    const data = { lastMatch: matchID };
+
+    try {
+        const query = await updatePlayerByPlayer(player, data);
+
+        if (query.success) return true;
+        return false;
+    }
+    catch(err) {
+        logger.error('module => pubg => updatePlayerLastMatch: ', err);
+        return false;
+    }
+}
+
+async function deleteSingleMatch(matchID) {
+    try {
+        const query = await deleteMatch(matchID);
+
+        if (query.success) return true;
+        return false;
+    }
+    catch(err) {
+        logger.error('module => pubg => deleteSingleMatch: ', err);
+        return false;
+    }
+}
+
+// Database calls
+let textChannel = false;
+async function getModuleChannels() {
+    try {
+        const query = await getModule({ name: 'pubg' }, 'textChannel');
+        textChannel = (query && query.data) ? query.data[0].textChannel : false;
+    }
+    catch(err) {
+        logger.error('module => pubg => getModuleChannels: ', err);
+    }
+}
+
+let shard = 'steam';
+let playersArray = [];
+let callsPerMinute = 1;
+async function getModuleConfig() {
+    playersArray = await getPlayersArray();
+    shard = await dbDerpyGet('pubgShard', shard);
+    callsPerMinute = await dbDerpyGet('pubgCallsPerMinute', callsPerMinute);
+
+    const callsNeeded = Math.ceil(playersArray.length / 6);
+    const time = 60 / callsPerMinute * callsNeeded * 1000;
+    updateInterval(time);
+
+    // Create this DB entry if it did not exists
+    await dbDerpyGet('lastDisplayedMatch', false);
+
+    // Update PUBG class variables
+    if (pubg) {
+        pubg.updatePlayers(playersArray);
+        pubg.updateShard(shard);
+    }
+}
+
+// PUBG class
 const pubgClass = require('../class/pubg');
 
 // Declare objects
-const db = new JsonDB(path.join(rootDir, 'data/db/pubg'), true, true);
-const pubg = new pubgClass(config.moduleConfig.pubg.apiKey, config.moduleConfig.pubg.shard, config.moduleConfig.pubg.players);
+const pubg = new pubgClass(config.pubgApiKey, shard, playersArray);
 const mapName = pubg.mapName();
 const axios = axiosModule.create({
     responseType: 'stream',
@@ -42,24 +231,6 @@ const shortHumanizer = humanizeDuration.humanizer({
     },
 });
 
-// Create the database structure if empty
-pubg.players.forEach(player => {
-    try {
-        db.getData(`/players/${player}/lastMatch`);
-    }
-    catch(err) {
-        db.push(`/players/${player}/lastMatch`, '');
-        logger.debug(err);
-    }
-});
-try {
-    db.getData('/matches');
-}
-catch(err) {
-    db.push('/matches', {});
-    logger.debug(err);
-}
-
 // Check if data/pubg/telemetry/raw exists, create it if not
 fs.ensureDirSync(path.join(rootDir, 'data/pubg/telemetry/raw'), 0o744);
 
@@ -76,8 +247,10 @@ function humanizeMeters(meters, short) {
     }
 }
 
-function displayMatch(id, message) {
-    const match = db.getData(`/matches/${id}`);
+async function displayMatch(id, message) {
+    const match = await getSingleMatch(id);
+
+    if (!match) return;
 
     const matchTime = humanizeDuration(match.duration * 1000, { language: 'fr' });
     const matchDate = moment(match.time).locale('fr').format('LLLL');
@@ -86,7 +259,7 @@ function displayMatch(id, message) {
     const pubgIcon = new Attachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
     const mapThumb = new Attachment(path.join(rootDir, `assets/img/${match.map}.png`));
 
-    let top = 0;
+    let top = 100;
     for (const player in match.players) {
         if (match.players[player].winPlace > top) {
             top = match.players[player].winPlace;
@@ -192,13 +365,16 @@ function displayMatch(id, message) {
             .catch(logger.error);
     }
     else {
-        client.guilds.get(guildID).channels.get(channelID).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
+        client.guilds.get(guildID).channels.get(textChannel).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
             .catch(logger.error);
     }
 }
 
-function displayMatchShort(id, message) {
-    const match = db.getData(`/matches/${id}`);
+async function displayMatchShort(id, message) {
+    const match = await getSingleMatch(id);
+
+    if (!match) return;
+
     const matchTime = humanizeDuration(match.duration * 1000, { language: 'fr' });
     const matchDate = moment(match.time).locale('fr').format('LLLL');
 
@@ -206,9 +382,9 @@ function displayMatchShort(id, message) {
     const pubgIcon = new Attachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
     const mapThumb = new Attachment(path.join(rootDir, `assets/img/${match.map}.png`));
 
-    let top = 0;
+    let top = 100;
     for (const player in match.players) {
-        if (match.players[player].winPlace > top) {
+        if (match.players[player].winPlace < top) {
             top = match.players[player].winPlace;
         }
     }
@@ -287,13 +463,13 @@ function displayMatchShort(id, message) {
             .catch(logger.error);
     }
     else {
-        client.guilds.get(guildID).channels.get(channelID).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
+        client.guilds.get(guildID).channels.get(textChannel).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
             .catch(logger.error);
     }
 }
 
-function cleanMatches() {
-    const matches = db.getData('/matches');
+async function cleanMatches() {
+    const matches = await getMatches();
     const timeToInfo = {};
     const timeArray = [];
 
@@ -312,33 +488,36 @@ function cleanMatches() {
         timeArray.sort((a, b) => b - a);
         for (let i = 20; i <= timeArray.length - 1; i++) {
             const match = timeToInfo[timeArray[i]];
-            db.delete(`/matches/${match.id}`);
-            fs.remove(path.join(rootDir, 'data/pubg/telemetry/raw', match.telemetry))
-                .then(() => {
-                    logger.debug(`Removed match: ${match.id} - With telemetry file: ${match.telemetry}`);
-                })
-                .catch(err => {
-                    logger.error(err);
-                });
+            const success = await deleteSingleMatch(match.id);
+
+            if (success) {
+                fs.remove(path.join(rootDir, 'data/pubg/telemetry/raw', match.telemetry))
+                    .then(() => {
+                        logger.debug(`Removed match: ${match.id} - With telemetry file: ${match.telemetry}`);
+                    })
+                    .catch(err => {
+                        logger.error(err);
+                    });
+            }
         }
     }
 }
 
-function gotNewMatch(idS) {
+async function gotNewMatch(idS) {
     const filtered = [...new Set(idS)];
 
-    filtered.forEach(async id => {
+    filtered.forEach(async matchID => {
         try {
             // Get formated to array match from pubg api class, store it, display the match
-            logger.debug(`Getting match id: ${id}`);
-            const match = await pubg.getMatch(id);
-            if (typeof match != 'object') {
+            logger.debug(`Getting match id: ${matchID}`);
+            const match = await pubg.getMatch(matchID);
+            if (typeof match !== 'object') {
                 logger.error(match);
                 return;
             }
-            await db.push(`/matches/${id}`, match);
-            await db.push('/lastDisplayedMatch', id);
-            displayMatchShort(id);
+            await addSingleMatch(matchID, match);
+            await dbDerpyUpdate('lastDisplayedMatch', matchID);
+            displayMatchShort(matchID);
 
             // Get the telemetry json
             const url = match.telemetryURL.match(/^https:\/\/telemetry-cdn\.playbattlegrounds\.com\/bluehole-pubg\/(.+)$/)[1];
@@ -380,35 +559,30 @@ function gotNewMatch(idS) {
 async function updatePlayersLastMatch() {
     logger.debug('Updating players last match');
     const matches = await pubg.getPlayersLastMatch();
-    if (typeof matches != 'object') {
-        logger.error(matches);
+
+    if (typeof matches !== 'object') {
+        logger.error('module => pubg => updatePlayersLastMatch: matches is not an object, matches: %o', matches);
         return;
     }
     let gotNew = false;
     const idS = [];
 
     for (const player in matches) {
-        if (db.getData(`/players/${player}/lastMatch`) != matches[player]) {
-            db.push(`/players/${player}/lastMatch`, matches[player]);
-            if (matches[player] != null) {
-                gotNew = true;
-                idS.push(matches[player]);
-            }
+        const lastMatch = await getPlayerLastMatch(player);
+        const matchID = matches[player];
+
+        if (matchID !== null && lastMatch !== matchID) {
+            await updatePlayerLastMatch(player, matchID);
+            gotNew = true;
+            idS.push(matchID);
         }
     }
 
-    if (gotNew) {
-        gotNewMatch(idS);
-    }
+    if (gotNew) gotNewMatch(idS);
 }
 
-function displayLastMatch(messageObj) {
-    const players = db.getData('/players');
-    const matches = [];
-
-    for (const player in players) {
-        matches.push(players[player].lastMatch);
-    }
+async function displayLastMatch(messageObj) {
+    const matches = await getPlayersLastMatchArray();
 
     const filteredMatches = [...new Set(matches)];
     filteredMatches.forEach(match => {
@@ -417,10 +591,10 @@ function displayLastMatch(messageObj) {
     });
 }
 
-function displayFullMatch(messageObj) {
+async function displayFullMatch(messageObj) {
     try {
-        const match = db.getData('/lastDisplayedMatch');
-        displayMatch(match, messageObj);
+        const match = await dbDerpyGet('lastDisplayedMatch', false);
+        if (match) displayMatch(match, messageObj);
     }
     catch(err) {
         logger.error(err);
@@ -428,10 +602,26 @@ function displayFullMatch(messageObj) {
 }
 
 if (process.env.NODE_ENV === 'production') updatePlayersLastMatch();
-setInterval(updatePlayersLastMatch, config.moduleConfig.pubg.updateInterval);
-logger.debug('Starting pubg interval');
+
+let timeout;
+function updateInterval(time) {
+    if (timeout) clearInterval(timeout);
+    timeout = setInterval(updatePlayersLastMatch, time);
+    logger.debug('Starting pubg interval, seconds: ' + time / 1000);
+}
 
 exports.displayLastMatch = displayLastMatch;
 exports.displayFullMatch = displayFullMatch;
+
+process.on('message', async message => {
+    if (typeof message !== 'object') return;
+    if (!message.message) return;
+
+    if (message.message === 'pubg:channels') await getModuleChannels();
+    else if (message.message === 'pubg:config') await getModuleConfig();
+});
+
+exports.getModuleChannels = getModuleChannels;
+exports.getModuleConfig = getModuleConfig;
 
 logger.debug('Module pubg loaded');

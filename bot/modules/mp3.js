@@ -11,7 +11,7 @@ const { getModule } = require('../../db/api/modules');
 const { getMP3, addMP3 } = require('../../db/api/mp3');
 
 // Module variables
-const mp3List = [];
+let mp3List;
 let isPlaying = false;
 
 // Database call
@@ -38,6 +38,8 @@ async function getModuleConfig() {
             return;
         }
         const dbData = query.data || [];
+
+        mp3List = [];
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -122,16 +124,18 @@ client.on('message', message => {
             isPlaying = true;
         });
         dispatcher.on('end', () => {
-            isPlaying = false;
-            voiceChannel.leave();
+            setTimeout(() => {
+                isPlaying = false;
+                voiceChannel.leave();
+            }, 2000);
         });
         dispatcher.on('error', err => {
             isPlaying = false;
             voiceChannel.leave();
-            logger.error(err);
+            logger.error('module => mp3 => main event: ', err);
         });
         dispatcher.on('debug', debug => {
-            logger.debug(debug);
+            logger.debug('module => mp3 => main event: ', debug);
         });
     });
 });

@@ -365,6 +365,8 @@ async function displayMatch(id, message) {
             .catch(logger.error);
     }
     else {
+        if (!textChannel) return logger.error('PUBG module is enabled, but the text channel is not defined.');
+
         client.guilds.get(guildID).channels.get(textChannel).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
             .catch(logger.error);
     }
@@ -463,6 +465,8 @@ async function displayMatchShort(id, message) {
             .catch(logger.error);
     }
     else {
+        if (!textChannel) return logger.error('PUBG module is enabled, but the text channel is not defined.');
+
         client.guilds.get(guildID).channels.get(textChannel).send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
             .catch(logger.error);
     }

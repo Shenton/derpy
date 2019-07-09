@@ -1,12 +1,12 @@
 const { logger } = require('../logger');
 const validator = require('../validator');
 
-const { addActivity, getActivity, updateActivity, deleteActivity } = require('../collection/activity');
+const { addReddit, getReddit, updateReddit, deleteReddit } = require('../collection/reddit');
 
 async function get(query) {
     if (!query) query = {};
 
-    const data = await getActivity(query);
+    const data = await getReddit(query);
 
     if (!data) return { success: false, status: 500, errors: ['Internal API error'] };
 
@@ -17,16 +17,19 @@ async function get(query) {
 async function add(data) {
     const badRequest = [];
 
-    if (!data || !data.activity) {
-        logger.error('api => activity => Add: Missing parameter.');
+    if (!data || !data.name || !data.listing || !data.type) {
+        logger.error('api => reddit => Add: Missing parameter.');
         return { success: false, status: 400, errors: ['Missing parameters'] };
     }
 
-    if (!validator.activity(data.activity)) badRequest.push('"activity" is not valid');
+    if (!validator.subreddit(data.name)) badRequest.push('"name" is not valid');
+    if (!validator.listing(data.listing)) badRequest.push('"listing" is not valid');
+    if (!validator.redditType(data.type)) badRequest.push('"type" is not valid');
+    if (!validator.redditLimit(data.limit)) badRequest.push('"limit" is not valid');
 
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
-    const success = await addActivity(data.activity);
+    const success = await addReddit(data.name, data.listing, data.type, data.limit);
 
     if (success === 200) return { success: true, status: 200 };
     else if (success === 409) return { success: false, status: 409, errors: ['Already exists'] };
@@ -39,16 +42,31 @@ async function update(id, data) {
 
     const badRequest = [];
 
-    if (!data && !data.activity && !data.enabled) {
-        logger.error('api => activity => update: Missing parameter.');
+    if (!data && !data.name && !data.listing && !data.type && !data.limit && !data.enabled) {
+        logger.error('api => reddit => update: Missing parameter.');
         return { success: false, status: 400, errors: ['Missing parameters'] };
     }
 
     const doc = {};
 
-    if (data.activity) {
-        if (!validator.activity(data.activity)) badRequest.push('"activity" is not valid');
-        else doc.activity = data.activity;
+    if (data.name) {
+        if (!validator.subreddit(data.name)) badRequest.push('"name" is not valid');
+        else doc.name = data.name;
+    }
+
+    if (data.listing) {
+        if (!validator.listing(data.listing)) badRequest.push('"listing" is not valid');
+        else doc.listing = data.listing;
+    }
+
+    if (data.type) {
+        if (!validator.redditType(data.type)) badRequest.push('"type" is not valid');
+        else doc.type = data.type;
+    }
+
+    if (data.limit) {
+        if (!validator.redditLimit(data.limit)) badRequest.push('"limit" is not valid');
+        else doc.limit = data.limit;
     }
 
     if (data.enabled === true || data.enabled === false) {
@@ -58,7 +76,7 @@ async function update(id, data) {
 
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
-    const success = await updateActivity({ _id: id }, doc);
+    const success = await updateReddit({ _id: id }, doc);
 
     if (success) return { success: true, status: 200, modified: success.nModified };
     else return { success: false, status: 500, errors: ['Internal API error'] };
@@ -68,13 +86,13 @@ async function del(id) {
     if (!id) return { success: false, status: 400, errors: ['"id" is missing'] };
     if (!validator.mongoID(id)) return { success: false, status: 400, errors: ['"id" is invalid'] };
 
-    const success = await deleteActivity({ _id: id });
+    const success = await deleteReddit({ _id: id });
 
     if (success) return { success: true, status: 200 };
     else return { success: false, status: 500, errors: ['Internal API error'] };
 }
 
-module.exports.getActivity = get;
-module.exports.addActivity = add;
-module.exports.updateActivity = update;
-module.exports.deleteActivity = del;
+module.exports.getReddit = get;
+module.exports.addReddit = add;
+module.exports.updateReddit = update;
+module.exports.deleteReddit = del;

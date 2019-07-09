@@ -100,4 +100,31 @@ validator.object = (object) => {
     return true;
 };
 
+validator.subreddit = (name) => {
+    if (typeof name !== 'string') return false;
+    return /^[a-zA-Z0-9_]{2,22}$/.test(name);
+};
+
+validator.listing = (listing) => {
+    if (typeof listing !== 'string') return false;
+    if (listing !== 'hot' && listing !== 'new' && listing !== 'rising'
+        && listing !== 'controversial' && listing !== 'top' && listing !== 'gilded') {
+
+        return false;
+    }
+    return true;
+};
+
+validator.redditType = (type) => {
+    if (typeof type !== 'string') return false;
+    if (type !== 'image') return false;
+    return true;
+};
+
+validator.redditLimit = (limit) => {
+    if (typeof limit !== 'number') return false;
+    if (limit !== 25 && limit !== 50 && limit !== 75 && limit !== 100) return false;
+    return true;
+};
+
 module.exports = validator;

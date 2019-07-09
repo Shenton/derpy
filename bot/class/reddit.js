@@ -7,6 +7,7 @@ const axios = Axios.create({
         'Accept': 'application/json',
         'Accept-Encoding': 'gzip',
     },
+    maxRedirects: 0,
 });
 
 const listings = ['hot', 'new', 'rising', 'controversial', 'top', 'gilded'];
@@ -21,33 +22,45 @@ class RedditCaller extends EventEmitter {
 
         this.getJson()
             .then(data => {
-                if (!data) throw 'Reddit class - Data is undefined.';
-                if (typeof data !== 'object') throw `Reddit class - Data is not an object. Type: ${typeof data}`;
-                if (data.kind !== 'Listing') throw `Reddit class - Data.kind is not "Listing". Data.kind: ${data.kind}`;
+                if (!data) throw new Error('Reddit class: data is undefined.');
+                if (typeof data !== 'object') throw new Error(`Reddit class: data is not an object. Type: ${typeof data}`);
+                if (data.kind !== 'Listing') throw new Error(`Reddit class: data.kind is not "Listing". Data.kind: ${data.kind}`);
 
                 this.postsList = data.data.children.map(p => p.data.permalink);
 
                 this.canWatch = true;
             })
             .catch(err => {
-                throw err;
+                this.emit('error', err);
             });
     }
 
     getJson() {
         return axios(this.url)
             .then(res => {
-                if (res.status == 200) return res.data;
-                else throw new Error(`Reddit class - Axios: Status: ${res.status}`);
+                if (res.status === 200) return res.data;
+                else throw new Error(`Reddit class => Axios status: ${res.status}`);
             })
             .catch(err => {
                 let errorString;
 
-                if (err.response) errorString = `Reddit class - Axios: Status: ${err.response.status} Data: ${err.response.data}`;
-                else if (err.request) errorString = `Reddit class - Axios: Request: ${err.request}`;
-                else errorString = `Reddit class - Axios: Message: ${err.message}`;
+                if (err.response) {
+                    if (err.response.status === 302) {
+                        const url = err.response.config.url;
+                        errorString = `Reddit class: Reddit tried to redirect the request, this often mean the subreddit do not exists. URL: ${url}`;
+                    }
+                    else {
+                        errorString = `Reddit class => Axios status: ${err.response.status}, data: ${err.response.data}`;
+                    }
+                }
+                else if (err.request) {
+                    errorString = `Reddit class => Axios request: ${err.request}`;
+                }
+                else {
+                    errorString = `Reddit class => Axios message: ${err.message}`;
+                }
 
-                throw new Error(`Reddit class - Axios: ${errorString}`);
+                this.emit('error', errorString);
             });
     }
 
@@ -80,7 +93,7 @@ class RedditCaller extends EventEmitter {
 class RedditWatcher {
     constructor(callsPerMinute) {
         this.callsPerMinute = callsPerMinute || 12;
-        this.updateInterval = (60 / this.callsPerMinute) * 1000;
+        this.updateInterval = 60 / this.callsPerMinute * 1000;
         this.watched = {};
         this.index = 1;
         this.indexes = 0;
@@ -100,7 +113,7 @@ class RedditWatcher {
         const listing = options.listing || 'hot';
         const limit = options.limit || 25;
 
-        if (!listings.includes(listing)) throw `The listing ${listing} for sub ${name} is not supported, use one of ${listings}`;
+        if (!listings.includes(listing)) throw new Error(`The listing ${listing} for sub ${name} is not supported, use one of ${listings}`);
 
         const url = `${name}/${listing}.json?limit=${limit}`;
 
@@ -108,6 +121,19 @@ class RedditWatcher {
         const caller = new RedditCaller(url);
         this.watched[this.indexes] = caller;
         return caller;
+    }
+
+    destroy() {
+        if (!this.indexes) return;
+
+        this.indexes = 0;
+
+        for (const index in this.watched) {
+            this.watched[index] = null;
+        }
+
+        this.index = 1;
+        this.watched = {};
     }
 }
 

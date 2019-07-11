@@ -101,6 +101,7 @@ app.use('/api/activity', require('./api/routes/activity'));
 app.use('/api/mp3', require('./api/routes/mp3'));
 app.use('/api/player', require('./api/routes/player'));
 app.use('/api/reddit', require('./api/routes/reddit'));
+app.use('/api/rss', require('./api/routes/rss'));
 app.use('/api/response', require('./api/routes/response'));
 
 // Render every route with Nuxt.js

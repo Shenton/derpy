@@ -18,11 +18,16 @@ async function getModuleChannels() {
     }
 }
 
-const exactResponses = {};
-const containResponses = {};
-const exact = [];
-const contain = [];
+let exactResponses;
+let containResponses;
+let exact;
+let contain;
 async function getModuleConfig() {
+    exactResponses = {};
+    containResponses = {};
+    exact = [];
+    contain = [];
+
     try {
         const query = await getResponse();
 

@@ -58,7 +58,7 @@ validator.uuidv4 = (uuid) => {
 
 validator.response = (response) => {
     if (typeof response !== 'string') return false;
-    if (response.length > 100) return false;
+    if (response.length > 256) return false;
     if (/<|>|```/.test(response)) return false;
     return true;
 };
@@ -125,6 +125,16 @@ validator.redditLimit = (limit) => {
     if (typeof limit !== 'number') return false;
     if (limit !== 25 && limit !== 50 && limit !== 75 && limit !== 100) return false;
     return true;
+};
+
+validator.url = (url) => {
+    if (typeof url !== 'string') return false;
+    return /^(?:\w+:)?\/\/([^\s.]+\.\S{2}[:?\d]*)\S*$/.test(url);
+};
+
+validator.logo = (logo) => {
+    if (typeof logo !== 'string') return false;
+    return /^[a-z0-9]{2,22}(\.jpeg|\.jpg|\.png){1}$/.test(logo);
 };
 
 module.exports = validator;

@@ -42,7 +42,7 @@ async function add(trigger, res, type) {
         trigger: trigger,
         response: res,
         type: type,
-        enabled: true,
+        enabled: false,
         revision: 0,
     });
 

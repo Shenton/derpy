@@ -9,6 +9,7 @@ const _9c8cb068 = () => interopDefault(import('..\\pages\\modules\\music.vue' /*
 const _72be3b33 = () => interopDefault(import('..\\pages\\modules\\pubg.vue' /* webpackChunkName: "pages_modules_pubg" */))
 const _142ccb72 = () => interopDefault(import('..\\pages\\modules\\reddit.vue' /* webpackChunkName: "pages_modules_reddit" */))
 const _0bff7e6a = () => interopDefault(import('..\\pages\\modules\\response.vue' /* webpackChunkName: "pages_modules_response" */))
+const _84fca58e = () => interopDefault(import('..\\pages\\modules\\rss.vue' /* webpackChunkName: "pages_modules_rss" */))
 const _16b246b4 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
 
 Vue.use(Router)
@@ -113,6 +114,10 @@ export function createRouter() {
       path: "/modules/response",
       component: _0bff7e6a,
       name: "modules-response"
+    }, {
+      path: "/modules/rss",
+      component: _84fca58e,
+      name: "modules-rss"
     }, {
       path: "/",
       component: _16b246b4,

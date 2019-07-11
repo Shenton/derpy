@@ -605,8 +605,6 @@ async function displayFullMatch(messageObj) {
     }
 }
 
-if (process.env.NODE_ENV === 'production') updatePlayersLastMatch();
-
 let timeout;
 function updateInterval(time) {
     if (timeout) clearInterval(timeout);

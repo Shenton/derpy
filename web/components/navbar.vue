@@ -16,6 +16,7 @@
                     <b-dropdown-item to="/modules/pubg">PUBG</b-dropdown-item>
                     <b-dropdown-item to="/modules/reddit">Reddit</b-dropdown-item>
                     <b-dropdown-item to="/modules/response">Response</b-dropdown-item>
+                    <b-dropdown-item to="/modules/rss">RSS</b-dropdown-item>
                     <b-dropdown-divider></b-dropdown-divider>
                     <b-dropdown-item to="/modules">Configuration</b-dropdown-item>
                 </b-nav-item-dropdown>
@@ -42,12 +43,3 @@
     </b-container>
 </b-navbar>
 </template>
-
-<script>
-export default {
-}
-</script>
-
-<style>
-
-</style>

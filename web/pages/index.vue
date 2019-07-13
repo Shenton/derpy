@@ -13,7 +13,7 @@
     <b-container>
         <h2>{{ $store.state.botinfo.info.name }}</h2>
         <hr class="border-primary">
-        <b-row>
+        <b-row class="mb-5">
             <b-col class="text-center">
                 <p>Membres</p>
                 <h3>{{ $store.state.botinfo.info.memberCount }}</h3>
@@ -27,20 +27,18 @@
                 <h3>{{ $store.state.botinfo.info.voiceChannels.length }}</h3>
             </b-col>
         </b-row>
-        <!--<div class="shadow-sm p-3 mb-5 bg-secondary rounded">
-            <p>{{ $store.state.botinfo.info }}</p>
-
-            <b-button @click="makeToast()" class="mb-2">Test</b-button>
-
-            <b-progress :value="value" :max="max" show-progress animated></b-progress>
-            <b-progress class="mt-2" :max="max" show-value>
-                <b-progress-bar :value="value * (6 / 10)" variant="success"></b-progress-bar>
-                <b-progress-bar :value="value * (2.5 / 10)" variant="warning"></b-progress-bar>
-                <b-progress-bar :value="value * (1.5 / 10)" variant="danger"></b-progress-bar>
-            </b-progress>
-
-            <b-button class="mt-3" @click="rendomValue">Click me</b-button>
-        </div>-->
+        <b-row class="mb-5">
+            <b-col>
+                <h2>Modules activés</h2>
+                <hr class="border-primary">
+                <p>{{ activatedModules() }}</p>
+            </b-col>
+            <b-col>
+                <h2>Commandes activées</h2>
+                <hr class="border-primary">
+                <p>{{ activatedCommands() }}</p>
+            </b-col>
+        </b-row>
     </b-container>
 </div>
 </template>
@@ -51,8 +49,9 @@ export default {
     data() {
         return {
             title: 'Accueil',
-            value: 45,
-            max: 100,
+            modules: [],
+            commands: [],
+
         };
     },
     head () {
@@ -60,22 +59,25 @@ export default {
             titleTemplate: '%s - ' + this.title,
         }
     },
+    async asyncData({ $axios }) {
+        try {
+            const modules = await $axios.$get('public/modules');
+            const commands = await $axios.$get('public/commands');
+            return { modules: modules, commands: commands };
+        }
+        catch(err) {}
+    },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
         this.$store.dispatch('botinfo/getInfo');
     },
     methods: {
-        makeToast() {
-            const n = Math.floor(Math.random() * 4) + 1;
-
-            if (n == 1) this.$toast.success('Test');
-            else if (n == 2) this.$toast.warning('Test');
-            else if (n == 3) this.$toast.info('Test');
-            else if (n == 4) this.$toast.error('Test');
+        activatedModules() {
+            return this.modules.map(m => m.enabled ? m.name : null).join(' ');
         },
-        rendomValue() {
-            this.value = Math.random() * this.max
-        },
+        activatedCommands() {
+            return this.commands.map(m => m.enabled ? m.name : null).join(' ');
+        }
     },
 }
 </script>

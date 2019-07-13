@@ -3,10 +3,10 @@ const validator = require('../validator');
 
 const { addCommand, getCommand, updateCommand, deleteCommand } = require('../collection/commands');
 
-async function get(query) {
+async function get(query, select) {
     if (!query) query = {};
 
-    const data = await getCommand(query);
+    const data = await getCommand(query, select);
 
     if (!data) return { success: false, status: 500, errors: ['Internal API error'] };
 

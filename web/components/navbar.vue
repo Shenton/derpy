@@ -12,17 +12,16 @@
                 <b-nav-item-dropdown v-if="$store.state.auth.hasAccess" text="Modules">
                     <b-dropdown-item to="/modules/activity">Activity</b-dropdown-item>
                     <b-dropdown-item to="/modules/mp3">mp3</b-dropdown-item>
-                    <b-dropdown-item to="/modules/music">Music</b-dropdown-item>
                     <b-dropdown-item to="/modules/pubg">PUBG</b-dropdown-item>
                     <b-dropdown-item to="/modules/reddit">Reddit</b-dropdown-item>
                     <b-dropdown-item to="/modules/response">Response</b-dropdown-item>
                     <b-dropdown-item to="/modules/rss">RSS</b-dropdown-item>
-                    <b-dropdown-divider></b-dropdown-divider>
-                    <b-dropdown-item to="/modules">Configuration</b-dropdown-item>
                 </b-nav-item-dropdown>
                 <b-nav-item-dropdown v-if="$store.state.auth.isOwner" text="Administration">
                     <b-dropdown-item to="/administration/commands">Commandes</b-dropdown-item>
+                    <b-dropdown-item to="/administration">Configuration</b-dropdown-item>
                     <b-dropdown-item to="#">Membres</b-dropdown-item>
+                    <b-dropdown-item to="/administration/modules">Modules</b-dropdown-item>
                 </b-nav-item-dropdown>
             </b-navbar-nav>
         </b-collapse>

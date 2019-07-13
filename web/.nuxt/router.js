@@ -2,11 +2,12 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import { interopDefault } from './utils'
 
+const _5ca8dfd4 = () => interopDefault(import('..\\pages\\administration\\index.vue' /* webpackChunkName: "pages_administration_index" */))
 const _6a56c3f9 = () => interopDefault(import('..\\pages\\modules\\index.vue' /* webpackChunkName: "pages_modules_index" */))
 const _1e5e4818 = () => interopDefault(import('..\\pages\\administration\\commands.vue' /* webpackChunkName: "pages_administration_commands" */))
+const _84871d6a = () => interopDefault(import('..\\pages\\administration\\modules.vue' /* webpackChunkName: "pages_administration_modules" */))
 const _174c4638 = () => interopDefault(import('..\\pages\\modules\\activity.vue' /* webpackChunkName: "pages_modules_activity" */))
 const _a743ca52 = () => interopDefault(import('..\\pages\\modules\\mp3.vue' /* webpackChunkName: "pages_modules_mp3" */))
-const _9c8cb068 = () => interopDefault(import('..\\pages\\modules\\music.vue' /* webpackChunkName: "pages_modules_music" */))
 const _72be3b33 = () => interopDefault(import('..\\pages\\modules\\pubg.vue' /* webpackChunkName: "pages_modules_pubg" */))
 const _142ccb72 = () => interopDefault(import('..\\pages\\modules\\reddit.vue' /* webpackChunkName: "pages_modules_reddit" */))
 const _0bff7e6a = () => interopDefault(import('..\\pages\\modules\\response.vue' /* webpackChunkName: "pages_modules_response" */))
@@ -88,6 +89,10 @@ export function createRouter() {
     scrollBehavior,
 
     routes: [{
+      path: "/administration",
+      component: _5ca8dfd4,
+      name: "administration"
+    }, {
       path: "/modules",
       component: _6a56c3f9,
       name: "modules"
@@ -96,6 +101,10 @@ export function createRouter() {
       component: _1e5e4818,
       name: "administration-commands"
     }, {
+      path: "/administration/modules",
+      component: _84871d6a,
+      name: "administration-modules"
+    }, {
       path: "/modules/activity",
       component: _174c4638,
       name: "modules-activity"
@@ -103,10 +112,6 @@ export function createRouter() {
       path: "/modules/mp3",
       component: _a743ca52,
       name: "modules-mp3"
-    }, {
-      path: "/modules/music",
-      component: _9c8cb068,
-      name: "modules-music"
     }, {
       path: "/modules/pubg",
       component: _72be3b33,

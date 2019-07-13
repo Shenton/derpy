@@ -4,32 +4,25 @@
         fluid bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
-        header="Administration: Commandes"
-        lead="Configure les commandes de Derpy."
+        header="Modules"
+        lead="Configuration générique des modules."
     ></b-jumbotron>
     <b-container>
         <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
     </b-container>
-    <b-container v-if="commands.length" class="pb-5">
+    <b-container class="pb-5">
         <b-table
             hover
             head-variant="light"
-            selectable
-            select-mode="single"
-            selectedVariant="primary"
             :current-page="currentPage"
             :per-page="perPage"
-            @row-selected="rowSelected"
-            :items="commands"
+            :items="modulesData"
             :fields="fields"
         >
             <template slot="enabledCheckBox" slot-scope="row">
                 <b-form>
-                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)"></b-form-checkbox>
+                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item.name, row.item.enabled)"></b-form-checkbox>
                 </b-form>
-            </template>
-            <template slot="row-details" slot-scope="row">
-                <CommandUpdateForm @submitUpdate="submitUpdate" :data="row.item"/>
             </template>
         </b-table>
         <b-row>
@@ -43,23 +36,25 @@
             </b-col>
         </b-row>
         <hr class="border-primary">
-        <p>Pour que les modifications soit prisent en compte, il faut redémarrer Derpy.</p>
+        <p>Pour activer/désactiver les modules il faut redémarrer Derpy.</p>
         <b-button @click="restartDerpy()" block :variant="restartVariant">
             <b-spinner v-if="restarting" small></b-spinner>
             <span v-else>Redémarrer Derpy</span>
         </b-button>
     </b-container>
+    <moduleConfiguration v-for="mod in modulesData" :key="mod.key" :data="mod" @submitUpdate="submitUpdate"/>
 </div>
 </template>
 
 <script>
-import CommandUpdateForm from '../../components/command-update-form';
+import moduleConfiguration from '../../components/module-configuration';
+import { setTimeout } from 'timers';
 
 export default {
-    name: 'Commandes',
+    name: 'modules',
     fetch({ store, redirect }) {
         if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.isOwner) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
     },
     head() {
         return {
@@ -68,12 +63,12 @@ export default {
     },
     data() {
         return {
-            title: 'Administration: Commandes',
-            commands: [],
+            title: 'Modules',
+            modulesData: [],
             fields: [
                 {
                     key: 'name',
-                    label: 'Commande',
+                    label: 'Module',
                     sortable: true,
                     thStyle: {
                         width: '80%'
@@ -81,7 +76,7 @@ export default {
                 },
                 {
                     key: 'enabledCheckBox',
-                    label: 'Activée',
+                    label: 'Activé',
                     sortable: true,
                     thStyle: {
                         width: '20%'
@@ -98,38 +93,37 @@ export default {
     },
     async asyncData({ $axios }) {
         try {
-            const data = await $axios.$get('commands');
-            const commands = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
-            return { commands: commands };
+            const data = await $axios.$get('modules');
+            const modules = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
+            return { modulesData: modules };
         }
         catch(err) {}
-        
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
-        this.totalRows = this.commands.length;
+        this.$store.dispatch('botinfo/getInfo');
+        this.totalRows = this.modulesData.length;
     },
     methods: {
-        async submitUpdate(id, data) {
-            this.hideRowDetails();
-
+        async submitUpdate(name, data) {
             try {
                 const res = await this.$axios({
                     method: 'patch',
                     data: data,
-                    url: 'commands/' + id,
+                    url: 'modules/' + name,
                 });
 
                 if (res.data.modifed === 0) {
                     this.$toast.warning('Aucune modification');
                 }
                 else {
-                    this.$toast.success('Commande modifiée');
+                    this.$toast.success('Module modifié');
 
                     try {
-                        const data = await this.$axios.$get('commands');
-                        this.commands = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
-                        this.totalRows = this.commands.length;
+                        const data = await this.$axios.$get('modules');
+                        const modules = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
+                        this.modulesData = modules;
+                        this.totalRows = this.modulesData.length;
                     }
                     catch(err) {
                         this.$axiosGetErrorHandler(err);
@@ -137,24 +131,12 @@ export default {
                 }
             }
             catch(err) {
-                this.axiosPostError(err, 'Erreur avec l\'édition de la commande');
+                this.$axiosPostErrorHandler(err, 'Module non trouvé', 'Ce module existe déjà', 'Erreur avec l\'édition du module');
             }
         },
-        axiosPostError(err, methodMessage) {
-            this.$axiosPostErrorHandler(err, 'Commande non trouvée', 'Cette commande existe déjà', methodMessage);
-        },
-        toggleEnabled(id, enabled) {
-            if (enabled) this.submitUpdate(id, { enabled: false });
-            else this.submitUpdate(id, { enabled: true });
-        },
-        rowSelected(row) {
-            this.hideRowDetails();
-            if (!row.length) return;
-            const items = row[0];
-            items._showDetails = !items._showDetails;
-        },
-        hideRowDetails() {
-            this.commands.map(items => items._showDetails = false);
+        toggleEnabled(name, enabled) {
+            if (enabled) this.submitUpdate(name, { enabled: false });
+            else this.submitUpdate(name, { enabled: true });
         },
         async restartDerpy() {
             try {
@@ -172,11 +154,7 @@ export default {
         },
     },
     components: {
-        CommandUpdateForm,
+        moduleConfiguration,
     },
 }
 </script>
-
-<style>
-
-</style>

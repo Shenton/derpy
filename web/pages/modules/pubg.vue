@@ -53,20 +53,6 @@
             <b-button type="submit" variant="primary">Ajouter</b-button>
             <b-button type="reset">Annuler</b-button>
         </b-form>
-
-        <b-form @submit="submitConfigUpdate">
-            <h4>PUBG shard: <strong class="text-primary">{{ configForm.shard }}</strong></h4>
-            <hr class="border-primary">
-            <b-form-select class="mb-5" v-model="configForm.shard" :options="shardsSelectOptions"></b-form-select>
-
-            <h4>Nombre d'appels à l'API de PUBG par minute: <strong class="text-primary">{{ configForm.callsPerMinute }}</strong></h4>
-            <hr class="border-primary">
-            <b-input-group class="mb-5" prepend="1" append="8">
-                <b-form-input v-model="configForm.callsPerMinute" type="range" min="1" max="8"></b-form-input>
-            </b-input-group>
-
-            <b-button type="submit" block variant="primary">Appliquer les modifications</b-button>
-        </b-form>
     </b-container>
 </div>
 </template>
@@ -113,32 +99,13 @@ export default {
             pageOptions: [5, 10, 15],
             showNewForm: true,
             newPlayer: '',
-            shard: 'steam',
-            shardsSelectOptions: [
-                { value: 'kakao', text: 'Kakao' },
-                { value: 'psn', text: 'PS4' },
-                { value: 'steam', text: 'Steam' },
-                { value: 'tournament', text: 'Tournaments' },
-                { value: 'xbox', text: 'Xbox' },
-            ],
-            callsPerMinute: 1,
-            configForm: {
-                shard: 'steam',
-                callsPerMinute : 1,
-            }
         };
     },
     async asyncData({ $axios }) {
         try {
             const data = await $axios.$get('player');
             const players = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
-            const shard = await $axios.$get('derpy/pubgShard');
-            const callsPerMinute = await $axios.$get('derpy/pubgCallsPerMinute');
-            return {
-                players: players,
-                shard: shard[0].value,
-                callsPerMinute: callsPerMinute[0].value,
-            };
+            return { players: players };
         }
         catch(err) {}
         
@@ -146,10 +113,6 @@ export default {
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
         this.totalRows = this.players.length;
-        this.configForm = {
-            shard: this.shard,
-            callsPerMinute: this.callsPerMinute,
-        }
     },
     methods: {
         async submitNewPlayer(event) {
@@ -230,54 +193,6 @@ export default {
             }
             catch(err) {
                 this.axiosPostError(err, 'Erreur avec la suppression du joueur');
-            }
-        },
-        async submitConfigUpdate(event) {
-            event.preventDefault();
-
-            const shard = this.configForm.shard;
-            const callsPerMinute = this.configForm.callsPerMinute;
-
-            if (shard === this.shard && callsPerMinute === this.callsPerMinute) {
-                this.$toast.warning('Aucune modification');
-            }
-
-            if (shard !== this.shard) {
-                const value = await this.update(shard, 'pubgShard', 'Shard modifiée');
-                this.shard = value;
-                this.configForm.shard = value;
-            }
-            if (callsPerMinute !== this.callsPerMinute) {
-                const value = await this.update(callsPerMinute, 'pubgCallsPerMinute', 'Nombre d\'appels à l\'API de PUBG modifié');
-                this.callsPerMinute = value;
-                this.configForm.callsPerMinute = value;
-            }
-        },
-        async update(value, name, success) {
-            try {
-                const res = await this.$axios({
-                    method: 'patch',
-                    data: { value: value },
-                    url: 'derpy/' + name,
-                });
-
-                if (res.data.modifed === 0) {
-                    this.$toast.warning('Aucune modification');
-                }
-                else {
-                    this.$toast.success(success);
-
-                    try {
-                        const data = await this.$axios.$get('derpy/' + name);
-                        return data[0].value;
-                    }
-                    catch(err) {
-                        this.$axiosGetErrorHandler(err);
-                    }
-                }
-            }
-            catch(err) {
-                this.$axiosPostErrorHandler(err, 'Configuration non trouvé', 'Cette configuration existe déjà', 'Erreur avec l\'édition de la configuration');
             }
         },
         axiosPostError(err, methodMessage) {

@@ -14,7 +14,7 @@ function hasAccess(req, method) {
         logger.warn(`api => routes => modules => ${method}: access without discord session set`);
         return false;
     }
-    if (!req.session.discordAuth.isOwner && !req.session.discordAuth.hasAccess) {
+    if (!req.session.discordAuth.isOwner) {
         logger.warn(`api => routes => modules => ${method}: user did not have access user: ${req.session.discordAuth.username} id: ${req.session.discordAuth.memberID}`);
         return false;
     }

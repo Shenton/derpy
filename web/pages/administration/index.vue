@@ -4,14 +4,16 @@
         fluid bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
-        header="Module: Music"
-        lead="Joue de la musique sur les canaux vocaux."
+        header="Configuration"
+        lead="Configuration de Derpy."
     ></b-jumbotron>
     <b-container>
         <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
     </b-container>
     <b-container>
         <b-form @submit="submitUpdate">
+            <h2>Music</h2>
+            <hr class="border-primary">
             <h4>Durée maximum des vidéos: <strong class="text-primary">{{ form.maxVideoDuration }} minute{{ form.maxVideoDuration > 1 ? 's' : '' }}</strong></h4>
             <hr class="border-primary">
             <b-input-group prepend="0" append="60" class="mb-5">
@@ -30,6 +32,18 @@
                 <b-form-input v-model="form.volume" type="range" min="0" max="100"></b-form-input>
             </b-input-group>
 
+            <h2>PUBG</h2>
+            <hr class="border-primary">
+            <h4>PUBG shard: <strong class="text-primary">{{ form.shard }}</strong></h4>
+            <hr class="border-primary">
+            <b-form-select class="mb-5" v-model="form.shard" :options="shardsSelectOptions"></b-form-select>
+
+            <h4>Nombre d'appels à l'API de PUBG par minute: <strong class="text-primary">{{ form.callsPerMinute }}</strong></h4>
+            <hr class="border-primary">
+            <b-input-group class="mb-5" prepend="1" append="8">
+                <b-form-input v-model="form.callsPerMinute" type="range" min="1" max="8"></b-form-input>
+            </b-input-group>
+
             <b-button type="submit" block variant="primary">Appliquer les modifications</b-button>
         </b-form>
     </b-container>
@@ -38,10 +52,10 @@
 
 <script>
 export default {
-    name: 'Music',
+    name: 'Configuration',
     fetch({ store, redirect }) {
         if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
+        if (!store.state.auth.isOwner) return redirect('/');
     },
     head() {
         return {
@@ -50,14 +64,25 @@ export default {
     },
     data() {
         return {
-            title: 'Module: Music',
+            title: 'Configuration',
             maxVideoDuration: 0,
             maxPlaylistSize: 0,
             volume: 0,
+            shard: 'steam',
+            shardsSelectOptions: [
+                { value: 'kakao', text: 'Kakao' },
+                { value: 'psn', text: 'PS4' },
+                { value: 'steam', text: 'Steam' },
+                { value: 'tournament', text: 'Tournaments' },
+                { value: 'xbox', text: 'Xbox' },
+            ],
+            callsPerMinute: 1,
             form: {
                 maxVideoDuration: 0,
                 maxPlaylistSize: 0,
                 volume: 0,
+                shard: 'steam',
+                callsPerMinute : 1,
             }
         }
     },
@@ -66,11 +91,15 @@ export default {
             const maxVideoDuration = await $axios.$get('derpy/maxVideoDuration');
             const maxPlaylistSize = await $axios.$get('derpy/maxPlaylistSize');
             const volume = await $axios.$get('derpy/volume');
+            const shard = await $axios.$get('derpy/pubgShard');
+            const callsPerMinute = await $axios.$get('derpy/pubgCallsPerMinute');
 
             return {
                 maxVideoDuration: maxVideoDuration[0].value,
                 maxPlaylistSize: maxPlaylistSize[0].value,
                 volume: volume[0].value,
+                shard: shard[0].value,
+                callsPerMinute: callsPerMinute[0].value,
             };
         }
         catch(err) {}
@@ -82,6 +111,8 @@ export default {
             maxVideoDuration: this.maxVideoDuration / 60,
             maxPlaylistSize: this.maxPlaylistSize,
             volume: this.volume * 100,
+            shard: this.shard,
+            callsPerMinute: this.callsPerMinute,
         }
     },
     methods: {
@@ -91,8 +122,15 @@ export default {
             const maxVideoDuration = this.form.maxVideoDuration * 60;
             const maxPlaylistSize = this.form.maxPlaylistSize;
             const volume = this.form.volume / 100;
+            const shard = this.form.shard;
+            const callsPerMinute = this.form.callsPerMinute;
 
-            if (maxVideoDuration === this.maxVideoDuration && maxPlaylistSize === this.maxPlaylistSize && volume === this.volume) {
+            if (maxVideoDuration === this.maxVideoDuration
+                && maxPlaylistSize === this.maxPlaylistSize
+                && volume === this.volume
+                && shard === this.shard
+                && callsPerMinute === this.callsPerMinute) {
+
                 this.$toast.warning('Aucune modification');
             }
 
@@ -110,6 +148,17 @@ export default {
                 const value = await this.update(volume, 'volume', 'Volume modifié');
                 this.volume = value;
                 this.form.volume = value * 100;
+            }
+
+            if (shard !== this.shard) {
+                const value = await this.update(shard, 'pubgShard', 'Shard modifiée');
+                this.shard = value;
+                this.form.shard = value;
+            }
+            if (callsPerMinute !== this.callsPerMinute) {
+                const value = await this.update(callsPerMinute, 'pubgCallsPerMinute', 'Nombre d\'appels à l\'API de PUBG modifié');
+                this.callsPerMinute = value;
+                this.form.callsPerMinute = value;
             }
         },
         async update(value, name, success) {

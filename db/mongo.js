@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 if (!mongoose.connection.name) {
     const { logger } = require('./logger');
-    const { dbConnect, dbName } = require('./config').db;
+    const { dbConnect, dbName } = require('./config');
 
     mongoose.set('useCreateIndex', true);
     mongoose.connect(dbConnect + dbName, { useNewUrlParser: true });

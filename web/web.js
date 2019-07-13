@@ -6,8 +6,7 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 
-const { port, sessionSecret, authSecret } = require('./config').webServer;
-const { dbConnect, dbName } = require('./config').db;
+const { port, sessionSecret, authSecret, dbConnect, dbName } = require('./config');
 
 const app = require('express')();
 
@@ -47,8 +46,8 @@ const sess = {
         maxAge: 7 * 24 * 60 * 60 * 1000,
     },
     store: store,
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
 };
 
 if (process.env.NODE_ENV === 'production') {
@@ -96,6 +95,7 @@ app.use('/api/system', require('./api/routes/system'));
 // DB APIs
 app.use('/api/public', require('./api/routes/public'));
 app.use('/api/derpy', require('./api/routes/derpy'));
+app.use('/api/commands', require('./api/routes/commands'));
 app.use('/api/modules', require('./api/routes/modules'));
 app.use('/api/activity', require('./api/routes/activity'));
 app.use('/api/mp3', require('./api/routes/mp3'));

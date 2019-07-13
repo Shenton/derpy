@@ -5,7 +5,7 @@ const path = require('path');
 
 // Derpy modules
 const logger = require('./logger');
-const config = require('./config');
+const { prefix, ownerID, discordToken } = require('./config');
 const { rootDir, guildID, helpEmbed } = require('./variables');
 const { getDerpy, addDerpy, updateDerpy } = require('../db/collection/derpy');
 const { getInformation } = require('./methods');
@@ -21,38 +21,44 @@ client.on('error', logger.error.bind(logger));
 client.commands = new Collection();
 const commandFiles = fs.readdirSync(path.join(rootDir, 'commands')).filter(file => file.endsWith('.js'));
 const commandsList = [];
-for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
+(async () => {
+    for (let i = 0; i < commandFiles.length; i++) {
+        const file = commandFiles[i];
+        const commandModule = require(`./commands/${file}`);
+        const command = await commandModule.init();
 
-    const commandName = path.basename(file, '.js');
-    commandsList.push(config.prefix + commandName);
-}
-const commandsString = commandsList.join(' ');
-helpEmbed.fields.push({ name: 'Génériques', value: `\`${commandsString}\`` });
+        if (command) {
+            client.commands.set(command.name, command);
+            commandsList.push(prefix + command.name);
+        }
+    }
+    const commandsString = commandsList.join(' ');
+    helpEmbed.fields.push({ name: 'Génériques', value: `\`${commandsString}\`` });
+})();
 
 // Commands handling
 const cooldowns = new Collection();
 client.on('message', message => {
+
     // This bot is designed to only serve one guild
     if (message.channel.type === 'text' && message.guild.id != guildID) return;
 
     // Is a command (start with prefix), is not a bot
-    if (!message.content.startsWith(config.prefix) || message.author.bot) return;
+    if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     /**
      * Set the command name and the arguments
      * Set the command to an object
      * Check if the command exists
      */
-    const args = message.content.slice(config.prefix.length).split(/ +/);
+    const args = message.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
     const command = client.commands.get(commandName) ||
-        client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+        client.commands.find(cmd => cmd.aliases && cmd.aliases.length && cmd.aliases.includes(commandName));
     if (!command) return;
 
     // Is the command owner only
-    if (command.ownerOnly && message.author.id != config.ownerID) {
+    if (command.ownerOnly && message.author.id != ownerID) {
         logger.warn(`User ${message.author.username} (${message.author.tag}) try to use owner command ${commandName}`);
         return message.reply('tu ne peux pas utiliser cette commande.')
             .catch(logger.error);
@@ -65,7 +71,7 @@ client.on('message', message => {
     }
 
     // Can the command be executed on this channel
-    if (message.channel.type === 'text' && command.allowedChannels &&
+    if (message.channel.type === 'text' && command.allowedChannels.length &&
         !command.allowedChannels.includes(message.channel.id)) {
         return message.reply('cette commande ne peut pas être utilisée sur ce canal.')
             .catch(logger.error);
@@ -73,7 +79,7 @@ client.on('message', message => {
 
     // Do the member has role access
     let hasRoleAccess = false;
-    if (command.allowedRoles) {
+    if (command.allowedRoles.length) {
         message.member.roles.array().forEach(role => {
             if (command.allowedRoles.includes(role.id)) hasRoleAccess = true;
         });
@@ -99,7 +105,7 @@ client.on('message', message => {
     const cooldownAmount = (command.cooldown || 3) * 1000;
     if (timestamps.has(message.author.id)) {
         const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
-        if (now < expirationTime && message.author.id != config.ownerID) {
+        if (now < expirationTime && message.author.id != ownerID) {
             const timeLeft = (expirationTime - now) / 1000;
             return message.reply(`merci d'attendre ${timeLeft.toFixed(1)} seconde(s) avant d'utiliser "${command.name}".`)
                 .catch(logger.error);
@@ -111,7 +117,7 @@ client.on('message', message => {
     // Required args handling
     if (command.args && !args.length) {
         let reply = 'cette commande a besoin d\'argument(s).';
-        if (command.usage) reply += `\nUtilisation: \`${config.prefix}${command.name} ${command.usage}\``;
+        if (command.usage) reply += `\nUtilisation: \`${prefix}${command.name} ${command.usage}\``;
         return message.reply(reply)
             .catch(logger.error);
     }
@@ -190,4 +196,4 @@ process.on('message', message => {
 });
 
 // Log Derpy to Discord
-client.login(config.discordToken);
+client.login(discordToken);

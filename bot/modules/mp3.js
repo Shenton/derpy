@@ -4,8 +4,8 @@ const path = require('path');
 
 // Derpy modules
 const logger = require('../logger');
-const config = require('../config');
 const client = require('../client');
+const { prefix } = require('../config');
 const { rootDir, guildID } = require('../variables');
 const { getModule } = require('../../db/api/modules');
 const { getMP3, addMP3 } = require('../../db/api/mp3');
@@ -91,11 +91,11 @@ client.on('message', message => {
     if (message.author.bot
         || message.channel.type !== 'text'
         || message.guild.id != guildID
-        || !message.content.startsWith(config.prefix)
+        || !message.content.startsWith(prefix)
         || isPlaying) return;
 
     // Grab and test the command
-    const command = message.content.slice(config.prefix.length);
+    const command = message.content.slice(prefix.length);
     if (!testCommand(command)) return;
 
     // Does this command exists

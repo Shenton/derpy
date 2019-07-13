@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 const { logger } = require('../../logger');
 
-const { baseURL, discordClientID, discordRedirectCallback } = require('../../config').webServer;
+const { baseURL, discordClientID, discordRedirectCallback } = require('../../config');
 
 router.get('/login', function(req, res) {
     bcrypt.genSalt(10, function(err, salt) {

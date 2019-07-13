@@ -8,8 +8,8 @@ const { Attachment } = require('discord.js');
 
 // Derpy modules
 const logger = require('../logger');
-const config = require('../config');
 const client = require('../client');
+const { pubgApiKey } = require('../config');
 const { rootDir, guildID } = require('../variables');
 const { getModule } = require('../../db/api/modules');
 const { getPlayer, updatePlayerByPlayer } = require('../../db/api/player');
@@ -205,7 +205,7 @@ async function getModuleConfig() {
 const pubgClass = require('../class/pubg');
 
 // Declare objects
-const pubg = new pubgClass(config.pubgApiKey, shard, playersArray);
+const pubg = new pubgClass(pubgApiKey, shard, playersArray);
 const mapName = pubg.mapName();
 const axios = axiosModule.create({
     responseType: 'stream',

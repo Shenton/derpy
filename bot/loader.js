@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 
 const logger = require('./logger');
-const config = require('./config');
 const client = require('./client');
+const { prefix } = require('./config');
 const { rootDir, helpEmbed } = require('./variables');
 const { modulesList } = require('./variables');
 const { getModule } = require('../db/api/modules');
@@ -24,11 +24,13 @@ modulesList.forEach(async mod => {
                 const commandFiles = fs.readdirSync(path.join(rootDir, 'commands', mod.name)).filter(file => file.endsWith('.js'));
                 const commandsList = [];
                 for (const file of commandFiles) {
-                    const command = require(`./commands/${mod.name}/${file}`);
-                    client.commands.set(command.name, command);
+                    const commandModule = require(`./commands/${mod.name}/${file}`);
+                    const command = await commandModule.init();
 
-                    const commandName = path.basename(file, '.js');
-                    commandsList.push(config.prefix + commandName);
+                    if (command) {
+                        client.commands.set(command.name, command);
+                        commandsList.push(prefix + command.name);
+                    }
                 }
 
                 if (mod.publicName) {

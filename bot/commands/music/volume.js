@@ -1,23 +1,51 @@
-// Derpy globals
-const { config } = require('../../../bot');
-const { getSafe } = require('../../methods');
-
-const commandName = 'volume';
-const allowedChannels = getSafe(() => config.commandConfig[commandName].allowedChannels, false);
-const allowedRoles = getSafe(() => config.commandConfig[commandName].allowedRoles, false);
-
+// Derpy modules
+const logger = require('../../logger');
 const { commandVolume } = require('../../modules/music');
+const { dbCommandGet } = require('../../methods');
 
-module.exports = {
-    name: commandName,
-    aliases: ['vol', 'son'],
-    allowedChannel: allowedChannels,
-    allowedRoles: allowedRoles,
-    guildOnly: true,
-    cooldown: 5,
-    description: 'Ajuste le volume du bot',
-    usage: '<Sans argument affiche le volume|[0-100]>',
-    execute(message, args) {
-        commandVolume(message, args);
-    },
-};
+// Variables
+const commandName = 'volume';
+let allowedChannels = [];
+let allowedRoles = [];
+let guildOnly = true;
+let aliases = ['vol', 'son'];
+let description = 'Ajuste le volume du bot';
+let usage = '<Sans argument affiche le volume|[0-100]>';
+let cooldown = 5;
+
+async function init() {
+    try {
+        const data = await dbCommandGet(commandName);
+
+        if (data) {
+            if (!data.enabled) return false;
+
+            if (data.allowedChannels && data.allowedChannels.length) allowedChannels = data.allowedChannels;
+            if (data.allowedRoles && data.allowedRoles.length) allowedRoles = data.allowedRoles;
+            if (data.guildOnly) guildOnly = true;
+            if (data.aliases && data.aliases.length) aliases = data.aliases;
+            if (data.description) description = data.description;
+            if (data.usage) usage = data.usage;
+            if (data.cooldown) cooldown = data.cooldown;
+        }
+
+        return {
+            name: commandName,
+            aliases: aliases,
+            allowedChannels: allowedChannels,
+            allowedRoles: allowedRoles,
+            guildOnly: guildOnly,
+            description: description,
+            usage: usage,
+            cooldown: cooldown,
+            execute(message, args) {
+                commandVolume(message, args);
+            },
+        };
+    }
+    catch(err) {
+        logger.error(`command => ${commandName} error: `, err);
+    }
+}
+
+exports.init = init;

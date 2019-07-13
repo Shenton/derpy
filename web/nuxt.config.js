@@ -1,4 +1,4 @@
-const { baseURL } = require('./config').webServer;
+const { baseURL } = require('./config');
 
 module.exports = {
     env: {

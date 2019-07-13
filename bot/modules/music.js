@@ -7,8 +7,8 @@ const htmlspecialchars = require('html-specialchars');
 
 // Derpy modules
 const logger = require('../logger');
-const config = require('../config');
 const client = require('../client');
+const { youtubeApiKey, prefix } = require('../config');
 const { rootDir, guildID, channelID } = require('../variables');
 const { getModule } = require('../../db/api/modules');
 const { dbDerpyGet, dbDerpyUpdate } = require('../methods');
@@ -61,7 +61,7 @@ async function getModuleConfig() {
 }
 
 // Declare objects
-const youtube = new Youtube(config.youtubeApiKey);
+const youtube = new Youtube(youtubeApiKey);
 
 // Test if the string is an URL.
 function isURL(string) {
@@ -331,7 +331,7 @@ async function commandAdd(message, request) {
 async function commandPlay(message, request) {
     // The command is not authorized when we are already playing a video
     if (isPlaying.status) {
-        return message.reply(`je suis déjà en train de lire une vidéo, utilise ${config.prefix}add pour en ajouter une à la playlist.`)
+        return message.reply(`je suis déjà en train de lire une vidéo, utilise ${prefix}add pour en ajouter une à la playlist.`)
             .catch(logger.error);
     }
 

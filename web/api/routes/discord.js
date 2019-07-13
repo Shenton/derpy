@@ -6,7 +6,7 @@ const qs = require('qs');
 const { logger } = require('../../logger');
 const { getOneUser, addUser, updateUser } = require('../../../db/api/user');
 
-const { baseURL, discordClientID, discordClientSecret, discordRedirectCallback } = require('../../config').webServer;
+const { baseURL, discordClientID, discordClientSecret, discordRedirectCallback } = require('../../config');
 
 function getMemberInfo(sessionID, state, code) {
     const userData = {};

@@ -1,7 +1,7 @@
 // Derpy modules
 const logger = require('../logger');
-const config = require('../config');
 const client = require('../client');
+const { ownerID } = require('../config');
 const { guildID } = require('../variables');
 const { getModule } = require('../../db/api/modules');
 const { getResponse } = require('../../db/api/response');
@@ -85,7 +85,7 @@ client.on('message', message => {
 
     if (response.includes('{member}')) {
         // Immune for the owner
-        if (message.author.id == config.ownerID) return;
+        if (message.author.id == ownerID) return;
         response = response.replace('{member}', `<@${message.author.id}>`);
     }
 

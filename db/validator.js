@@ -17,6 +17,7 @@ validator.snowflakeArray = (array) => {
 validator.memberID = validator.snowflake;
 validator.channelID = validator.snowflake;
 validator.channelIDs = validator.snowflakeArray;
+validator.roleIDs = validator.snowflakeArray;
 
 validator.username = (username) => {
     if (typeof username !== 'string') return false;
@@ -85,11 +86,6 @@ validator.activity = (name) => {
     return true;
 };
 
-validator.mp3 = (name) => {
-    if (typeof name !== 'string') return false;
-    return /^[a-z0-9]{3,8}$/.test(name);
-};
-
 validator.player = (name) => {
     if (typeof name !== 'string') return false;
     return /^[a-zA-Z0-9_-]{1,30}$/.test(name);
@@ -136,5 +132,17 @@ validator.logo = (logo) => {
     if (typeof logo !== 'string') return false;
     return /^[a-z0-9]{2,22}(\.jpeg|\.jpg|\.png){1}$/.test(logo);
 };
+
+validator.isString = (string) => {
+    if (typeof string !== 'string') return false;
+    return true;
+};
+
+validator.command = (command) => {
+    if (typeof command !== 'string') return false;
+    return /^[a-z0-9]{2,8}$/.test(command);
+};
+
+validator.mp3 = validator.command;
 
 module.exports = validator;

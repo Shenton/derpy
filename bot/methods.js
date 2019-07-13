@@ -1,8 +1,8 @@
 const logger = require('./logger');
 const client = require('./client');
-//const config = require('./config');
 const { guildID, channelID } = require('./variables');
 const { getDerpy, updateDerpy, addDerpy } = require('../db/api/derpy');
+const { getCommand, addCommand } = require('../db/api/commands');
 
 // Try to execute the provided function, return value if it fails
 function getSafe(fn, value) {
@@ -144,8 +144,28 @@ async function dbDerpyUpdate(name, value) {
     }
 }
 
+async function dbCommandGet(name) {
+    try {
+        const query = await getCommand({ name: name });
+
+        if (query.status === 404) {
+            await addCommand({ name: name });
+            return false;
+        }
+
+        const data = query.data[0];
+
+        if (data) return data;
+        else return false;
+    }
+    catch(err) {
+        logger.error('methods => dbCommandGet: ', err);
+    }
+}
+
 exports.getSafe = getSafe;
 exports.restartDerpy = restartDerpy;
 exports.getInformation = getInformation;
 exports.dbDerpyGet = dbDerpyGet;
 exports.dbDerpyUpdate = dbDerpyUpdate;
+exports.dbCommandGet = dbCommandGet;

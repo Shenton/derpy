@@ -22,13 +22,6 @@ const modulesList = [
         channels: 0,
     },
     {
-        name: 'admin',
-        load: false,
-        commands: true,
-        isFake: true,
-        channels: 0,
-    },
-    {
         name: 'mp3',
         load: true,
         commands: false,

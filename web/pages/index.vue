@@ -27,7 +27,7 @@
                 <h3>{{ $store.state.botinfo.info.voiceChannels.length }}</h3>
             </b-col>
         </b-row>
-        <div class="shadow-sm p-3 mb-5 bg-secondary rounded">
+        <!--<div class="shadow-sm p-3 mb-5 bg-secondary rounded">
             <p>{{ $store.state.botinfo.info }}</p>
 
             <b-button @click="makeToast()" class="mb-2">Test</b-button>
@@ -40,7 +40,7 @@
             </b-progress>
 
             <b-button class="mt-3" @click="rendomValue">Click me</b-button>
-        </div>
+        </div>-->
     </b-container>
 </div>
 </template>

@@ -10,6 +10,6 @@ else {
     config = jsonfile.readFileSync(path.join('..', 'config.json'));
 }
 
-config.webServer.discordRedirectCallback = config.webServer.baseURL + '/api/discord/callback';
+config.discordRedirectCallback = config.baseURL + '/api/discord/callback';
 
 module.exports = config;

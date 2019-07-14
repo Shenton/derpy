@@ -23,9 +23,9 @@ module.exports = {
         '~/plugins/scroll-to-top.client',
         '~/plugins/axios-error-handler',
     ],
-    router: {
-        esModule: false,
-    },
+    // router: {
+    //     esModule: false,
+    // },
     css: [
         '~/assets/scss/main.scss',
     ],

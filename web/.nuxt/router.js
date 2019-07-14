@@ -5,6 +5,7 @@ import { interopDefault } from './utils'
 const _5ca8dfd4 = () => interopDefault(import('..\\pages\\administration\\index.vue' /* webpackChunkName: "pages_administration_index" */))
 const _6a56c3f9 = () => interopDefault(import('..\\pages\\modules\\index.vue' /* webpackChunkName: "pages_modules_index" */))
 const _1e5e4818 = () => interopDefault(import('..\\pages\\administration\\commands.vue' /* webpackChunkName: "pages_administration_commands" */))
+const _5772f9dd = () => interopDefault(import('..\\pages\\administration\\members.vue' /* webpackChunkName: "pages_administration_members" */))
 const _84871d6a = () => interopDefault(import('..\\pages\\administration\\modules.vue' /* webpackChunkName: "pages_administration_modules" */))
 const _174c4638 = () => interopDefault(import('..\\pages\\modules\\activity.vue' /* webpackChunkName: "pages_modules_activity" */))
 const _a743ca52 = () => interopDefault(import('..\\pages\\modules\\mp3.vue' /* webpackChunkName: "pages_modules_mp3" */))
@@ -100,6 +101,10 @@ export function createRouter() {
       path: "/administration/commands",
       component: _1e5e4818,
       name: "administration-commands"
+    }, {
+      path: "/administration/members",
+      component: _5772f9dd,
+      name: "administration-members"
     }, {
       path: "/administration/modules",
       component: _84871d6a,

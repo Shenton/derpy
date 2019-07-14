@@ -20,7 +20,7 @@
                 <b-nav-item-dropdown v-if="$store.state.auth.isOwner" text="Administration">
                     <b-dropdown-item to="/administration/commands">Commandes</b-dropdown-item>
                     <b-dropdown-item to="/administration">Configuration</b-dropdown-item>
-                    <b-dropdown-item to="#">Membres</b-dropdown-item>
+                    <b-dropdown-item to="/administration/members">Membres</b-dropdown-item>
                     <b-dropdown-item to="/administration/modules">Modules</b-dropdown-item>
                 </b-nav-item-dropdown>
             </b-navbar-nav>

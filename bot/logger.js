@@ -1,22 +1,13 @@
 const { createLogger, format, transports } = require('winston');
 const path = require('path');
-require('winston-daily-rotate-file');
 
-const errorTransport = new transports.DailyRotateFile({
-    level: 'error',
-    filename: path.join('..', 'log', 'bot-error-%DATE%.log'),
-    datePattern: 'DD-MM-YYYY',
-    zippedArchive: true,
-    maxSize: '10m',
-    maxFiles: '30d',
+const combinedTransport = new transports.File({
+    filename: path.join('..', 'log', 'bot.log'),
+    //zippedArchive: true,
+    maxSize: 10 * 1024 * 1024,
+    maxFiles: 5,
 });
-const combinedTransport = new transports.DailyRotateFile({
-    filename: path.join('..', 'log', 'bot-combined-%DATE%.log'),
-    datePattern: 'DD-MM-YYYY',
-    zippedArchive: true,
-    maxSize: '10m',
-    maxFiles: '30d',
-});
+
 const logger = createLogger({
     level: 'info',
     format: format.combine(
@@ -26,7 +17,7 @@ const logger = createLogger({
         format.json()
     ),
     defaultMeta: { service: 'bot' },
-    transports: [errorTransport, combinedTransport],
+    transports: [combinedTransport],
 });
 // If we are in dev we want to also output the log to the console
 if (process.env.NODE_ENV === 'development') {
@@ -52,11 +43,5 @@ if (process.env.NODE_ENV === 'development') {
         ),
     }));
 }
-errorTransport.on('rotate', function(oldFilename, newFilename) {
-    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
-});
-combinedTransport.on('rotate', function(oldFilename, newFilename) {
-    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
-});
 
 module.exports = logger;

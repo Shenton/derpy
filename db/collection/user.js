@@ -3,7 +3,6 @@ const Schema = mongoose.Schema;
 const uuidv4 = require('uuid/v4');
 
 const { logger } = require('../logger');
-
 const { ownerID } = require('../config');
 
 const userSchema = new Schema({

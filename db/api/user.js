@@ -7,11 +7,11 @@ async function get(filter) {
     const badRequest = [];
     const f = {};
 
-    if (filter.memberID) {
+    if (filter && filter.memberID) {
         if (!validator.memberID(filter.memberID)) badRequest.push('"memberID" is not valid');
         else f.memberID = filter.memberID;
     }
-    else if (filter.uniqueID) {
+    else if (filter && filter.uniqueID) {
         if (!validator.uuidv4(filter.uniqueID)) badRequest.push('"uniqueID" is not valid');
         else f.uniqueID = filter.uniqueID;
     }
@@ -29,6 +29,8 @@ async function get(filter) {
 async function getOne(filter) {
     const badRequest = [];
     const f = {};
+
+    if (!filter) return { success: false, status: 400, errors: ['filter is missing'] };
 
     if (filter.memberID) {
         if (!validator.memberID(filter.memberID)) badRequest.push('"memberID" is not valid');
@@ -79,20 +81,34 @@ async function add(data) {
 }
 
 async function update(filter, data) {
+    const badFilter = [];
     const f = {};
 
-    if (!filter.memberID) return { success: false, status: 400, errors: ['"memberID" is missing'] };
-    if (!validator.memberID(filter.memberID)) return { success: false, status: 400, errors: ['"memberID" is not valid'] };
+    if (!filter || (!filter.memberID && !filter.uniqueID && !filter._id)) {
+        return { success: false, status: 400, errors: ['filter is missing'] };
+    }
 
-    f.memberID = filter.memberID;
+    if (filter.memberID) {
+        if (!validator.memberID(filter.memberID)) badFilter.push('"memberID" is not valid');
+        else f.memberID = filter.memberID;
+    }
+    else if (filter.uniqueID) {
+        if (!validator.uuidv4(filter.uniqueID)) badFilter.push('"uniqueID" is not valid');
+        else f.uniqueID = filter.uniqueID;
+    }
+    else if (filter._id) {
+        if (!validator.mongoID(filter._id)) badFilter.push('"_id" is not valid');
+        else f._id = filter._id;
+    }
+
+    if (badFilter.length) return { success: false, status: 400, errors: badFilter };
 
     const badRequest = [];
 
-    if (!data.memberID && !data.username && !data.discriminator && !data.avatar
-        && !data.accessToken && !data.tokenType && !data.expires && !data.refreshToken) {
+    if (!data.memberID && !data.username && !data.discriminator && !data.avatar && !data.accessToken
+        && !data.tokenType && !data.expires && !data.refreshToken && data.hasAccess === 'undefined') {
 
         logger.error('api => user => update: Missing parameter.');
-
         return { success: false, status: 400, errors: ['Missing parameters'] };
     }
 
@@ -126,10 +142,14 @@ async function update(filter, data) {
         if (!validator.token(data.refreshToken)) badRequest.push('"refreshToken" is not valid');
         else doc.refreshToken = data.refreshToken;
     }
+    if (data.hasAccess === true || data.hasAccess === false) {
+        if (!validator.isBoolean(data.hasAccess)) badRequest.push('"hasAccess" is not valid');
+        else doc.hasAccess = data.hasAccess;
+    }
 
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
-    const success = await updateUser({ memberID: f.memberID }, doc);
+    const success = await updateUser(f, doc);
 
     if (success) return { success: true, status: 200 };
     else return { success: false, status: 500, errors: ['Internal API error'] };

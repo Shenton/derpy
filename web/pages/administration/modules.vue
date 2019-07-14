@@ -4,7 +4,7 @@
         fluid bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
-        header="Modules"
+        header="Administration: Modules"
         lead="Configuration générique des modules."
     ></b-jumbotron>
     <b-container>
@@ -63,7 +63,7 @@ export default {
     },
     data() {
         return {
-            title: 'Modules',
+            title: 'Administration: Modules',
             modulesData: [],
             fields: [
                 {

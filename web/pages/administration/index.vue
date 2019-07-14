@@ -4,7 +4,7 @@
         fluid bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
-        header="Configuration"
+        header="Administration: Configuration"
         lead="Configuration de Derpy."
     ></b-jumbotron>
     <b-container>
@@ -15,19 +15,16 @@
             <h2>Music</h2>
             <hr class="border-primary">
             <h4>Durée maximum des vidéos: <strong class="text-primary">{{ form.maxVideoDuration }} minute{{ form.maxVideoDuration > 1 ? 's' : '' }}</strong></h4>
-            <hr class="border-primary">
             <b-input-group prepend="0" append="60" class="mb-5">
                 <b-form-input v-model="form.maxVideoDuration" type="range" min="0" max="60"></b-form-input>
             </b-input-group>
 
             <h4>Nombre d'entrées maximum de la liste de lecture: <strong class="text-primary">{{ form.maxPlaylistSize }} entrée{{ form.maxPlaylistSize > 1 ? 's' : '' }}</strong></h4>
-            <hr class="border-primary">
             <b-input-group prepend="0" append="40" class="mb-5">
                 <b-form-input v-model="form.maxPlaylistSize" type="range" min="0" max="40"></b-form-input>
             </b-input-group>
 
             <h4>Volume: <strong class="text-primary">{{ form.volume }}</strong></h4>
-            <hr class="border-primary">
             <b-input-group prepend="0" append="100" class="mb-5">
                 <b-form-input v-model="form.volume" type="range" min="0" max="100"></b-form-input>
             </b-input-group>
@@ -35,11 +32,9 @@
             <h2>PUBG</h2>
             <hr class="border-primary">
             <h4>PUBG shard: <strong class="text-primary">{{ form.shard }}</strong></h4>
-            <hr class="border-primary">
             <b-form-select class="mb-5" v-model="form.shard" :options="shardsSelectOptions"></b-form-select>
 
             <h4>Nombre d'appels à l'API de PUBG par minute: <strong class="text-primary">{{ form.callsPerMinute }}</strong></h4>
-            <hr class="border-primary">
             <b-input-group class="mb-5" prepend="1" append="8">
                 <b-form-input v-model="form.callsPerMinute" type="range" min="1" max="8"></b-form-input>
             </b-input-group>

@@ -1,44 +1,21 @@
 const { createLogger, format, transports } = require('winston');
 const morgan = require('morgan');
 const path = require('path');
-require('winston-daily-rotate-file');
 
-// Declare daily rotate transports objects
-const errorTransport = new transports.DailyRotateFile({
-    level: 'error',
-    filename: path.join('..', 'log', 'web-error-%DATE%.log'),
-    datePattern: 'DD-MM-YYYY',
-    zippedArchive: true,
-    maxSize: '10m',
-    maxFiles: '30d',
-});
-errorTransport.on('rotate', function(oldFilename, newFilename) {
-    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
+const combinedTransport = new transports.File({
+    filename: path.join('..', 'log', 'web.log'),
+    //zippedArchive: true,
+    maxSize: 10 * 1024 * 1024,
+    maxFiles: 5,
 });
 
-const combinedTransport = new transports.DailyRotateFile({
-    filename: path.join('..', 'log', 'web-combined-%DATE%.log'),
-    datePattern: 'DD-MM-YYYY',
-    zippedArchive: true,
-    maxSize: '10m',
-    maxFiles: '30d',
-});
-combinedTransport.on('rotate', function(oldFilename, newFilename) {
-    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
+const accessTransport = new transports.File({
+    filename: path.join('..', 'log', 'web-access.log'),
+    //zippedArchive: true,
+    maxSize: 10 * 1024 * 1024,
+    maxFiles: 5,
 });
 
-const accessTransport = new transports.DailyRotateFile({
-    filename: path.join('..', 'log', 'web-access-%DATE%.log'),
-    datePattern: 'DD-MM-YYYY',
-    zippedArchive: true,
-    maxSize: '10m',
-    maxFiles: '30d',
-});
-accessTransport.on('rotate', function(oldFilename, newFilename) {
-    logger.info(`Rotating log file: ${oldFilename} => ${newFilename}`);
-});
-
-// Creating loggers
 const logger = createLogger({
     level: 'info',
     format: format.combine(
@@ -48,7 +25,7 @@ const logger = createLogger({
         format.json()
     ),
     defaultMeta: { service: 'web' },
-    transports: [errorTransport, combinedTransport],
+    transports: [combinedTransport],
 });
 
 const accessLogger = createLogger({

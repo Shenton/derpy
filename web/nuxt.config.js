@@ -30,7 +30,7 @@ module.exports = {
         '~/assets/scss/main.scss',
     ],
     build: {
-        extractCSS: process.env.NODE_ENV === 'production',
+        extractCSS: true,
     },
     head: {
         title: 'Derpy',

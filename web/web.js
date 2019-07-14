@@ -105,18 +105,14 @@ app.use('/api/reddit', require('./api/routes/reddit'));
 app.use('/api/rss', require('./api/routes/rss'));
 app.use('/api/response', require('./api/routes/response'));
 
-async function start() {
-    if (nuxtConfig.dev.dev) {
-        const builder = new Builder(nuxt);
-        await builder.build();
-    }
-    else {
-        await nuxt.ready();
-    }
+// Render every route with Nuxt.js
+app.use(nuxt.render);
 
-    app.use(nuxt.render);
+// Build only in dev mode with hot-reloading
+if (nuxtConfig.dev) new Builder(nuxt).build().then(listen);
+else listen();
 
+function listen() {
     app.listen(port, '0.0.0.0');
     logger.info('Web server listening on `localhost:' + port + '`.');
 }
-start();

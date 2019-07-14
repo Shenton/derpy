@@ -7,7 +7,7 @@
 
       <div class="title">{{ message }}</div>
       <p v-if="statusCode === 404" class="description">
-        <NuxtLink class="error-link" to="/">Retour à l'accueil</NuxtLink>
+        <NuxtLink class="error-link" to="/">Back to the home page</NuxtLink>
       </p>
 
       <div class="logo">
@@ -42,7 +42,7 @@ export default {
       return (this.error && this.error.statusCode) || 500
     },
     message() {
-      return this.error.message || `Erreur`
+      return this.error.message || `Error`
     }
   }
 }

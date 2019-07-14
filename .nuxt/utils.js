@@ -134,11 +134,11 @@ export async function setContext(app, context) {
       isDev: false,
       isHMR: false,
       app,
-      store: app.store,
+
       payload: context.payload,
       error: context.error,
       base: '/',
-      env: {"version":"2.0.0"}
+      env: {}
     }
     // Only set once
     if (context.req) {

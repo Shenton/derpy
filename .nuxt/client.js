@@ -29,7 +29,6 @@ if (!global.fetch) { global.fetch = fetch }
 let _lastPaths = []
 let app
 let router
-let store
 
 // Try to rehydrate SSR data from window
 const NUXT = window.__NUXT__ || {}
@@ -231,7 +230,7 @@ async function render(to, from, next) {
     await callMiddleware.call(this, Components, app.context, layout)
     if (nextCalled) return
     // Show error page
-    app.context.error({ statusCode: 404, message: `Page non trouvée` })
+    app.context.error({ statusCode: 404, message: `This page could not be found` })
     return next()
   }
 
@@ -289,7 +288,7 @@ async function render(to, from, next) {
 
     // ...If .validate() returned false
     if (!isValid) {
-      this.error({ statusCode: 404, message: `Page non trouvée` })
+      this.error({ statusCode: 404, message: `This page could not be found` })
       return next()
     }
 
@@ -476,7 +475,6 @@ async function mountApp(__app) {
   // Set global variables
   app = __app.app
   router = __app.router
-  store = __app.store
 
   // Resolve route components
   const Components = await Promise.all(resolveComponents(router))

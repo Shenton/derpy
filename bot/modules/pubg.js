@@ -187,7 +187,8 @@ async function getModuleConfig() {
     shard = await dbDerpyGet('pubgShard', shard);
     callsPerMinute = await dbDerpyGet('pubgCallsPerMinute', callsPerMinute);
 
-    const callsNeeded = Math.ceil(playersArray.length / 6);
+    const playersCount = playersArray.length ? playersArray.length : 1;
+    const callsNeeded = Math.ceil(playersCount / 6);
     const time = 60 / callsPerMinute * callsNeeded * 1000;
     updateInterval(time);
 

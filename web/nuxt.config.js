@@ -4,9 +4,8 @@ module.exports = {
     env: {
         version: process.env.npm_package_version,
     },
-    srcDir: __dirname,
     rootDir: __dirname,
-    modulesDir: ['../node_modules'],
+    modulesDir: ['./../node_modules'],
     modules: [
         '@nuxtjs/axios',
         'bootstrap-vue/nuxt',
@@ -23,9 +22,6 @@ module.exports = {
         '~/plugins/scroll-to-top.client',
         '~/plugins/axios-error-handler',
     ],
-    router: {
-        esModule: false,
-    },
     css: [
         '~/assets/scss/main.scss',
     ],

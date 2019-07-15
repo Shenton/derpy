@@ -103,7 +103,6 @@ export default {
             return { commands: commands };
         }
         catch(err) {}
-        
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);

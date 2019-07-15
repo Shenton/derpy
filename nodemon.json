@@ -1,5 +1,8 @@
 {
-    "ignore": ["web/*"],
-    "verbose": true,
+    "ignore": [
+        "web/plugins/*",
+        "web/store/*"
+    ],
+    "verbose": false,
     "ext": "js"
 }

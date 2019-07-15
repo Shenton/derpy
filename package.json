@@ -46,6 +46,7 @@
     "simple-youtube-api": "^5.2.1",
     "uuid": "^3.3.2",
     "winston": "^3.2.1",
+    "winston-mongodb": "^5.0.0",
     "ytdl-core": "^0.29.3"
   },
   "devDependencies": {

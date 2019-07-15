@@ -1,11 +1,11 @@
 const { createLogger, format, transports } = require('winston');
-const path = require('path');
+require('winston-mongodb');
 
-const combinedTransport = new transports.File({
-    filename: path.join('..', 'log', 'db.log'),
-    //zippedArchive: true,
-    maxSize: 10 * 1024 * 1024,
-    maxFiles: 5,
+const { dbConnect, dbName } = require('./config');
+
+const transport = new transports.MongoDB({
+    db: dbConnect + dbName,
+    collection: 'logdb',
 });
 
 const logger = createLogger({
@@ -17,7 +17,7 @@ const logger = createLogger({
         format.json()
     ),
     defaultMeta: { service: 'db' },
-    transports: [combinedTransport],
+    transports: [transport],
 });
 
 // If we are in dev we want to also output the log to the console

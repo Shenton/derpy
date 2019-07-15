@@ -1,19 +1,18 @@
 const { createLogger, format, transports } = require('winston');
 const morgan = require('morgan');
-const path = require('path');
 
-const combinedTransport = new transports.File({
-    filename: path.join('..', 'log', 'web.log'),
-    //zippedArchive: true,
-    maxSize: 10 * 1024 * 1024,
-    maxFiles: 5,
+require('winston-mongodb');
+
+const { dbConnect, dbName } = require('./config');
+
+const transport = new transports.MongoDB({
+    db: dbConnect + dbName,
+    collection: 'logweb',
 });
 
-const accessTransport = new transports.File({
-    filename: path.join('..', 'log', 'web-access.log'),
-    //zippedArchive: true,
-    maxSize: 10 * 1024 * 1024,
-    maxFiles: 5,
+const accessTransport = new transports.MongoDB({
+    db: dbConnect + dbName,
+    collection: 'logwebaccess',
 });
 
 const logger = createLogger({
@@ -25,7 +24,7 @@ const logger = createLogger({
         format.json()
     ),
     defaultMeta: { service: 'web' },
-    transports: [combinedTransport],
+    transports: [transport],
 });
 
 const accessLogger = createLogger({

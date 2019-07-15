@@ -29,14 +29,18 @@
         </b-row>
         <b-row class="mb-5">
             <b-col>
-                <h2>Modules activés</h2>
+                <h2>Modules</h2>
                 <hr class="border-primary">
-                <p>{{ activatedModules() }}</p>
+                <h5>
+                    <b-badge class="mr-1" v-for="mod in modules" v-bind:key="mod.name" :variant="mod.enabled ? 'success' : 'danger'">{{mod.name}}</b-badge>
+                </h5>
             </b-col>
             <b-col>
-                <h2>Commandes activées</h2>
+                <h2>Commandes</h2>
                 <hr class="border-primary">
-                <p>{{ activatedCommands() }}</p>
+                <h5>
+                    <b-badge class="mr-1" v-for="command in commands" v-bind:key="command.name" :variant="command.enabled ? 'success' : 'danger'">{{command.name}}</b-badge>
+                </h5>
             </b-col>
         </b-row>
     </b-container>
@@ -70,14 +74,6 @@ export default {
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
         this.$store.dispatch('botinfo/getInfo');
-    },
-    methods: {
-        activatedModules() {
-            return this.modules.map(m => m.enabled ? m.name : null).join(' ');
-        },
-        activatedCommands() {
-            return this.commands.map(m => m.enabled ? m.name : null).join(' ');
-        }
     },
 }
 </script>

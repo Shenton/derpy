@@ -34,7 +34,7 @@ async function add(data) {
 
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
-    const success = await addCommand(data.name, data.description, data.usage, data.aliases,
+    const success = await addCommand(data.name, data.description, data.usage, data.aliases, data.cooldown,
         data.allowedChannels, data.allowedRoles, data.ownerOnly, data.guildOnly);
 
     if (success === 200) return { success: true, status: 200 };

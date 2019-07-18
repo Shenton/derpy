@@ -28,7 +28,7 @@ function getNeige() {
 
 async function init() {
     try {
-        const data = await dbCommandGet(commandName);
+        const data = await dbCommandGet(commandName, description, usage, aliases, cooldown);
 
         if (data) {
             if (!data.enabled) return false;

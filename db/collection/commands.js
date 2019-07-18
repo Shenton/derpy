@@ -43,7 +43,7 @@ async function get(query, select) {
 }
 
 // Add
-async function add(name, description, usage, aliases, allowedChannels, allowedRoles, ownerOnly, guildOnly, cooldown) {
+async function add(name, description, usage, aliases, cooldown, allowedChannels, allowedRoles, ownerOnly, guildOnly) {
     const mod = new Commands({
         name: name,
         enabled: false,

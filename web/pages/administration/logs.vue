@@ -61,7 +61,7 @@ export default {
                         width: '30%'
                     },
                     formatter: value => {
-                        return moment(value).format('DD/MM/YYYY HH:MM:ss.SSS');
+                        return moment(value).format('DD/MM/YYYY HH:mm:ss.SSS');
                     },
                 },
                 {

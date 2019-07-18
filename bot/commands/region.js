@@ -16,10 +16,11 @@ let guildOnly = true;
 let aliases = [];
 let description = 'Liste les régions ou change de région';
 let usage = '<Sans argument liste les régions|[region] change pour cette région>';
+let cooldown = 3;
 
 async function init() {
     try {
-        const data = await dbCommandGet(commandName);
+        const data = await dbCommandGet(commandName, description, usage, aliases, cooldown);
 
         if (data) {
             if (!data.enabled) return false;
@@ -30,6 +31,7 @@ async function init() {
             if (data.aliases && data.aliases.length) aliases = data.aliases;
             if (data.description) description = data.description;
             if (data.usage) usage = data.usage;
+            if (data.cooldown) cooldown = data.cooldown;
         }
 
         return {

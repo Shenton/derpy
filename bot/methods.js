@@ -2,7 +2,7 @@ const logger = require('./logger');
 const client = require('./client');
 const { guildID, channelID } = require('./variables');
 const { getDerpy, updateDerpy, addDerpy } = require('../db/api/derpy');
-const { getCommand, addCommand } = require('../db/api/commands');
+const { getCommand, addCommand, updateCommandByName } = require('../db/api/commands');
 
 // Try to execute the provided function, return value if it fails
 function getSafe(fn, value) {
@@ -144,14 +144,35 @@ async function dbDerpyUpdate(name, value) {
     }
 }
 
-async function dbCommandGet(name) {
+async function dbCommandGet(name, description, usage, aliases, cooldown) {
     try {
         const query = await getCommand({ name: name });
 
         if (query.status === 404) {
-            await addCommand({ name: name });
+            await addCommand({
+                name: name,
+                description: description,
+                usage: usage,
+                aliases: aliases,
+                cooldown: cooldown,
+            });
             return false;
         }
+
+        /**
+         *
+         * Temporary fix
+         *
+         */
+        if (description && !query.data[0].description) await updateCommandByName(name, { description: description });
+        if (usage && !query.data[0].usage) await updateCommandByName(name, { usage: usage });
+        if (aliases.length && !query.data[0].aliases.length) await updateCommandByName(name, { aliases: aliases });
+        if (cooldown && !query.data[0].cooldown) await updateCommandByName(name, { cooldown: cooldown });
+        /**
+         *
+         * /Temporary fix
+         *
+         */
 
         const data = query.data[0];
 

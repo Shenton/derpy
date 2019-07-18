@@ -30,12 +30,12 @@ router.get('/', async function(req, res) {
         return res.send('Unauthorized');
     }
 
-    const data = await getCommand();
+    const query = await getCommand();
 
-    res.status(data.status);
+    res.status(query.status);
 
-    if (data.success) res.json(data.data);
-    else res.json(data.errors);
+    if (query.success) res.json(query.data);
+    else res.json(query.errors);
 });
 
 router.patch('/:id', async function(req, res) {
@@ -46,17 +46,17 @@ router.patch('/:id', async function(req, res) {
         return res.send('Unauthorized');
     }
 
-    const data = await updateCommandByID(req.params.id, req.body);
+    const query = await updateCommandByID(req.params.id, req.body);
 
-    res.status(data.status);
+    res.status(query.status);
 
-    if (data.success) {
-        res.json({ modified: data.modified });
+    if (query.success) {
+        res.json({ modified: query.modified });
         logger.info(`User: ${req.session.discordAuth.username} edited module: %o`, req.params.id);
         //process.send({ app: 'web', message: req.params.name + ':channels' });
     }
     else {
-        res.json(data.errors);
+        res.json(query.errors);
     }
 });
 

@@ -25,7 +25,7 @@ router.get('/modules', async function(req, res) {
 });
 
 router.get('/commands', async function(req, res) {
-    const data = await getCommand({}, 'name enabled');
+    const data = await getCommand({}, 'name aliases enabled');
 
     res.status(data.status);
 

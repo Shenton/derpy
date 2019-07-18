@@ -32,9 +32,9 @@ async function get(query) {
 }
 
 // Add
-async function add(value) {
+async function add(name) {
     const mp3 = new MP3({
-        mp3: value,
+        mp3: name,
         enabled: false,
         revision: 0,
     });
@@ -43,7 +43,7 @@ async function add(value) {
         const newMP3 = await mp3.save();
 
         if(newMP3 === mp3) {
-            logger.info(`collection => mp3 => add: Added mp3: ${value}`);
+            logger.info(`collection => mp3 => add: Added mp3: ${name}`);
             return 200;
         }
         else {

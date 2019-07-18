@@ -32,14 +32,14 @@
                 <h2>Modules</h2>
                 <hr class="border-primary">
                 <h5>
-                    <b-badge class="mr-1" v-for="mod in modules" v-bind:key="mod.name" :variant="mod.enabled ? 'success' : 'danger'">{{mod.name}}</b-badge>
+                    <b-badge class="mr-1" v-for="mod in modules" v-bind:key="mod.name" :variant="mod.enabled ? 'success' : 'danger'">{{ mod.name }}</b-badge>
                 </h5>
             </b-col>
             <b-col>
                 <h2>Commandes</h2>
                 <hr class="border-primary">
                 <h5>
-                    <b-badge class="mr-1" v-for="command in commands" v-bind:key="command.name" :variant="command.enabled ? 'success' : 'danger'">{{command.name}}</b-badge>
+                    <b-badge class="mr-1" v-for="command in commands" v-bind:key="command.name" :variant="command.enabled ? 'success' : 'danger'">{{ command.name }}</b-badge>
                 </h5>
             </b-col>
         </b-row>

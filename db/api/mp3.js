@@ -1,5 +1,6 @@
 const { logger } = require('../logger');
 const validator = require('../validator');
+const { getCommandsAndAliases } = require('../methods');
 
 const { addMP3, getMP3, updateMP3, deleteMP3 } = require('../collection/mp3');
 
@@ -23,8 +24,11 @@ async function add(data) {
     }
 
     if (!validator.mp3(data.mp3)) badRequest.push('"mp3" is not valid');
-
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
+
+    const commandsAndAliases = await getCommandsAndAliases();
+    if (!commandsAndAliases) return { success: false, status: 500, errors: ['Internal API error'] };
+    if (commandsAndAliases.includes(data.mp3)) return { success: false, status: 409, errors: ['Command already exists'] };
 
     const success = await addMP3(data.mp3);
 

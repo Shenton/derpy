@@ -29,7 +29,7 @@
                 </b-form>
             </template>
             <template slot="row-details" slot-scope="row">
-                <CommandUpdateForm @submitUpdate="submitUpdate" :data="row.item"/>
+                <CommandUpdateForm @submitUpdate="submitUpdate" :data="row.item" :commandsAndAliases="commandsAndAliases"/>
             </template>
         </b-table>
         <b-row>
@@ -70,6 +70,7 @@ export default {
         return {
             title: 'Administration: Commandes',
             commands: [],
+            commandsAndAliases: [],
             fields: [
                 {
                     key: 'name',
@@ -107,6 +108,7 @@ export default {
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
         this.totalRows = this.commands.length;
+        this.setCommandsAndAliases();
     },
     methods: {
         async submitUpdate(id, data) {
@@ -129,6 +131,7 @@ export default {
                         const data = await this.$axios.$get('commands');
                         this.commands = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
                         this.totalRows = this.commands.length;
+                        this.setCommandsAndAliases();
                     }
                     catch(err) {
                         this.$axiosGetErrorHandler(err);
@@ -167,6 +170,21 @@ export default {
                 this.restarting = false;
                 this.restartVariant = 'danger';
                 setTimeout(() => this.restartVariant = 'primary', 3000);
+            }
+        },
+        setCommandsAndAliases() {
+            this.commandsAndAliases = [];
+
+            for (let i = 0; i < this.commands.length; i++) {
+                const command = this.commands[i];
+
+                this.commandsAndAliases.push(command.name);
+
+                if (command.aliases && command.aliases.length) {
+                    command.aliases.forEach(alias => {
+                        this.commandsAndAliases.push(alias);
+                    });
+                }
             }
         },
     },

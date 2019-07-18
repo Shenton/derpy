@@ -21,6 +21,7 @@ module.exports = {
         '~/plugins/toast.client',
         '~/plugins/scroll-to-top.client',
         '~/plugins/axios-error-handler',
+        '~/plugins/validator.client',
     ],
     css: [
         '~/assets/scss/main.scss',

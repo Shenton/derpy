@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 
 const { logger } = require('../../logger');
-
 const { getMP3, addMP3, updateMP3, deleteMP3 } = require('../../../db/api/mp3');
 
 function hasAccess(req, method) {

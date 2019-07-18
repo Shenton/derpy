@@ -57,7 +57,11 @@ async function getModuleConfig() {
                     return element.mp3 === commandName && element.enabled;
                 });
 
-                if (enabled) mp3List.push(commandName);
+                // Does a command already exists with this name
+                const command = client.commands.get(commandName) ||
+                    client.commands.find(cmd => cmd.aliases && cmd.aliases.length && cmd.aliases.includes(commandName));
+                if (command) logger.error(`module => mp3 => getModuleConfig: A command with this name (${commandName}) already exists.`);
+                else if (enabled) mp3List.push(commandName);
             }
             else {
                 try {

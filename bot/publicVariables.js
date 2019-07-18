@@ -22,12 +22,6 @@ const modulesList = [
         channels: 0,
     },
     {
-        name: 'mp3',
-        load: true,
-        commands: false,
-        channels: 8,
-    },
-    {
         name: 'music',
         load: true,
         commands: true,
@@ -58,6 +52,12 @@ const modulesList = [
         load: true,
         commands: false,
         channels: 1,
+    },
+    {
+        name: 'mp3',
+        load: true,
+        commands: false,
+        channels: 8,
     },
 ];
 

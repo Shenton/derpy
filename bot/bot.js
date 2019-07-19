@@ -127,7 +127,7 @@ client.on('message', message => {
     // Execute the command
     try {
         command.execute(message, args);
-        if (message.channel.type === 'text') message.delete();
+        if (message.channel.type === 'text' && message.deletable && !message.deleted) message.delete();
     }
     catch (err) {
         logger.error(err);

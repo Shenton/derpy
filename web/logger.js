@@ -1,22 +1,25 @@
 const { createLogger, format, transports } = require('winston');
 const morgan = require('morgan');
-
 require('winston-mongodb');
 
-const { dbConnect, dbName } = require('./config');
+const { dbConnect, dbName, debug } = require('./config');
+
+const logLevel = debug ? 'debug' : 'info';
 
 const transport = new transports.MongoDB({
+    level: logLevel,
     db: dbConnect + dbName,
     collection: 'logweb',
 });
 
 const accessTransport = new transports.MongoDB({
+    level: logLevel,
     db: dbConnect + dbName,
     collection: 'logwebaccess',
 });
 
 const logger = createLogger({
-    level: 'info',
+    level: logLevel,
     format: format.combine(
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
         format.errors({ stack: true }),
@@ -28,7 +31,7 @@ const logger = createLogger({
 });
 
 const accessLogger = createLogger({
-    level: 'info',
+    level: logLevel,
     format: format.combine(
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
         format.errors({ stack: true }),

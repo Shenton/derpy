@@ -1,15 +1,18 @@
 const { createLogger, format, transports } = require('winston');
 require('winston-mongodb');
 
-const { dbConnect, dbName } = require('./config');
+const { dbConnect, dbName, debug } = require('./config');
+
+const logLevel = debug ? 'debug' : 'info';
 
 const transport = new transports.MongoDB({
+    level: logLevel,
     db: dbConnect + dbName,
     collection: 'logdb',
 });
 
 const logger = createLogger({
-    level: 'info',
+    level: logLevel,
     format: format.combine(
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
         format.errors({ stack: true }),
@@ -21,7 +24,6 @@ const logger = createLogger({
 });
 
 // If we are in dev we want to also output the log to the console
-// Also defining Morgan format
 if (process.env.NODE_ENV === 'development') {
     const myFormat = format.printf(({ level, message, label, timestamp, stack }) => {
         let color = '';

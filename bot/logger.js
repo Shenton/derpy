@@ -9,7 +9,7 @@ const transport = new transports.MongoDB({
 });
 
 const logger = createLogger({
-    level: 'info',
+    level: 'debug',
     format: format.combine(
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
         format.errors({ stack: true }),

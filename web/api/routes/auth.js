@@ -8,7 +8,7 @@ const { baseURL, discordClientID, discordRedirectCallback } = require('../../con
 router.get('/login', function(req, res) {
     bcrypt.genSalt(10, function(err, salt) {
         if (err) {
-            logger.error('Routes => auth => bcrypt salt error: ', err);
+            logger.error('routes => auth => bcrypt salt error: ', err);
             /**
              *
              * This should redirect to an error page
@@ -20,7 +20,7 @@ router.get('/login', function(req, res) {
 
         bcrypt.hash(req.sessionID, salt, function(err, hash) {
             if (err) {
-                logger.error('Routes => auth => login => bcrypt hash error: ', err);
+                logger.error('routes => auth => login => bcrypt hash error: ', err);
                 /**
                  *
                  * This should redirect to an error page
@@ -30,7 +30,7 @@ router.get('/login', function(req, res) {
                 return res.redirect(baseURL);
             }
 
-            logger.debug('Routes => auth => login => bcrypt hash: ' + hash);
+            logger.debug(`routes => auth => login => bcrypt sessID: ${req.sessionID} - hash: ${hash}`);
             req.session.discordState = hash;
 
             const callback = encodeURIComponent(discordRedirectCallback);
@@ -49,7 +49,7 @@ router.get('/login', function(req, res) {
 router.get('/logout', function(req, res) {
     req.session.destroy(function(err) {
         if (err) {
-            logger.error('Routes => auth => logout => bcrypt hash error: ', err);
+            logger.error('routes => auth => logout => session destroy error: ', err);
             /**
              *
              * This should redirect to an error page

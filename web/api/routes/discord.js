@@ -13,7 +13,7 @@ function getMemberInfo(sessionID, state, code) {
     return bcrypt.compare(sessionID, state)
         .then(function(check) {
             if (!check) {
-                logger.warn('API => discord => callback: state did not check');
+                logger.warn(`API => discord => callback: state did not check, sessID ${sessionID} - state: ${state}`);
                 return false;
             }
 

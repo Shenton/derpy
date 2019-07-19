@@ -35,7 +35,8 @@ async function get(query) {
 // Add
 async function add(name) {
     const quote = new Quote({
-        quote: name,
+        name: name,
+        quotes: [],
         enabled: false,
         revision: 0,
     });

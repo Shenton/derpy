@@ -59,6 +59,12 @@ const modulesList = [
         commands: false,
         channels: 8,
     },
+    {
+        name: 'quote',
+        load: true,
+        commands: false,
+        channels: 2,
+    },
 ];
 
 exports.modulesList = modulesList;

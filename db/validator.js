@@ -59,6 +59,7 @@ validator.uuidv4 = (uuid) => {
 
 validator.response = (response) => {
     if (typeof response !== 'string') return false;
+    if (response === '') return false;
     if (response.length > 256) return false;
     if (/<|>|```/.test(response)) return false;
     return true;
@@ -144,5 +145,13 @@ validator.command = (command) => {
 };
 
 validator.mp3 = validator.command;
+
+validator.quote = (quote) => {
+    if (typeof quote !== 'string') return false;
+    if (quote === '') return false;
+    if (quote.length > 1000) return false;
+    if (/<|>|```/.test(quote)) return false;
+    return true;
+};
 
 module.exports = validator;

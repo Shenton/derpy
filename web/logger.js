@@ -87,7 +87,7 @@ accessLogger.streamInfo = {
         accessLogger.info(message);
     },
 };
-const morganInfo = morgan('tiny', {
+const morganInfo = morgan('default', {
     skip: function(req, res) {
         return res.statusCode >= 400;
     },
@@ -99,7 +99,7 @@ accessLogger.streamError = {
         accessLogger.error(message);
     },
 };
-const morganError = morgan('tiny', {
+const morganError = morgan('default', {
     skip: function(req, res) {
         return res.statusCode < 400;
     },

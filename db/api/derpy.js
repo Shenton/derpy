@@ -20,8 +20,7 @@ async function add(name, data) {
     if (!validator.letters(name)) return { success: false, status: 400, errors: ['"name" is invalid'] };
 
     if (!data) {
-        logger.error('api => derpy => Add: Missing parameter.');
-
+        logger.error('api => derpy => Add: Missing parameter. name: %o - data: %o', name, data);
         return { success: false, status: 400, errors: ['Missing parameters'] };
     }
 

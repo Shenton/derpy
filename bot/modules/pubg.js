@@ -262,7 +262,7 @@ async function displayMatch(id, message) {
 
     let top = 100;
     for (const player in match.players) {
-        if (match.players[player].winPlace > top) {
+        if (match.players[player].winPlace < top) {
             top = match.players[player].winPlace;
         }
     }

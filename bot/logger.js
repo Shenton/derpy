@@ -4,6 +4,7 @@ require('winston-mongodb');
 const { dbConnect, dbName } = require('./config');
 
 const transport = new transports.MongoDB({
+    level: 'debug',
     db: dbConnect + dbName,
     collection: 'logbot',
 });
@@ -20,7 +21,7 @@ const logger = createLogger({
     transports: [transport],
 });
 // If we are in dev we want to also output the log to the console
-if (process.env.NODE_ENV === 'development') {
+if (1 === 1 || process.env.NODE_ENV === 'development') {
     const myFormat = format.printf(({ level, message, label, timestamp, stack }) => {
         let color = '';
 

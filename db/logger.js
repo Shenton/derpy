@@ -4,6 +4,7 @@ require('winston-mongodb');
 const { dbConnect, dbName } = require('./config');
 
 const transport = new transports.MongoDB({
+    level: 'debug',
     db: dbConnect + dbName,
     collection: 'logdb',
 });

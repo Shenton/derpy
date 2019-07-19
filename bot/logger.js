@@ -4,13 +4,12 @@ require('winston-mongodb');
 const { dbConnect, dbName } = require('./config');
 
 const transport = new transports.MongoDB({
-    level: 'debug',
     db: dbConnect + dbName,
     collection: 'logbot',
 });
 
 const logger = createLogger({
-    level: 'debug',
+    level: 'info',
     format: format.combine(
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
         format.errors({ stack: true }),

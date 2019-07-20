@@ -127,7 +127,11 @@ client.on('message', message => {
     // Execute the command
     try {
         command.execute(message, args);
-        if (message.deletable && !message.deleted) message.delete();
+        if (message.deletable && !message.deleted) {
+            message.delete()
+                .then(msg => logger.debug(`Deleted message from ${msg.author.username}`))
+                .catch(err => logger.error('main file => on message => delete message: ', err));
+        }
     }
     catch (err) {
         logger.error(err);

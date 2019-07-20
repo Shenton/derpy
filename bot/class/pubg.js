@@ -75,51 +75,68 @@ class pubgClass {
         }
     }
 
-    async getMatch(id) {
+    async getMatch(matchID) {
         try {
-            const res = await axios(`matches/${id}`);
-            if (res.status > 400) {
-                return (httpErrors[res.status]) ? httpErrors[res.status] : res.status;
-            }
+            const res = await axios(`matches/${matchID}`);
+            if (res.status > 400) return (httpErrors[res.status]) ? httpErrors[res.status] : res.status;
+            if (res.data.data.attributes.mapName === 'Range_Main') return false;
 
             const out = {};
             out['duration'] = res.data.data.attributes.duration;
             out['map'] = res.data.data.attributes.mapName;
             out['time'] = res.data.data.attributes.createdAt;
             out['mode'] = res.data.data.attributes.gameMode;
-            out['players'] = {};
+            out['teams'] = [];
 
-            res.data.included.forEach(element => {
-                if (element.type == 'participant' && this.players.includes(element.attributes.stats.name)) {
-                    out.players[element.attributes.stats.name] = {
-                        'DBNOs': element.attributes.stats.DBNOs,
-                        'assists': element.attributes.stats.assists,
-                        'boosts': element.attributes.stats.boosts,
-                        'damageDealt': element.attributes.stats.damageDealt,
-                        'deathType': element.attributes.stats.deathType,
-                        'headshotKills': element.attributes.stats.headshotKills,
-                        'heals': element.attributes.stats.heals,
-                        'killPlace': element.attributes.stats.killPlace,
-                        'killPoints': element.attributes.stats.killPoints,
-                        'killStreaks': element.attributes.stats.killStreaks,
-                        'kills': element.attributes.stats.kills,
-                        'longestKill': element.attributes.stats.longestKill,
-                        'revives': element.attributes.stats.revives,
-                        'rideDistance': element.attributes.stats.rideDistance,
-                        'roadKills': element.attributes.stats.roadKills,
-                        'swimDistance': element.attributes.stats.swimDistance,
-                        'teamKills': element.attributes.stats.teamKills,
-                        'timeSurvived': element.attributes.stats.timeSurvived,
-                        'vehicleDestroys': element.attributes.stats.vehicleDestroys,
-                        'walkDistance': element.attributes.stats.walkDistance,
-                        'weaponsAcquired': element.attributes.stats.weaponsAcquired,
-                        'winPlace': element.attributes.stats.winPlace,
-                    };
+            const playerIDs = [];
+            const playerStats = {};
+            const teams = {};
+
+            const included = res.data.included;
+
+            // Grab the watched players IDs
+            included.forEach(element => {
+                if (element.type === 'participant' && this.players.includes(element.attributes.stats.name)) {
+                    playerIDs.push(element.id);
+                    playerStats[element.id] = element.attributes.stats;
                 }
                 else if (element.type == 'asset' && element.id == res.data.data.relationships.assets.data[0].id) {
                     out['telemetryURL'] = element.attributes.URL;
                 }
             });
+
+            // Grab the teams
+            included.forEach(element => {
+                if (element.type === 'roster') {
+                    element.relationships.participants.data.forEach(player => {
+                        if (playerIDs.includes(player.id) && !teams[element.id]) {
+                            teams[element.id] = {
+                                rank: element.attributes.stats.rank,
+                                playerIDs: element.relationships.participants.data.map(p => p.id),
+                                players: [],
+                            };
+                        }
+                    });
+                }
+            });
+
+            // Add/grab the players stats
+            for (const teamID in teams) {
+                teams[teamID].playerIDs.forEach(id => {
+                    if (playerStats[id]) {
+                        teams[teamID].players.push(playerStats[id]);
+                    }
+                    else {
+                        included.forEach(element => {
+                            if (element.type === 'participant' && element.id === id) {
+                                teams[teamID].players.push(element.attributes.stats);
+                            }
+                        });
+                    }
+                });
+
+                out['teams'].push(teams[teamID]);
+            }
 
             return out;
         }

@@ -1,51 +1,18 @@
 {
-    "discordToken": "",
-    "ownerID": "000000000000000000",
+    "discordToken": "<The Discord bot token.>",
+    "ownerID": "<Your discord member ID. Discord's IDs are strings.>",
     "prefix": "!",
-    "guildID": "000000000000000000",
-    "channelID": "000000000000000000",
-    "moduleConfig": {
-        "reddit": {
-            "channelID": "000000000000000000",
-            "imageSubreddit": [
-                { "name": "pics", "listing": "hot", "limit": 50 }
-            ]
-        },
-        "rss": {
-            "channelID": "000000000000000000",
-            "updateInterval": 300000,
-            "feeds": {
-                "nofrag": {
-                    "feed": "https://nofrag.com/feed/",
-                    "url": "https://nofrag.com/",
-                    "description": "L'actualité des simulateurs de meurtres",
-                    "img": "nofrag.jpeg"
-                }
-            }
-        },
-        "pubg": {
-            "apiKey": "",
-            "shard": "steam",
-            "updateInterval": 20000,
-            "players": ["Ibiza","Kaymind","Shroud"],
-            "channelID": "000000000000000000"
-        },
-        "music": {
-            "youtubeApiKey": "",
-            "allowedVoiceChannels": ["000000000000000000","000000000000000000"],
-            "maxVideoDuration": 600,
-            "maxPlaylistSize": 20
-        },
-        "mp3": {
-            "allowedVoiceChannels": ["000000000000000000","000000000000000000","000000000000000000"]
-        }
-    },
-    "commandConfig": {
-        "match": {
-            "allowedChannels": ["000000000000000000"]
-        },
-        "full": {
-            "allowedChannels": ["000000000000000000","000000000000000000"]
-        }
-    }
+    "guildID": "<The guild on which the bot will run.>",
+    "channelID": "<The bot will use this channel if it needs one and none is defined for the module/command.>",
+    "youtubeApiKey": "<Your youtube API key.>",
+    "pubgApiKey": "<Your PUBG API key>",
+    "baseURL": "<The public URL for the front end.>",
+    "port": 3000,
+    "authSecret": "<A random string aka keyboard cat.>",
+    "sessionSecret": "<A random string aka keyboard cat.>",
+    "discordClientID": "<The Discord app client ID, this is for the authentification.>",
+    "discordClientSecret": "<The Discord app cleint secret, this is for the authentification.>",
+    "dbConnect": "mongodb://localhost/",
+    "dbName": "derpy",
+    "debug": false
 }

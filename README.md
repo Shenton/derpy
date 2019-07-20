@@ -14,6 +14,8 @@ This repository is mainly here to easily deploy Derpy on my server, but if someo
 ## Deploy Derpy
 Before anything you will need:
 * Node.js (Derpy was developed with version 10.15.3)
+* MongoDB
+* A web server to act as a proxy (NGINX/Apache)
 * Python 2.7
 * FFmpeg
 * A discord token
@@ -23,7 +25,7 @@ Before anything you will need:
 ### Linux
 On Linux it is pretty straightforward, this should get you there (on Debian 9)
 ```bash
-sudo apt install python2.7 ffmpeg
+sudo apt install mongodb nginx python2.7 ffmpeg
 ```
 For Node.js it is up to you, I personally create a new user for each app and use [nvm](https://github.com/nvm-sh/nvm).
 
@@ -46,7 +48,45 @@ At this point you should take a look at the sample config file, rename/copy it t
 
 To get channels and members ID, activate the developer mode from the Discord application settings and use the context menu on them.
 
+### Building the front end
+Before running Derpy the front end must be build. If you run Derpy in develoment, the front end must be build before running in production.
+```bash
+npm run build
+```
 
+### NGINX
+Derpy require a secure web server acting as a proxy. You can get a certificate using [Let’s Encrypt](https://letsencrypt.org/).
+
+Here is a virtual server configuration example for NGINX:
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    ssl_certificate /etc/letsencrypt/live/derpy.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/derpy.example.com/privkey.pem;
+
+    server_name derpy.example.com;
+
+    if ($ssl_protocol = "") {
+        return 301 https://$server_name$request_uri;
+    }
+
+    location / {
+        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### Running Derpy
 You can activate the log rotation of pm2 by running:
 ```bash
 npm run pm2logrotate
@@ -62,6 +102,16 @@ npm stop
 You can start Derpy in development mode by running:
 ```bash
 npm run dev
+```
+
+### Updating Derpy
+```bash
+cd derpy
+npm stop
+git pull
+npm i
+npm run build
+npm start
 ```
 
 ## Disclaimer

@@ -1,11 +1,11 @@
 <template>
 <div>
-    <Navbar/>
-    <nuxt/>
+    <Navbar />
+    <nuxt />
     <hr class="border-primary">
-    <Footer/>
-    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
-    <b-button class="scroll-to-top" variant="primary" @click="scrollToTop()"><i class="fas fa-chevron-up"></i></b-button>
+    <Footer />
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true" />
+    <b-button class="scroll-to-top" variant="primary" @click="scrollToTop()"><i class="fas fa-chevron-up" /></b-button>
 </div>
 </template>
 
@@ -14,16 +14,16 @@ import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 
 export default {
-    methods: {
-        scrollToTop() {
-            $('html').animate({ scrollTop: 0 }, 'slow');
-        }
-    },
     components: {
         Navbar,
         Footer,
     },
-}
+    methods: {
+        scrollToTop() {
+            $('html').animate({ scrollTop: 0 }, 'slow');
+        },
+    },
+};
 </script>
 
 <style>

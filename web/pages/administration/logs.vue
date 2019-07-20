@@ -54,13 +54,14 @@ export default {
             logs: [],
             category: 'bot',
             page: 1,
+            timeout: null,
             options: [
                 { value: 'bot', text: 'Bot' },
                 { value: 'db', text: 'Database' },
                 { value: 'web', text: 'Front end' },
                 { value: 'webaccess', text: 'Front end access' },
             ],
-            filter: 1,
+            filter: '1',
             levels: ['info', 'warn', 'error', 'debug'],
             levelsOptions: [
                 { text: 'Information', value: 'info' },
@@ -94,7 +95,6 @@ export default {
     async asyncData({ $axios }) {
         try {
             const data = await $axios.$get('logs/bot');
-            //const commands = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
             return { logs: data };
         }
         catch(err) {
@@ -109,10 +109,10 @@ export default {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
     },
     created() {
-        if (process.browser) window.addEventListener('scroll', this.handleScroll);
+        if (process.browser) $(window).scroll(this.handleScroll);
     },
-    destroyed() {
-        if (process.browser) window.removeEventListener('scroll', this.handleScroll);
+    beforeDestroy() {
+        clearInterval(this.timeout);
     },
     methods: {
         async getLogs() {
@@ -127,16 +127,16 @@ export default {
         },
         async getMoreLogs() {
             try {
+                this.page++;
                 const data = await this.$axios.$get(`logs/${this.category}/${this.page}`);
                 this.logs = this.logs.concat(data);
             }
             catch(err) {
-                //
+                clearInterval(this.timeout);
             }
         },
         handleScroll() {
             if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
-                this.page++;
                 this.getMoreLogs();
             }
         },
@@ -157,7 +157,7 @@ export default {
         triggerFilter() {
             let f = this.filter;
             f++;
-            this.filter = f;
+            this.filter = String(f);
         },
     },
 };

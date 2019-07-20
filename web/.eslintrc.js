@@ -62,6 +62,7 @@ module.exports = {
         'vue/name-property-casing': ['error', 'kebab-case'],
         'vue/singleline-html-element-content-newline': ['error', {
             ignores: [
+                'NuxtLink',
                 'b-dropdown-item',
                 'b-button',
                 // Default config

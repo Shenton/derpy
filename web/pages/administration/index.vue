@@ -1,14 +1,15 @@
 <template>
 <div>
     <b-jumbotron
-        fluid bg-variant="dark"
+        fluid
+        bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
         header="Administration: Configuration"
         lead="Configuration de Derpy."
-    ></b-jumbotron>
+    />
     <b-container>
-        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs" />
     </b-container>
     <b-container>
         <b-form @submit="submitUpdate">
@@ -16,30 +17,32 @@
             <hr class="border-primary">
             <h4>Durée maximum des vidéos: <strong class="text-primary">{{ form.maxVideoDuration }} minute{{ form.maxVideoDuration > 1 ? 's' : '' }}</strong></h4>
             <b-input-group prepend="0" append="60" class="mb-5">
-                <b-form-input v-model="form.maxVideoDuration" type="range" min="0" max="60"></b-form-input>
+                <b-form-input v-model="form.maxVideoDuration" type="range" min="0" max="60" />
             </b-input-group>
 
             <h4>Nombre d'entrées maximum de la liste de lecture: <strong class="text-primary">{{ form.maxPlaylistSize }} entrée{{ form.maxPlaylistSize > 1 ? 's' : '' }}</strong></h4>
             <b-input-group prepend="0" append="40" class="mb-5">
-                <b-form-input v-model="form.maxPlaylistSize" type="range" min="0" max="40"></b-form-input>
+                <b-form-input v-model="form.maxPlaylistSize" type="range" min="0" max="40" />
             </b-input-group>
 
             <h4>Volume: <strong class="text-primary">{{ form.volume }}</strong></h4>
             <b-input-group prepend="0" append="100" class="mb-5">
-                <b-form-input v-model="form.volume" type="range" min="0" max="100"></b-form-input>
+                <b-form-input v-model="form.volume" type="range" min="0" max="100" />
             </b-input-group>
 
             <h2>PUBG</h2>
             <hr class="border-primary">
             <h4>PUBG shard: <strong class="text-primary">{{ form.shard }}</strong></h4>
-            <b-form-select class="mb-5" v-model="form.shard" :options="shardsSelectOptions"></b-form-select>
+            <b-form-select v-model="form.shard" class="mb-5" :options="shardsSelectOptions" />
 
             <h4>Nombre d'appels à l'API de PUBG par minute: <strong class="text-primary">{{ form.callsPerMinute }}</strong></h4>
             <b-input-group class="mb-5" prepend="1" append="8">
-                <b-form-input v-model="form.callsPerMinute" type="range" min="1" max="8"></b-form-input>
+                <b-form-input v-model="form.callsPerMinute" type="range" min="1" max="8" />
             </b-input-group>
 
-            <b-button type="submit" block variant="primary">Appliquer les modifications</b-button>
+            <b-button type="submit" block variant="primary">
+                Appliquer les modifications
+            </b-button>
         </b-form>
     </b-container>
 </div>
@@ -47,15 +50,11 @@
 
 <script>
 export default {
-    name: 'Configuration',
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.isOwner) return redirect('/');
-    },
+    name: 'administration-configuration',
     head() {
         return {
             titleTemplate: '%s - ' + this.title,
-        }
+        };
     },
     data() {
         return {
@@ -78,8 +77,8 @@ export default {
                 volume: 0,
                 shard: 'steam',
                 callsPerMinute : 1,
-            }
-        }
+            },
+        };
     },
     async asyncData({ $axios }) {
         try {
@@ -97,8 +96,13 @@ export default {
                 callsPerMinute: callsPerMinute[0].value,
             };
         }
-        catch(err) {}
-        
+        catch(err) {
+            //
+        }
+    },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.isOwner) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -108,7 +112,7 @@ export default {
             volume: this.volume * 100,
             shard: this.shard,
             callsPerMinute: this.callsPerMinute,
-        }
+        };
     },
     methods: {
         async submitUpdate(event) {
@@ -182,7 +186,7 @@ export default {
             catch(err) {
                 this.$axiosPostErrorHandler(err, 'Configuration non trouvé', 'Cette configuration existe déjà', 'Erreur avec l\'édition de la configuration');
             }
-        }
-    }
-}
+        },
+    },
+};
 </script>

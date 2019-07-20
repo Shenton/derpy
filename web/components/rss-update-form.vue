@@ -2,24 +2,28 @@
 <div class=" p-3">
     <b-form @submit="submitUpdate">
         <b-form-group>
-            <b-form-input v-model="name" placeholder="Le nom du flux" required></b-form-input>
+            <b-form-input v-model="name" placeholder="Le nom du flux" required />
         </b-form-group>
         <b-form-group>
-            <b-form-input v-model="feed" placeholder="L'addresse du flux" required></b-form-input>
+            <b-form-input v-model="feed" placeholder="L'addresse du flux" required />
         </b-form-group>
         <b-form-group>
-            <b-form-input v-model="nameURL" placeholder="L'addresse du site" required></b-form-input>
+            <b-form-input v-model="nameURL" placeholder="L'addresse du site" required />
         </b-form-group>
         <b-form-group>
-            <b-form-input v-model="description" placeholder="La description/slogan du site"></b-form-input>
+            <b-form-input v-model="description" placeholder="La description/slogan du site" />
         </b-form-group>
         <b-row>
             <b-col>
-                <b-form-select v-model="logo" :options="logos"></b-form-select>
+                <b-form-select v-model="logo" :options="logos" />
             </b-col>
             <b-col>
-                <b-button type="submit" variant="primary">Modifier</b-button>
-                <b-button v-if="$store.state.auth.isOwner" class="float-right" @click="submitDelete" variant="danger">Supprimer</b-button>
+                <b-button type="submit" variant="primary">
+                    Modifier
+                </b-button>
+                <b-button v-if="$store.state.auth.isOwner" class="float-right" variant="danger" @click="submitDelete">
+                    Supprimer
+                </b-button>
             </b-col>
         </b-row>
     </b-form>
@@ -29,7 +33,16 @@
 <script>
 export default {
     name: 'rss-update-form',
-    props: ['data', 'logos'],
+    props: {
+        data: {
+            type: Object,
+            required: true,
+        },
+        logos: {
+            type: Array,
+            required: true,
+        },
+    },
     data() {
         return {
             rssID: null,
@@ -57,12 +70,12 @@ export default {
                 feed: this.feed,
                 nameURL: this.nameURL,
                 logo: this.logo,
-                description: this.description
+                description: this.description,
             });
         },
         submitDelete() {
             this.$emit('submitDelete', this.rssID);
         },
     },
-}
+};
 </script>

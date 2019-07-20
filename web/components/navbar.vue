@@ -1,11 +1,11 @@
 <template>
 <b-navbar :sticky="true" toggleable="lg" type="dark" variant="primary">
     <b-container>
-        <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+        <b-navbar-toggle target="nav-collapse" />
 
         <b-collapse id="nav-collapse" is-nav>
             <b-navbar-brand to="/">
-                <b-img width="32" height="32" src="/img/alien-icon.png" alt="logo"></b-img>&nbsp;Derpy
+                <b-img width="32" height="32" src="/img/alien-icon.png" alt="logo" />&nbsp;Derpy
             </b-navbar-brand>
 
             <b-navbar-nav>
@@ -35,12 +35,12 @@
             <b-dropdown-text>
                 <strong><span class="text-primary">{{ $store.state.auth.name }}</span></strong><span class="text-secondary">#{{ $store.state.auth.discriminator }}</span>
             </b-dropdown-text>
-            <b-dropdown-divider></b-dropdown-divider>
+            <b-dropdown-divider />
             <b-dropdown-item href="/api/auth/logout">Déconnexion</b-dropdown-item>
         </b-dropdown>
 
         <b-button v-else v-b-popover.hover.bottom="'Connexion avec Discord'" variant="secondary" href="/api/auth/login">
-            Connexion&nbsp;&nbsp;<i class="fab fa-discord"></i>
+            Connexion&nbsp;&nbsp;<i class="fab fa-discord" />
         </b-button>
     </b-container>
 </b-navbar>

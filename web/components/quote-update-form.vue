@@ -2,7 +2,7 @@
 <div class=" p-3">
     <b-form @submit="submitUpdate">
         <b-form-group>
-            <b-form-input v-model="name" required></b-form-input>
+            <b-form-input v-model="name" required />
         </b-form-group>
         <b-table
             hover
@@ -13,16 +13,16 @@
             :fields="fields"
         >
             <template slot="delete" slot-scope="row">
-                <i class="far fa-trash-alt text-danger" @click="deleteQuote(row.item.index)"></i>
+                <i class="far fa-trash-alt text-danger" @click="deleteQuote(row.item.index)" />
             </template>
         </b-table>
         <b-row>
             <b-col>
-                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0"></b-pagination>
+                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" />
             </b-col>
             <b-col>
                 <b-form-group label-cols-sm="4" label="Nombre par page" class="mb-3">
-                    <b-form-select v-model="perPage" :options="pageOptions"></b-form-select>
+                    <b-form-select v-model="perPage" :options="pageOptions" />
                 </b-form-group>
             </b-col>
         </b-row>
@@ -31,11 +31,15 @@
                 v-model="newQuotes"
                 placeholder="Ajouter des citations, une par ligne"
                 rows="3"
-            ></b-form-textarea>
+            />
         </b-form-group>
         <b-form-group>
-            <b-button type="submit" variant="primary">Modifier</b-button>
-            <b-button v-if="$store.state.auth.isOwner" class="float-right" @click="submitDelete" variant="danger">Supprimer</b-button>
+            <b-button type="submit" variant="primary">
+                Modifier
+            </b-button>
+            <b-button v-if="$store.state.auth.isOwner" class="float-right" variant="danger" @click="submitDelete">
+                Supprimer
+            </b-button>
         </b-form-group>
     </b-form>
 </div>
@@ -44,7 +48,12 @@
 <script>
 export default {
     name: 'quote-update-form',
-    props: ['data'],
+    props: {
+        data: {
+            type: Object,
+            required: true,
+        },
+    },
     data() {
         return {
             quoteID: null,
@@ -57,7 +66,7 @@ export default {
                     label: 'Citation',
                     sortable: true,
                     thStyle: {
-                        width: '90%'
+                        width: '90%',
                     },
                 },
                 {
@@ -65,7 +74,7 @@ export default {
                     label: 'Supprimer',
                     sortable: true,
                     thStyle: {
-                        width: '10%'
+                        width: '10%',
                     },
                 },
             ],
@@ -108,5 +117,5 @@ export default {
             this.$emit('submitDelete', this.quoteID);
         },
     },
-}
+};
 </script>

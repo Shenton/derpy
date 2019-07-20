@@ -1,14 +1,15 @@
 <template>
 <div>
     <b-jumbotron
-        fluid bg-variant="dark"
+        fluid
+        bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
         header="Module: Response"
         lead="Définis un déclencheur, le bot postera la réponse."
-    ></b-jumbotron>
+    />
     <b-container>
-        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs" />
     </b-container>
     <b-container v-if="responses.length" class="pb-5">
         <b-table
@@ -19,26 +20,26 @@
             selectedVariant="primary"
             :current-page="currentPage"
             :per-page="perPage"
-            @row-selected="rowSelected"
             :items="responses"
             :fields="fields"
+            @row-selected="rowSelected"
         >
             <template slot="enabledCheckBox" slot-scope="row">
                 <b-form>
-                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)"></b-form-checkbox>
+                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)" />
                 </b-form>
             </template>
             <template slot="row-details" slot-scope="row">
-                <ResponseUpdateForm @submitUpdate="submitUpdate" @submitDelete="submitDelete" :data="row.item"/>
+                <ResponseUpdateForm :data="row.item" @submitUpdate="submitUpdate" @submitDelete="submitDelete" />
             </template>
         </b-table>
         <b-row>
             <b-col>
-                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0"></b-pagination>
+                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" />
             </b-col>
             <b-col>
                 <b-form-group label-cols-sm="3" label="Nombre par page" class="mb-0">
-                    <b-form-select v-model="perPage" :options="pageOptions"></b-form-select>
+                    <b-form-select v-model="perPage" :options="pageOptions" />
                 </b-form-group>
             </b-col>
         </b-row>
@@ -46,16 +47,16 @@
     <b-container>
         <h4>Ajouter une nouvelle réponse</h4>
         <hr class="border-primary">
-        <b-form @submit="submitNew" @reset="resetNew" v-if="showNewForm">
+        <b-form v-if="showNewForm" @submit="submitNew" @reset="resetNew">
             <b-form-group>
-                <b-form-input v-model="newForm.trigger" placeholder="Le déclencheur" required></b-form-input>
+                <b-form-input v-model="newForm.trigger" placeholder="Le déclencheur" required />
             </b-form-group>
             <b-form-group>
-                <b-form-input v-model="newForm.response" placeholder="La réponse" required></b-form-input>
+                <b-form-input v-model="newForm.response" placeholder="La réponse" required />
             </b-form-group>
             <b-row>
                 <b-col>
-                    <b-form-select v-model="newForm.type" :options="responseSelectOptions"></b-form-select>
+                    <b-form-select v-model="newForm.type" :options="responseSelectOptions" />
                 </b-col>
                 <b-col>
                     <b-button type="submit" variant="primary">Ajouter</b-button>
@@ -71,15 +72,14 @@
 import ResponseUpdateForm from '../../components/response-update-form';
 
 export default {
-    name: 'Response',
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
+    name: 'module-response',
+    components: {
+        ResponseUpdateForm,
     },
     head() {
         return {
             titleTemplate: '%s - ' + this.title,
-        }
+        };
     },
     data() {
         return {
@@ -91,24 +91,24 @@ export default {
                     label: 'Déclencheur',
                     sortable: true,
                     thStyle: {
-                        width: '40%'
-                    }
+                        width: '40%',
+                    },
                 },
                 {
                     key: 'response',
                     label: 'Réponse',
                     sortable: true,
                     thStyle: {
-                        width: '40%'
-                    }
+                        width: '40%',
+                    },
                 },
                 {
                     key: 'enabledCheckBox',
                     label: 'Activée',
                     sortable: true,
                     thStyle: {
-                        width: '20%'
-                    }
+                        width: '20%',
+                    },
                 },
             ],
             totalRows: 1,
@@ -133,8 +133,13 @@ export default {
             const responses = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
             return { responses: responses };
         }
-        catch(err) {}
-        
+        catch(err) {
+            //
+        }
+    },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -145,7 +150,7 @@ export default {
             event.preventDefault();
 
             try {
-                const res = await this.$axios({
+                await this.$axios({
                     method: 'post',
                     data: { trigger: this.newForm.trigger, response: this.newForm.response, type: this.newForm.type },
                     url: 'response',
@@ -167,13 +172,13 @@ export default {
                 this.axiosPostError(err, 'Erreur avec l\'ajout de la réponse');
             }
         },
-        async submitUpdate(id, data) {
+        async submitUpdate(id, doc) {
             this.hideRowDetails();
 
             try {
                 const res = await this.$axios({
                     method: 'patch',
-                    data: data,
+                    data: doc,
                     url: 'response/' + id,
                 });
 
@@ -248,11 +253,8 @@ export default {
             this.showNewForm = false;
             this.$nextTick(() => {
                 this.showNewForm = true;
-            })
+            });
         },
-    },
-    components: {
-        ResponseUpdateForm,
     },
 };
 </script>

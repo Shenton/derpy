@@ -1,62 +1,67 @@
 <template>
-    <b-container v-if="data.channels > 0" class="mb-3">
-        <h2>{{ name }}</h2>
-        <hr class="border-primary">
-        <b-form @submit="submitUpdate">
-            <b-card class="mb-3" no-body>
-                <b-tabs content-class="mt-3" fill card>
-                    <b-tab title="Canal (texte)" :disabled="!channelTypes.textChannel">
-                        <b-form-group label="Sélectionne sur quel canal textuel le module doit poster">
-                            <b-form-radio-group
-                                v-model="form.textChannel"
-                                :options="textOptions"
-                                stacked
-                            ></b-form-radio-group>
-                        </b-form-group>
-                    </b-tab>
-                    <b-tab title="Canaux (texte)" :disabled="!channelTypes.textChannels">
-                        <b-form-group label="Sélectionne sur quels canaux textuels le module doit poster">
-                            <b-form-checkbox-group
-                                v-model="form.textChannels"
-                                :options="textOptions"
-                                switches
-                                stacked
-                            ></b-form-checkbox-group>
-                        </b-form-group>
-                    </b-tab>
-                    <b-tab title="Canal (voix)" :disabled="!channelTypes.voiceChannel">
-                        <b-form-group label="Sélectionne sur quel canal vocal le module doit poster">
-                            <b-form-radio-group
-                                v-model="form.voiceChannel"
-                                :options="voiceOptions"
-                                stacked
-                            ></b-form-radio-group>
-                        </b-form-group>
-                    </b-tab>
-                    <b-tab title="Canaux (voix)" :disabled="!channelTypes.voiceChannels">
-                        <b-form-group label="Sélectionne sur quels canaux vocaux le module doit poster">
-                            <b-form-checkbox-group
-                                v-model="form.voiceChannels"
-                                :options="voiceOptions"
-                                switches
-                                stacked
-                            ></b-form-checkbox-group>
-                        </b-form-group>
-                    </b-tab>
-                </b-tabs>
-            </b-card>
-                <b-row>
-                    <b-col><b-button type="submit" block variant="primary">Appliquer les modifications</b-button></b-col>
-                    <b-col><b-button @click="setDefaultValues()" block variant="secondary">Annuler les modifications</b-button></b-col>
-                </b-row>
-        </b-form>
-    </b-container>
+<b-container v-if="data.channels > 0" class="mb-3">
+    <h2>{{ name }}</h2>
+    <hr class="border-primary">
+    <b-form @submit="submitUpdate">
+        <b-card class="mb-3" no-body>
+            <b-tabs content-class="mt-3" fill card>
+                <b-tab title="Canal (texte)" :disabled="!channelTypes.textChannel">
+                    <b-form-group label="Sélectionne sur quel canal textuel le module doit poster">
+                        <b-form-radio-group
+                            v-model="form.textChannel"
+                            :options="textOptions"
+                            stacked
+                        />
+                    </b-form-group>
+                </b-tab>
+                <b-tab title="Canaux (texte)" :disabled="!channelTypes.textChannels">
+                    <b-form-group label="Sélectionne sur quels canaux textuels le module doit poster">
+                        <b-form-checkbox-group
+                            v-model="form.textChannels"
+                            :options="textOptions"
+                            switches
+                            stacked
+                        />
+                    </b-form-group>
+                </b-tab>
+                <b-tab title="Canal (voix)" :disabled="!channelTypes.voiceChannel">
+                    <b-form-group label="Sélectionne sur quel canal vocal le module doit poster">
+                        <b-form-radio-group
+                            v-model="form.voiceChannel"
+                            :options="voiceOptions"
+                            stacked
+                        />
+                    </b-form-group>
+                </b-tab>
+                <b-tab title="Canaux (voix)" :disabled="!channelTypes.voiceChannels">
+                    <b-form-group label="Sélectionne sur quels canaux vocaux le module doit poster">
+                        <b-form-checkbox-group
+                            v-model="form.voiceChannels"
+                            :options="voiceOptions"
+                            switches
+                            stacked
+                        />
+                    </b-form-group>
+                </b-tab>
+            </b-tabs>
+        </b-card>
+        <b-row>
+            <b-col><b-button type="submit" block variant="primary">Appliquer les modifications</b-button></b-col>
+            <b-col><b-button block variant="secondary" @click="setDefaultValues()">Annuler les modifications</b-button></b-col>
+        </b-row>
+    </b-form>
+</b-container>
 </template>
 
 <script>
 export default {
     name: 'module-configuration',
-    props: ['data'],
+    props: {
+        data: {
+            type: Object,
+            required: true,
+        },
+    },
     data() {
         return {
             name: null,
@@ -126,6 +131,6 @@ export default {
                 voiceChannels: this.form.voiceChannels,
             });
         },
-    }
-}
+    },
+};
 </script>

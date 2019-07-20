@@ -1,26 +1,27 @@
 <template>
 <div>
     <b-jumbotron
-        fluid bg-variant="dark"
+        fluid
+        bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
         header="Administration: Logs"
         lead="Affiche les logs des différentes applications."
-    ></b-jumbotron>
+    />
     <b-container>
-        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs" />
     </b-container>
     <b-container>
         <b-form-group>
-            <b-form-select v-model="category" :options="options" @change="getLogs()"></b-form-select>
+            <b-form-select v-model="category" :options="options" @change="getLogs()" />
         </b-form-group>
         <b-form-group>
             <b-form-checkbox-group
-                @change="triggerFilter()"
                 v-model="levels"
                 :options="levelsOptions"
                 switches
-            ></b-form-checkbox-group>
+                @change="triggerFilter()"
+            />
         </b-form-group>
         <b-table
             hover
@@ -32,7 +33,7 @@
             :sort-desc="true"
             :filter="filter"
             :filter-function="filterFunc"
-        ></b-table>
+        />
     </b-container>
 </div>
 </template>
@@ -41,15 +42,11 @@
 import moment from 'moment';
 
 export default {
-    name: 'Logs',
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.isOwner) return redirect('/');
-    },
+    name: 'administration-logs',
     head() {
         return {
             titleTemplate: '%s - ' + this.title,
-        }
+        };
     },
     data() {
         return {
@@ -77,7 +74,7 @@ export default {
                     label: 'Date',
                     sortable: true,
                     thStyle: {
-                        width: '30%'
+                        width: '30%',
                     },
                     formatter: value => {
                         return moment(value).format('DD/MM/YYYY HH:mm:ss.SSS');
@@ -88,11 +85,11 @@ export default {
                     label: 'Message',
                     sortable: true,
                     thStyle: {
-                        width: '70%'
-                    }
+                        width: '70%',
+                    },
                 },
             ],
-        }
+        };
     },
     async asyncData({ $axios }) {
         try {
@@ -100,15 +97,21 @@ export default {
             //const commands = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
             return { logs: data };
         }
-        catch(err) {}
+        catch(err) {
+            //
+        }
+    },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.isOwner) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
     },
-    created () {
+    created() {
         if (process.browser) window.addEventListener('scroll', this.handleScroll);
     },
-    destroyed () {
+    destroyed() {
         if (process.browser) window.removeEventListener('scroll', this.handleScroll);
     },
     methods: {
@@ -118,16 +121,20 @@ export default {
                 this.page = 1;
                 this.logs = data;
             }
-            catch(err) {}
+            catch(err) {
+                //
+            }
         },
         async getMoreLogs() {
             try {
                 const data = await this.$axios.$get(`logs/${this.category}/${this.page}`);
                 this.logs = this.logs.concat(data);
             }
-            catch(err) {}
+            catch(err) {
+                //
+            }
         },
-        handleScroll () {
+        handleScroll() {
             if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
                 this.page++;
                 this.getMoreLogs();
@@ -148,10 +155,10 @@ export default {
             return this.levels.includes(level);
         },
         triggerFilter() {
-            let f= this.filter;
+            let f = this.filter;
             f++;
             this.filter = f;
-        }
+        },
     },
-}
+};
 </script>

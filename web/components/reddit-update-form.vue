@@ -2,21 +2,25 @@
 <div class=" p-3">
     <b-form @submit="submitUpdate">
         <b-form-group>
-            <b-form-input v-model="name" placeholder="Le subreddit" required></b-form-input>
+            <b-form-input v-model="name" placeholder="Le subreddit" required />
         </b-form-group>
         <b-form-group>
             <b-row>
                 <b-col>
-                    <b-form-select v-model="listing" :options="listings"></b-form-select>
+                    <b-form-select v-model="listing" :options="listings" />
                 </b-col>
                 <b-col>
-                    <b-form-select v-model="limit" :options="limits"></b-form-select>
+                    <b-form-select v-model="limit" :options="limits" />
                 </b-col>
             </b-row>
         </b-form-group>
         <b-form-group>
-            <b-button type="submit" variant="primary">Modifier</b-button>
-            <b-button v-if="$store.state.auth.isOwner" class="float-right" @click="submitDelete" variant="danger">Supprimer</b-button>
+            <b-button type="submit" variant="primary">
+                Modifier
+            </b-button>
+            <b-button v-if="$store.state.auth.isOwner" class="float-right" variant="danger" @click="submitDelete">
+                Supprimer
+            </b-button>
         </b-form-group>
     </b-form>
 </div>
@@ -25,7 +29,12 @@
 <script>
 export default {
     name: 'reddit-update-form',
-    props: ['data'],
+    props: {
+        data: {
+            type: Object,
+            required: true,
+        },
+    },
     data() {
         return {
             listings: [
@@ -66,5 +75,5 @@ export default {
             this.$emit('submitDelete', this.redditID);
         },
     },
-}
+};
 </script>

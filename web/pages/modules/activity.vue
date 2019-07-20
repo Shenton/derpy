@@ -1,14 +1,15 @@
 <template>
 <div>
     <b-jumbotron
-        fluid bg-variant="dark"
+        fluid
+        bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
         header="Module: Activity"
         lead="Change l'activité de Derpy au hasard."
-    ></b-jumbotron>
+    />
     <b-container>
-        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs" />
     </b-container>
     <b-container v-if="activities.length" class="pb-5">
         <b-table
@@ -19,26 +20,26 @@
             selectedVariant="primary"
             :current-page="currentPage"
             :per-page="perPage"
-            @row-selected="rowSelected"
             :items="activities"
             :fields="fields"
+            @row-selected="rowSelected"
         >
             <template slot="enabledCheckBox" slot-scope="row">
                 <b-form>
-                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)"></b-form-checkbox>
+                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)" />
                 </b-form>
             </template>
             <template slot="row-details" slot-scope="row">
-                <ActivityUpdateForm @submitUpdate="submitUpdate" @submitDelete="submitDelete" :data="row.item"/>
+                <ActivityUpdateForm :data="row.item" @submitUpdate="submitUpdate" @submitDelete="submitDelete" />
             </template>
         </b-table>
         <b-row>
             <b-col>
-                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0"></b-pagination>
+                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" />
             </b-col>
             <b-col>
                 <b-form-group label-cols-sm="3" label="Nombre par page" class="mb-0">
-                    <b-form-select v-model="perPage" :options="pageOptions"></b-form-select>
+                    <b-form-select v-model="perPage" :options="pageOptions" />
                 </b-form-group>
             </b-col>
         </b-row>
@@ -46,9 +47,9 @@
     <b-container>
         <h4>Ajouter une nouvelle activité</h4>
         <hr class="border-primary">
-        <b-form @submit="submitNew" @reset="resetNew" v-if="showNewForm">
+        <b-form v-if="showNewForm" @submit="submitNew" @reset="resetNew">
             <b-form-group>
-                <b-form-input v-model="newForm.activity" placeholder="L'activité" required></b-form-input>
+                <b-form-input v-model="newForm.activity" placeholder="L'activité" required />
             </b-form-group>
             <b-button type="submit" variant="primary">Ajouter</b-button>
             <b-button type="reset">Annuler</b-button>
@@ -61,15 +62,14 @@
 import ActivityUpdateForm from '../../components/activity-update-form';
 
 export default {
-    name: 'Activity',
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
+    name: 'module-activity',
+    components: {
+        ActivityUpdateForm,
     },
     head() {
         return {
             titleTemplate: '%s - ' + this.title,
-        }
+        };
     },
     data() {
         return {
@@ -81,16 +81,16 @@ export default {
                     label: 'Activité',
                     sortable: true,
                     thStyle: {
-                        width: '80%'
-                    }
+                        width: '80%',
+                    },
                 },
                 {
                     key: 'enabledCheckBox',
                     label: 'Activée',
                     sortable: true,
                     thStyle: {
-                        width: '20%'
-                    }
+                        width: '20%',
+                    },
                 },
             ],
             totalRows: 1,
@@ -109,8 +109,13 @@ export default {
             const activities = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
             return { activities: activities };
         }
-        catch(err) {}
-        
+        catch(err) {
+            //
+        }
+    },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -121,7 +126,7 @@ export default {
             event.preventDefault();
 
             try {
-                const res = await this.$axios({
+                await this.$axios({
                     method: 'post',
                     data: { activity: this.newForm.activity },
                     url: 'activity',
@@ -143,13 +148,13 @@ export default {
                 this.axiosPostError(err, 'Erreur avec l\'ajout de l\'activité');
             }
         },
-        async submitUpdate(id, data) {
+        async submitUpdate(id, doc) {
             this.hideRowDetails();
 
             try {
                 const res = await this.$axios({
                     method: 'patch',
-                    data: data,
+                    data: doc,
                     url: 'activity/' + id,
                 });
 
@@ -222,11 +227,8 @@ export default {
             this.showNewForm = false;
             this.$nextTick(() => {
                 this.showNewForm = true;
-            })
+            });
         },
-    },
-    components: {
-        ActivityUpdateForm,
     },
 };
 </script>

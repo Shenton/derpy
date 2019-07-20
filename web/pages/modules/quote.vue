@@ -1,14 +1,15 @@
 <template>
 <div>
     <b-jumbotron
-        fluid bg-variant="dark"
+        fluid
+        bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
         header="Module: Quote"
         lead="Associe une commande à une liste de citations."
-    ></b-jumbotron>
+    />
     <b-container>
-        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs" />
     </b-container>
     <b-container v-if="quotes.length" class="pb-5">
         <b-table
@@ -19,26 +20,26 @@
             selectedVariant="primary"
             :current-page="currentPage"
             :per-page="perPage"
-            @row-selected="rowSelected"
             :items="quotes"
             :fields="fields"
+            @row-selected="rowSelected"
         >
             <template slot="enabledCheckBox" slot-scope="row">
                 <b-form>
-                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)"></b-form-checkbox>
+                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)" />
                 </b-form>
             </template>
             <template slot="row-details" slot-scope="row">
-                <QuoteUpdateForm @submitUpdate="submitUpdate" @submitDelete="submitDelete" :data="row.item"/>
+                <QuoteUpdateForm :data="row.item" @submitUpdate="submitUpdate" @submitDelete="submitDelete" />
             </template>
         </b-table>
         <b-row>
             <b-col>
-                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0"></b-pagination>
+                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" />
             </b-col>
             <b-col>
                 <b-form-group label-cols-sm="3" label="Nombre par page" class="mb-0">
-                    <b-form-select v-model="perPage" :options="pageOptions"></b-form-select>
+                    <b-form-select v-model="perPage" :options="pageOptions" />
                 </b-form-group>
             </b-col>
         </b-row>
@@ -46,9 +47,9 @@
     <b-container>
         <h4>Ajouter une nouvelle commande</h4>
         <hr class="border-primary">
-        <b-form @submit="submitNew" @reset="resetNew" v-if="showNewForm">
+        <b-form v-if="showNewForm" @submit="submitNew" @reset="resetNew">
             <b-form-group>
-                <b-form-input v-model="newForm.name" placeholder="La commande" required></b-form-input>
+                <b-form-input v-model="newForm.name" placeholder="La commande" required />
             </b-form-group>
             <b-button type="submit" variant="primary">Ajouter</b-button>
             <b-button type="reset">Annuler</b-button>
@@ -61,15 +62,14 @@
 import QuoteUpdateForm from '../../components/quote-update-form';
 
 export default {
-    name: 'quote',
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
+    name: 'module-quote',
+    components: {
+        QuoteUpdateForm,
     },
     head() {
         return {
             titleTemplate: '%s - ' + this.title,
-        }
+        };
     },
     data() {
         return {
@@ -81,7 +81,7 @@ export default {
                     label: 'Commande',
                     sortable: true,
                     thStyle: {
-                        width: '40%'
+                        width: '40%',
                     },
                 },
                 {
@@ -89,7 +89,7 @@ export default {
                     label: 'Citation(s)',
                     sortable: true,
                     thStyle: {
-                        width: '40%'
+                        width: '40%',
                     },
                     formatter: (value) => {
                         return value.length;
@@ -100,7 +100,7 @@ export default {
                     label: 'Activée',
                     sortable: true,
                     thStyle: {
-                        width: '20%'
+                        width: '20%',
                     },
                 },
             ],
@@ -120,8 +120,13 @@ export default {
             const quotes = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
             return { quotes: quotes };
         }
-        catch(err) {}
-        
+        catch(err) {
+            //
+        }
+    },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -132,7 +137,7 @@ export default {
             event.preventDefault();
 
             try {
-                const res = await this.$axios({
+                await this.$axios({
                     method: 'post',
                     data: { name: this.newForm.name },
                     url: 'quote',
@@ -154,13 +159,13 @@ export default {
                 this.axiosPostError(err, 'Erreur avec l\'ajout de la commande');
             }
         },
-        async submitUpdate(id, data) {
+        async submitUpdate(id, doc) {
             this.hideRowDetails();
 
             try {
                 const res = await this.$axios({
                     method: 'patch',
-                    data: data,
+                    data: doc,
                     url: 'quote/' + id,
                 });
 
@@ -233,11 +238,8 @@ export default {
             this.showNewForm = false;
             this.$nextTick(() => {
                 this.showNewForm = true;
-            })
+            });
         },
-    },
-    components: {
-        QuoteUpdateForm,
     },
 };
 </script>

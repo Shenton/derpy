@@ -1,14 +1,15 @@
 <template>
 <div>
     <b-jumbotron
-        fluid bg-variant="dark"
+        fluid
+        bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
         header="Module: RSS"
         lead="Poste les nouvelles entrées d'un flux RSS."
-    ></b-jumbotron>
+    />
     <b-container>
-        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs" />
     </b-container>
     <b-container v-if="feeds.length" class="pb-5">
         <b-table
@@ -19,26 +20,26 @@
             selectedVariant="primary"
             :current-page="currentPage"
             :per-page="perPage"
-            @row-selected="rowSelected"
             :items="feeds"
             :fields="fields"
+            @row-selected="rowSelected"
         >
             <template slot="enabledCheckBox" slot-scope="row">
                 <b-form>
-                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)"></b-form-checkbox>
+                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)" />
                 </b-form>
             </template>
             <template slot="row-details" slot-scope="row">
-                <RssUpdateForm @submitUpdate="submitUpdateRss" @submitDelete="submitDeleteRss" :data="row.item" :logos="logoSelectOptions"/>
+                <RssUpdateForm :data="row.item" :logos="logoSelectOptions" @submitUpdate="submitUpdateRss" @submitDelete="submitDeleteRss" />
             </template>
         </b-table>
         <b-row>
             <b-col>
-                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0"></b-pagination>
+                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" />
             </b-col>
             <b-col>
                 <b-form-group label-cols-sm="3" label="Nombre par page" class="mb-0">
-                    <b-form-select v-model="perPage" :options="pageOptions"></b-form-select>
+                    <b-form-select v-model="perPage" :options="pageOptions" />
                 </b-form-group>
             </b-col>
         </b-row>
@@ -46,23 +47,22 @@
     <b-container class="pb-5">
         <h4>Ajouter un nouveau flux</h4>
         <hr class="border-primary">
-        <b-form @submit="submitNewRss" @reset="resetNewRss" v-if="showNewForm">
+        <b-form v-if="showNewForm" @submit="submitNewRss" @reset="resetNewRss">
             <b-form-group>
-                <b-form-input v-model="newForm.name" placeholder="Le nom du flux" required></b-form-input>
+                <b-form-input v-model="newForm.name" placeholder="Le nom du flux" required />
             </b-form-group>
             <b-form-group>
-                <b-form-input v-model="newForm.feed" placeholder="L'addresse du flux" required></b-form-input>
+                <b-form-input v-model="newForm.feed" placeholder="L'addresse du flux" required />
             </b-form-group>
             <b-form-group>
-                <b-form-input v-model="newForm.nameURL" placeholder="L'addresse du site" required></b-form-input>
+                <b-form-input v-model="newForm.nameURL" placeholder="L'addresse du site" required />
             </b-form-group>
             <b-form-group>
-                <b-form-input v-model="newForm.description" placeholder="La description/slogan du site"></b-form-input>
+                <b-form-input v-model="newForm.description" placeholder="La description/slogan du site" />
             </b-form-group>
             <b-row>
                 <b-col>
-                    <b-form-select v-model="newForm.logo" :options="logoSelectOptions">
-                    </b-form-select>
+                    <b-form-select v-model="newForm.logo" :options="logoSelectOptions" />
                 </b-col>
                 <b-col>
                     <b-button type="submit" variant="primary">Ajouter</b-button>
@@ -84,15 +84,25 @@
             </b-form-group>
 
             <b-form-group v-else>
-                <b-form-file name="newLogo" placeholder="Choisir un fichier jpeg ou png" accept=".jpeg,.jpg,.png" :state="newLogoValidation" v-model="newLogo"></b-form-file>
+                <b-form-file
+                    v-model="newLogo"
+                    name="newLogo"
+                    placeholder="Choisir un fichier jpeg ou png"
+                    accept=".jpeg,.jpg,.png"
+                    :state="newLogoValidation"
+                />
                 <b-form-invalid-feedback :state="newLogoValidation">
                     Le fichier doit être un jpeg ou un png de 1mo max, le nom ne doit contenir que des lettres minuscules ou des chiffres et être compris entre 2 et 22 charactères.
                 </b-form-invalid-feedback>
             </b-form-group>
 
             <b-form-group>
-                <b-button variant="primary" :disabled="!newLogoValidation" @click="uploadFile">Téléverser</b-button>
-                <b-button variant="secondary" @click="newLogo = null">Annuler</b-button>
+                <b-button variant="primary" :disabled="!newLogoValidation" @click="uploadFile">
+                    Téléverser
+                </b-button>
+                <b-button variant="secondary" @click="newLogo = null">
+                    Annuler
+                </b-button>
             </b-form-group>
         </b-form>
     </b-container>
@@ -103,15 +113,14 @@
 import RssUpdateForm from '../../components/rss-update-form';
 
 export default {
-    name: 'rss',
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
+    name: 'module-rss',
+    components: {
+        RssUpdateForm,
     },
     head() {
         return {
             titleTemplate: '%s - ' + this.title,
-        }
+        };
     },
     data() {
         return {
@@ -123,24 +132,24 @@ export default {
                     label: 'Nom',
                     sortable: true,
                     thStyle: {
-                        width: '20%'
-                    }
+                        width: '20%',
+                    },
                 },
                 {
                     key: 'feed',
                     label: 'Flux',
                     sortable: true,
                     thStyle: {
-                        width: '40%'
-                    }
+                        width: '40%',
+                    },
                 },
                 {
                     key: 'enabledCheckBox',
                     label: 'Activée',
                     sortable: true,
                     thStyle: {
-                        width: '20%'
-                    }
+                        width: '20%',
+                    },
                 },
             ],
             totalRows: 1,
@@ -166,6 +175,14 @@ export default {
             uploadVariant: 'primary',
         };
     },
+    computed: {
+        newLogoValidation() {
+            if (!this.newLogo) return null;
+            if (this.newLogo.type !== 'image/jpeg' && this.newLogo.type !== 'image/png') return false;
+            if (this.newLogo.size > 1024 * 1024) return false;
+            return /^[a-z0-9]{2,22}(\.jpeg|\.jpg|\.png){1}$/.test(this.newLogo.name);
+        },
+    },
     async asyncData({ $axios }) {
         let feeds;
         let files;
@@ -185,35 +202,31 @@ export default {
         catch(err) {
             files = [];
         }
-        
+
         return { feeds: feeds, logos: files };
+    },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
         this.totalRows = this.feeds.length;
         this.setLogosSelect();
     },
-    computed: {
-        newLogoValidation() {
-            if (!this.newLogo) return null;
-            if (this.newLogo.type !== 'image/jpeg' && this.newLogo.type !== 'image/png') return false;
-            if (this.newLogo.size > 1024 * 1024) return false;
-            return /^[a-z0-9]{2,22}(\.jpeg|\.jpg|\.png){1}$/.test(this.newLogo.name);
-        },
-    },
     methods: {
         async submitNewRss(event) {
             event.preventDefault();
 
             try {
-                const res = await this.$axios({
+                await this.$axios({
                     method: 'post',
                     data: {
                         name: this.newForm.name,
                         feed: this.newForm.feed,
                         nameURL: this.newForm.nameURL,
                         logo: this.newForm.logo,
-                        description: this.newForm.description
+                        description: this.newForm.description,
                     },
                     url: 'rss',
                 });
@@ -234,13 +247,13 @@ export default {
                 this.axiosPostError(err, 'Erreur avec l\'ajout du flux');
             }
         },
-        async submitUpdateRss(id, data) {
+        async submitUpdateRss(id, doc) {
             this.hideRowDetails();
 
             try {
                 const res = await this.$axios({
                     method: 'patch',
-                    data: data,
+                    data: doc,
                     url: 'rss/' + id,
                 });
 
@@ -317,7 +330,7 @@ export default {
             this.showNewForm = false;
             this.$nextTick(() => {
                 this.showNewForm = true;
-            })
+            });
         },
         async uploadFile(event) {
             event.preventDefault();
@@ -329,7 +342,7 @@ export default {
 
                 this.isUploading = true;
 
-                const res = await this.$axios({
+                await this.$axios({
                     method: 'post',
                     url: 'rss/upload',
                     data: formData,
@@ -344,7 +357,7 @@ export default {
 
                 setTimeout(() => {
                     this.newLogo = null;
-                    this.isUploading = false
+                    this.isUploading = false;
                     this.uploadProgress = 0;
                     this.uploadVariant = 'primary';
                     this.getLogos();
@@ -364,7 +377,7 @@ export default {
 
                 setTimeout(() => {
                     this.newLogo = null;
-                    this.isUploading = false
+                    this.isUploading = false;
                     this.uploadProgress = 0;
                     this.uploadVariant = 'primary';
                 }, 5000);
@@ -391,9 +404,6 @@ export default {
                 this.logoSelectOptions.push({ value: file, text: fileName });
             }
         },
-    },
-    components: {
-        RssUpdateForm,
     },
 };
 </script>

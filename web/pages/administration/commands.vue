@@ -1,14 +1,15 @@
 <template>
 <div>
     <b-jumbotron
-        fluid bg-variant="dark"
+        fluid
+        bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
         header="Administration: Commandes"
         lead="Configure les commandes de Derpy."
-    ></b-jumbotron>
+    />
     <b-container>
-        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs" />
     </b-container>
     <b-container v-if="commands.length" class="pb-5">
         <b-table
@@ -19,33 +20,33 @@
             selectedVariant="primary"
             :current-page="currentPage"
             :per-page="perPage"
-            @row-selected="rowSelected"
             :items="commands"
             :fields="fields"
+            @row-selected="rowSelected"
         >
             <template slot="enabledCheckBox" slot-scope="row">
                 <b-form>
-                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)"></b-form-checkbox>
+                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)" />
                 </b-form>
             </template>
             <template slot="row-details" slot-scope="row">
-                <CommandUpdateForm @submitUpdate="submitUpdate" :data="row.item" :commandsAndAliases="commandsAndAliases"/>
+                <CommandUpdateForm :data="row.item" :commandsAndAliases="commandsAndAliases" @submitUpdate="submitUpdate" />
             </template>
         </b-table>
         <b-row>
             <b-col>
-                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0"></b-pagination>
+                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" />
             </b-col>
             <b-col>
                 <b-form-group label-cols-sm="3" label="Nombre par page" class="mb-0">
-                    <b-form-select v-model="perPage" :options="pageOptions"></b-form-select>
+                    <b-form-select v-model="perPage" :options="pageOptions" />
                 </b-form-group>
             </b-col>
         </b-row>
         <hr class="border-primary">
         <p>Pour que les modifications soit prisent en compte, il faut redémarrer Derpy.</p>
-        <b-button @click="restartDerpy()" block :variant="restartVariant">
-            <b-spinner v-if="restarting" small></b-spinner>
+        <b-button block :variant="restartVariant" @click="restartDerpy()">
+            <b-spinner v-if="restarting" small />
             <span v-else>Redémarrer Derpy</span>
         </b-button>
     </b-container>
@@ -56,15 +57,14 @@
 import CommandUpdateForm from '../../components/command-update-form';
 
 export default {
-    name: 'Commandes',
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.isOwner) return redirect('/');
+    name: 'administration-commands',
+    components: {
+        CommandUpdateForm,
     },
     head() {
         return {
             titleTemplate: '%s - ' + this.title,
-        }
+        };
     },
     data() {
         return {
@@ -77,16 +77,16 @@ export default {
                     label: 'Commande',
                     sortable: true,
                     thStyle: {
-                        width: '80%'
-                    }
+                        width: '80%',
+                    },
                 },
                 {
                     key: 'enabledCheckBox',
                     label: 'Activée',
                     sortable: true,
                     thStyle: {
-                        width: '20%'
-                    }
+                        width: '20%',
+                    },
                 },
             ],
             totalRows: 1,
@@ -95,7 +95,7 @@ export default {
             pageOptions: [5, 10, 15],
             restarting: false,
             restartVariant: 'primary',
-        }
+        };
     },
     async asyncData({ $axios }) {
         try {
@@ -103,7 +103,13 @@ export default {
             const commands = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
             return { commands: commands };
         }
-        catch(err) {}
+        catch(err) {
+            //
+        }
+    },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.isOwner) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -111,13 +117,13 @@ export default {
         this.setCommandsAndAliases();
     },
     methods: {
-        async submitUpdate(id, data) {
+        async submitUpdate(id, doc) {
             this.hideRowDetails();
 
             try {
                 const res = await this.$axios({
                     method: 'patch',
-                    data: data,
+                    data: doc,
                     url: 'commands/' + id,
                 });
 
@@ -161,7 +167,7 @@ export default {
         async restartDerpy() {
             try {
                 this.restarting = true;
-                const res = await this.$axios.$get('system/restart');
+                await this.$axios.$get('system/restart');
                 this.restarting = false;
                 this.restartVariant = 'success';
                 setTimeout(() => this.restartVariant = 'primary', 3000);
@@ -188,8 +194,5 @@ export default {
             }
         },
     },
-    components: {
-        CommandUpdateForm,
-    },
-}
+};
 </script>

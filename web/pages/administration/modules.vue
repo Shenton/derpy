@@ -1,14 +1,15 @@
 <template>
 <div>
     <b-jumbotron
-        fluid bg-variant="dark"
+        fluid
+        bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
         header="Administration: Modules"
         lead="Configuration générique des modules."
-    ></b-jumbotron>
+    />
     <b-container>
-        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs" />
     </b-container>
     <b-container class="pb-5">
         <b-table
@@ -21,28 +22,28 @@
         >
             <template slot="enabledCheckBox" slot-scope="row">
                 <b-form>
-                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item.name, row.item.enabled)"></b-form-checkbox>
+                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item.name, row.item.enabled)" />
                 </b-form>
             </template>
         </b-table>
         <b-row>
             <b-col>
-                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0"></b-pagination>
+                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" />
             </b-col>
             <b-col>
                 <b-form-group label-cols-sm="3" label="Nombre par page" class="mb-0">
-                    <b-form-select v-model="perPage" :options="pageOptions"></b-form-select>
+                    <b-form-select v-model="perPage" :options="pageOptions" />
                 </b-form-group>
             </b-col>
         </b-row>
         <hr class="border-primary">
         <p>Pour activer/désactiver les modules il faut redémarrer Derpy.</p>
-        <b-button @click="restartDerpy()" block :variant="restartVariant">
-            <b-spinner v-if="restarting" small></b-spinner>
+        <b-button block :variant="restartVariant" @click="restartDerpy()">
+            <b-spinner v-if="restarting" small />
             <span v-else>Redémarrer Derpy</span>
         </b-button>
     </b-container>
-    <moduleConfiguration v-for="mod in modulesData" :key="mod.key" :data="mod" @submitUpdate="submitUpdate"/>
+    <moduleConfiguration v-for="mod in modulesData" :key="mod.key" :data="mod" @submitUpdate="submitUpdate" />
 </div>
 </template>
 
@@ -51,15 +52,14 @@ import moduleConfiguration from '../../components/module-configuration';
 import { setTimeout } from 'timers';
 
 export default {
-    name: 'modules',
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
+    name: 'administration-modules',
+    components: {
+        moduleConfiguration,
     },
     head() {
         return {
             titleTemplate: '%s - ' + this.title,
-        }
+        };
     },
     data() {
         return {
@@ -71,16 +71,16 @@ export default {
                     label: 'Module',
                     sortable: true,
                     thStyle: {
-                        width: '80%'
-                    }
+                        width: '80%',
+                    },
                 },
                 {
                     key: 'enabledCheckBox',
                     label: 'Activé',
                     sortable: true,
                     thStyle: {
-                        width: '20%'
-                    }
+                        width: '20%',
+                    },
                 },
             ],
             totalRows: 1,
@@ -89,7 +89,7 @@ export default {
             pageOptions: [5, 10, 15],
             restarting: false,
             restartVariant: 'primary',
-        }
+        };
     },
     async asyncData({ $axios }) {
         try {
@@ -97,7 +97,13 @@ export default {
             const modules = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
             return { modulesData: modules };
         }
-        catch(err) {}
+        catch(err) {
+            //
+        }
+    },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -105,11 +111,11 @@ export default {
         this.totalRows = this.modulesData.length;
     },
     methods: {
-        async submitUpdate(name, data) {
+        async submitUpdate(name, doc) {
             try {
                 const res = await this.$axios({
                     method: 'patch',
-                    data: data,
+                    data: doc,
                     url: 'modules/' + name,
                 });
 
@@ -141,7 +147,7 @@ export default {
         async restartDerpy() {
             try {
                 this.restarting = true;
-                const res = await this.$axios.$get('system/restart');
+                await this.$axios.$get('system/restart');
                 this.restarting = false;
                 this.restartVariant = 'success';
                 setTimeout(() => this.restartVariant = 'primary', 3000);
@@ -153,8 +159,5 @@ export default {
             }
         },
     },
-    components: {
-        moduleConfiguration,
-    },
-}
+};
 </script>

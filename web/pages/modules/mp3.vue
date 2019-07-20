@@ -1,14 +1,15 @@
 <template>
 <div>
     <b-jumbotron
-        fluid bg-variant="dark"
+        fluid
+        bg-variant="dark"
         text-variant="light"
         class="mt-3 mb-3 pt-4 pb-4"
         header="Module: mp3"
         lead="Joue des courts mp3 sur les canaux vocaux."
-    ></b-jumbotron>
+    />
     <b-container>
-        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs"></b-breadcrumb>
+        <b-breadcrumb :items="$store.state.breadcrumbs.crumbs" />
     </b-container>
     <b-container v-if="mp3s.length" class="pb-5">
         <b-table
@@ -21,17 +22,17 @@
         >
             <template slot="enabledCheckBox" slot-scope="row">
                 <b-form>
-                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)"></b-form-checkbox>
+                    <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)" />
                 </b-form>
             </template>
         </b-table>
         <b-row>
             <b-col>
-                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0"></b-pagination>
+                <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" />
             </b-col>
             <b-col>
                 <b-form-group label-cols-sm="3" label="Nombre par page" class="mb-0">
-                    <b-form-select v-model="perPage" :options="pageOptions"></b-form-select>
+                    <b-form-select v-model="perPage" :options="pageOptions" />
                 </b-form-group>
             </b-col>
         </b-row>
@@ -49,7 +50,13 @@
             </b-form-group>
 
             <b-form-group v-else>
-                <b-form-file name="newMP3" placeholder="Choisir un fichier mp3" accept=".mp3" :state="newMP3Validation" v-model="newMP3"></b-form-file>
+                <b-form-file
+                    v-model="newMP3"
+                    name="newMP3"
+                    placeholder="Choisir un fichier mp3"
+                    accept=".mp3"
+                    :state="newMP3Validation"
+                />
                 <b-form-invalid-feedback :state="newMP3Validation">
                     Le fichier doit être un mp3 de 1mo max, le nom ne doit contenir que des lettres minuscules ou des chiffres et être compris entre 3 et 10 charactères.
                 </b-form-invalid-feedback>
@@ -66,15 +73,11 @@
 
 <script>
 export default {
-    name: 'mp3',
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
-    },
+    name: 'module-mp3',
     head() {
         return {
             titleTemplate: '%s - ' + this.title,
-        }
+        };
     },
     data() {
         return {
@@ -86,16 +89,16 @@ export default {
                     label: 'mp3',
                     sortable: true,
                     thStyle: {
-                        width: '80%'
-                    }
+                        width: '80%',
+                    },
                 },
                 {
                     key: 'enabledCheckBox',
                     label: 'Activé',
                     sortable: true,
                     thStyle: {
-                        width: '20%'
-                    }
+                        width: '20%',
+                    },
                 },
             ],
             totalRows: 1,
@@ -111,18 +114,6 @@ export default {
             uploadVariant: 'primary',
         };
     },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('mp3');
-            const mp3s = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
-            return { mp3s: mp3s };
-        }
-        catch(err) {}
-    },
-    mounted() {
-        this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
-        this.totalRows = this.mp3s.length;
-    },
     computed: {
         newMP3Validation() {
             if (!this.newMP3) return null;
@@ -130,6 +121,24 @@ export default {
             if (this.newMP3.size > 1024 * 1024) return false;
             return /^[a-z0-9]{3,10}\.mp3$/.test(this.newMP3.name);
         },
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('mp3');
+            const mp3s = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
+            return { mp3s: mp3s };
+        }
+        catch(err) {
+            //
+        }
+    },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
+    },
+    mounted() {
+        this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
+        this.totalRows = this.mp3s.length;
     },
     methods: {
         async getMP3s() {
@@ -152,7 +161,7 @@ export default {
 
                 this.isUploading = true;
 
-                const res = await this.$axios({
+                await this.$axios({
                     method: 'post',
                     url: 'mp3/upload',
                     data: formData,
@@ -167,7 +176,7 @@ export default {
 
                 setTimeout(() => {
                     this.newMP3 = null;
-                    this.isUploading = false
+                    this.isUploading = false;
                     this.uploadProgress = 0;
                     this.uploadVariant = 'primary';
                     this.getMP3s();
@@ -187,7 +196,7 @@ export default {
 
                 setTimeout(() => {
                     this.newMP3 = null;
-                    this.isUploading = false
+                    this.isUploading = false;
                     this.uploadProgress = 0;
                     this.uploadVariant = 'primary';
                 }, 5000);
@@ -243,7 +252,7 @@ export default {
             this.showNewForm = false;
             this.$nextTick(() => {
                 this.showNewForm = true;
-            })
+            });
         },
     },
 };

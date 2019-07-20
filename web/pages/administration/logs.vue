@@ -12,7 +12,15 @@
     </b-container>
     <b-container>
         <b-form-group>
-            <b-form-select v-model="selected" :options="options" @change="getLogs()"></b-form-select>
+            <b-form-select v-model="category" :options="options" @change="getLogs()"></b-form-select>
+        </b-form-group>
+        <b-form-group>
+            <b-form-checkbox-group
+                @change="triggerFilter()"
+                v-model="levels"
+                :options="levelsOptions"
+                switches
+            ></b-form-checkbox-group>
         </b-form-group>
         <b-table
             hover
@@ -22,6 +30,8 @@
             :tbody-tr-class="rowClass"
             sort-by="timestamp"
             :sort-desc="true"
+            :filter="filter"
+            :filter-function="filterFunc"
         ></b-table>
     </b-container>
 </div>
@@ -45,12 +55,21 @@ export default {
         return {
             title: 'Administration: Logs',
             logs: [],
-            selected: 'bot',
+            category: 'bot',
+            page: 1,
             options: [
                 { value: 'bot', text: 'Bot' },
                 { value: 'db', text: 'Database' },
                 { value: 'web', text: 'Front end' },
                 { value: 'webaccess', text: 'Front end access' },
+            ],
+            filter: 1,
+            levels: ['info', 'warn', 'error', 'debug'],
+            levelsOptions: [
+                { text: 'Information', value: 'info' },
+                { text: 'Warning', value: 'warn' },
+                { text: 'Erreur', value: 'error' },
+                { text: 'Debug', value: 'debug' },
             ],
             fields: [
                 {
@@ -86,25 +105,53 @@ export default {
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
     },
+    created () {
+        if (process.browser) window.addEventListener('scroll', this.handleScroll);
+    },
+    destroyed () {
+        if (process.browser) window.removeEventListener('scroll', this.handleScroll);
+    },
     methods: {
         async getLogs() {
             try {
-                const data = await this.$axios.$get('logs/' + this.selected);
-                //const commands = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
+                const data = await this.$axios.$get(`logs/${this.category}`);
+                this.page = 1;
                 this.logs = data;
             }
             catch(err) {}
+        },
+        async getMoreLogs() {
+            try {
+                const data = await this.$axios.$get(`logs/${this.category}/${this.page}`);
+                this.logs = this.logs.concat(data);
+            }
+            catch(err) {}
+        },
+        handleScroll () {
+            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight) {
+                this.page++;
+                this.getMoreLogs();
+            }
         },
         rowClass(item) {
             if (!item) return;
             if (item.level === 'info') return 'table-info';
             else if (item.level === 'error') return 'table-danger';
             else if (item.level === 'warn') return 'table-warning';
+            else if (item.level === 'debug') return 'table-debug';
         },
+        filterFunc(item) {
+            const level = item.level;
+
+            if (!level) return true;
+
+            return this.levels.includes(level);
+        },
+        triggerFilter() {
+            let f= this.filter;
+            f++;
+            this.filter = f;
+        }
     },
 }
 </script>
-
-<style>
-
-</style>

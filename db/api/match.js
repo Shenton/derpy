@@ -52,6 +52,11 @@ async function update(matchID, data) {
         else doc.match = data.match;
     }
 
+    if (data.telemetry) {
+        if (!validator.object(data.telemetry)) badRequest.push('"telemetry" is not valid');
+        else doc.telemetry = data.telemetry;
+    }
+
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 
     const success = await updateMatch({ matchID: matchID }, doc);

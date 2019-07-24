@@ -13,6 +13,7 @@ const matchSchema = new Schema({
         type: Object,
         required: true,
     },
+    telemetry: Object,
 });
 
 const Match = mongoose.models.Match || mongoose.model('Match', matchSchema);

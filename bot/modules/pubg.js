@@ -5,6 +5,7 @@ const moment = require('moment');
 const fs = require('fs-extra');
 const axiosModule = require('axios');
 const { Attachment } = require('discord.js');
+const jsonfile = require('jsonfile');
 
 // Derpy modules
 const logger = require('../logger');
@@ -110,6 +111,20 @@ async function getMatches() {
     catch(err) {
         logger.error('module => pubg => getMatches: ', err);
         return {};
+    }
+}
+
+async function addTelemetry(matchID, telemetry) {
+    try {
+        const data = { telemetry: telemetry };
+        const query = await updateMatch(matchID, data);
+
+        if (query.success) return true;
+        return false;
+    }
+    catch(err) {
+        logger.error('module => pubg => addTelemetry: ', err);
+        return false;
     }
 }
 
@@ -535,13 +550,19 @@ async function gotNewMatch(idS) {
             // Get the telemetry json
             const url = match.telemetryURL.match(/^https:\/\/telemetry-cdn\.playbattlegrounds\.com\/bluehole-pubg\/(.+)$/)[1];
             const fileName = match.telemetryURL.substring(match.telemetryURL.lastIndexOf('/') + 1);
-            const writeStream = fs.createWriteStream(path.join(rootDir, 'data/pubg/telemetry/raw', fileName));
+            const filePath = path.join(rootDir, 'data/pubg/telemetry/raw', fileName);
+            const writeStream = fs.createWriteStream(filePath);
+
             axios(url)
                 .then(res => {
                     if (res.status == 200) {
                         res.data.pipe(writeStream);
                         writeStream.on('finish', () => {
                             logger.debug('Downloaded: ' + match.telemetryURL);
+                            const telemetryJson = jsonfile.readFileSync(filePath);
+                            const telemetry = pubg.parseTelemetry(telemetryJson);
+
+                            addTelemetry(matchID, telemetry);
                         });
                         writeStream.on('error', (err) => {
                             logger.error(err);

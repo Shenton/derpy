@@ -79,7 +79,10 @@ client.on('message', message => {
 
     // Do the member has role access
     let hasRoleAccess = false;
-    if (command.allowedRoles.length) {
+    if (message.author.id === ownerID) {
+        hasRoleAccess = true;
+    }
+    else if (command.allowedRoles.length) {
         message.member.roles.array().forEach(role => {
             if (command.allowedRoles.includes(role.id)) hasRoleAccess = true;
         });

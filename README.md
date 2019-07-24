@@ -48,6 +48,20 @@ At this point you should take a look at the sample config file, rename/copy it t
 
 To get channels and members ID, activate the developer mode from the Discord application settings and use the context menu on them.
 
+### Discord
+Go to Discord [developer portal](https://discordapp.com/developers/applications/) and create a new application, add a bot and add an oauth redirect to:
+```
+<your base url>/api/discord/callback
+```
+
+### Inviting the bot
+Get the bot application client id, it is located on the front page of your app. Edit and paste this URL in a browser:
+```
+https://discordapp.com/oauth2/authorize?&client_id=<your bot client id>&scope=bot&permissions=36829280
+```
+Then pick your guild.
+
+
 ### Building the front end
 Before running Derpy the front end must be build. If you run Derpy in develoment, the front end must be build before running in production.
 ```bash

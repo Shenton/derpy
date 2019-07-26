@@ -92,6 +92,21 @@ async function getSingleMatch(matchID) {
     }
 }
 
+async function getSingleTelemetry(matchID) {
+    try {
+        const query = await getMatch({ matchID: matchID });
+
+        if (!query.success) return false;
+
+        const telemetry = query.data[0].telemetry;
+        return telemetry;
+    }
+    catch(err) {
+        logger.error('module => pubg => getSingleTelemetry: ', err);
+        return false;
+    }
+}
+
 async function getMatches() {
     try {
         const query = await getMatch();
@@ -222,7 +237,11 @@ const pubgClass = require('../class/pubg');
 
 // Declare objects
 const pubg = new pubgClass(pubgApiKey, shard, playersArray);
-const mapName = pubg.mapName();
+pubg.on('error', logger.error.bind(logger));
+const mapNames = pubg.mapName();
+const locationNames = pubg.locationName();
+const causerNames = pubg.causerName();
+const gameModes = pubg.gameMode();
 const axios = axiosModule.create({
     responseType: 'stream',
     baseURL: 'https://telemetry-cdn.playbattlegrounds.com/bluehole-pubg/',
@@ -250,7 +269,8 @@ const shortHumanizer = humanizeDuration.humanizer({
 // Check if data/pubg/telemetry/raw exists, create it if not
 fs.ensureDirSync(path.join(rootDir, 'data/pubg/telemetry/raw'), 0o744);
 
-function humanizeMeters(meters, short) {
+function humanizeMeters(meters, short, isTelemetry) {
+    meters = isTelemetry ? meters / 100 : meters;
     meters = Math.round(meters);
     const quotient = Math.floor(meters / 1000);
     const remainder = meters % 1000;
@@ -271,6 +291,7 @@ async function displayMatch(id, message) {
 
         const matchTime = humanizeDuration(match.duration * 1000, { language: 'fr' });
         const matchDate = moment(match.time).locale('fr').format('LLLL');
+        const { gameType, gameMode, gamePOV } = gameModes[match.mode];
 
         const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
         const pubgIcon = new Attachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
@@ -281,9 +302,10 @@ async function displayMatch(id, message) {
         for (let i = 0; i < teams.length; i++) {
             const team = teams[i];
 
+            const mode = `${gameType ? gameType + ' • ' : ''}${gameMode ? gameMode + ' • ' : ''}${gamePOV ? gamePOV : ''}`;
             const title = team.rank == '1'
-                ? `${mapName[match.map]} :: ${match.mode} :: Winner Winner Chicken Dinner, Bitch!`
-                : `${mapName[match.map]} :: ${match.mode} :: Top ${team.rank}`;
+                ? `${mapNames[match.map]} • ${mode} • Winner Winner Chicken Dinner, Bitch!`
+                : `${mapNames[match.map]} • ${mode} • Top ${team.rank}`;
 
             const embedContent = {
                 color: 0xb26f1e,
@@ -291,7 +313,7 @@ async function displayMatch(id, message) {
                     name: title,
                     icon_url: 'attachment://pubgIcon.gif',
                 },
-                description: `\`${matchTime} :: ${matchDate}\``,
+                description: `\`${matchTime} • ${matchDate}\``,
                 thumbnail: {
                     url: `attachment://${match.map}.png`,
                 },
@@ -333,7 +355,7 @@ async function displayMatch(id, message) {
                     },
                     {
                         name: '\u200b',
-                        value: `[op.gg](https://pubg.op.gg/user/${data.name}) :: [pubg.sh](https://pubg.sh/${data.name}/steam/${id})`,
+                        value: `[op.gg](https://pubg.op.gg/user/${data.name}) • [pubg.sh](https://pubg.sh/${data.name}/steam/${id})`,
                         inline: true,
                     },
                     {
@@ -364,16 +386,18 @@ async function displayMatch(id, message) {
                 }
             }
 
-            embedContent.fields.push(
-                {
-                    name: '\u200b',
-                    value: '\u200b',
-                },
-                {
-                    name: 'Totaux',
-                    value: `\`\`\`css\n[${totalDamage} dégats]\nFrags: ${totalKills} (HS: ${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
-                },
-            );
+            if (gameMode !== 'Solo') {
+                embedContent.fields.push(
+                    {
+                        name: '\u200b',
+                        value: '\u200b',
+                    },
+                    {
+                        name: 'Totaux',
+                        value: `\`\`\`py\n@ Dégats${totalDamage}\nFrags: ${totalKills} (HS: ${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
+                    },
+                );
+            }
 
             if (message) {
                 message.channel.send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
@@ -400,6 +424,7 @@ async function displayMatchShort(id, message) {
 
         const matchTime = humanizeDuration(match.duration * 1000, { language: 'fr' });
         const matchDate = moment(match.time).locale('fr').format('LLLL');
+        const { gameType, gameMode, gamePOV } = gameModes[match.mode];
 
         const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
         const pubgIcon = new Attachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
@@ -410,9 +435,10 @@ async function displayMatchShort(id, message) {
         for (let i = 0; i < teams.length; i++) {
             const team = teams[i];
 
+            const mode = `${gameType ? gameType + ' • ' : ''}${gameMode ? gameMode + ' • ' : ''}${gamePOV ? gamePOV : ''}`;
             const title = team.rank == '1'
-                ? `${mapName[match.map]} :: ${match.mode} :: Winner Winner Chicken Dinner, Bitch!`
-                : `${mapName[match.map]} :: ${match.mode} :: Top ${team.rank}`;
+                ? `${mapNames[match.map]} • ${mode} • Winner Winner Chicken Dinner, Bitch!`
+                : `${mapNames[match.map]} • ${mode} • Top ${team.rank}`;
 
             const embedContent = {
                 color: 0xb26f1e,
@@ -420,7 +446,7 @@ async function displayMatchShort(id, message) {
                     name: title,
                     icon_url: 'attachment://pubgIcon.gif',
                 },
-                description: `\`${matchTime} :: ${matchDate}\``,
+                description: `\`${matchTime} • ${matchDate}\``,
                 thumbnail: {
                     url: `attachment://${match.map}.png`,
                 },
@@ -456,7 +482,7 @@ async function displayMatchShort(id, message) {
                     },
                     {
                         name: '\u200b',
-                        value: `[op.gg](https://pubg.op.gg/user/${data.name}) :: [pubg.sh](https://pubg.sh/${data.name}/steam/${id})`,
+                        value: `[op.gg](https://pubg.op.gg/user/${data.name}) • [pubg.sh](https://pubg.sh/${data.name}/steam/${id})`,
                         inline: true,
                     },
                     {
@@ -472,12 +498,14 @@ async function displayMatchShort(id, message) {
                 );
             }
 
-            embedContent.fields.push(
-                {
-                    name: 'Totaux',
-                    value: `\`\`\`css\n[${totalDamage} dégats]\nFrags: ${totalKills} (HS: ${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
-                },
-            );
+            if (gameMode !== 'Solo') {
+                embedContent.fields.push(
+                    {
+                        name: 'Totaux',
+                        value: `\`\`\`py\n@ Dégats: ${totalDamage}\nFrags: ${totalKills} (HS: ${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
+                    },
+                );
+            }
 
             if (message) {
                 message.channel.send({ files: [area51, pubgIcon, mapThumb], embed: embedContent })
@@ -494,6 +522,171 @@ async function displayMatchShort(id, message) {
     catch(err) {
         logger.error('module => pubg => displayMatchShort: ', err);
     }
+}
+
+function roundStat(stat) {
+    return stat.toFixed(2);
+}
+
+async function displayTelemetry(id, message, player) {
+    const telemetry = await getSingleTelemetry(id);
+
+    logger.debug('TELEM: %o', telemetry);
+    logger.debug('PLAYER ' + player);
+
+    if (!telemetry) return;
+    if (!telemetry[player]) return message.reply('ce joueur n\'a pas participé au dernier match.');
+
+    const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
+    const pubgIcon = new Attachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
+    const stats = telemetry[player];
+
+    const embedContent = {
+        color: 0xb26f1e,
+        author: {
+            name: 'Statistiques avancées pour ' + player,
+            icon_url: 'attachment://pubgIcon.gif',
+        },
+        description: `\`Match ID: ${telemetry.matchID}\``,
+        fields: [],
+        timestamp: new Date(),
+        footer: {
+            text: 'Derpy v' + process.env.npm_package_version,
+            icon_url: 'attachment://area51.png',
+        },
+    };
+
+    if (stats.weapon) {
+        const field = {
+            name: 'Armes',
+            value: '```py\n',
+        };
+
+        for (const name in stats.weapon) {
+            const weapon = stats.weapon[name];
+            const weaponName = causerNames[name] || name;
+
+            if (weaponName && weapon.shots) {
+                field.value += `@ ${weaponName}\nTir${weapon.shots > 1 ? 's' : ''}: ${weapon.shots} `
+                + `Touche${weapon.hits > 1 ? 's' : ''}: ${weapon.hits} (HS: ${weapon.headShots})\n`
+                + `Précision: ${roundStat(weapon.accuracy)}% (HS: ${roundStat(weapon.hsPercent)}%)\n\n`;
+            }
+        }
+
+        field.value += '```';
+        embedContent.fields.push(field);
+    }
+
+    if (stats.frag) {
+        const field = {
+            name: 'Frags',
+            value: '```py\n',
+        };
+        let total = 0;
+
+        stats.frag.forEach(frag => {
+            const distance = humanizeMeters(frag.distance, false, true);
+            const weapon = causerNames[frag.weapon] || frag.weapon;
+            const location = locationNames[frag.location] || frag.location;
+            field.value += `@ ${frag.name}\nArme: ${weapon}\nLocalisation: ${location}\nDistance: ${distance}\n\n`;
+            total++;
+        });
+
+        field.value += `Total: ${total}\`\`\``;
+        embedContent.fields.push(field);
+    }
+
+    if (stats.damageDone) {
+        const field = {
+            name: 'Dégats faits',
+            value: '```py\n',
+        };
+        let total = 0;
+
+        for (const victimName in stats.damageDone) {
+            const victim = stats.damageDone[victimName];
+
+            field.value += `@ ${victimName}\n`;
+
+            for (const weaponName in victim) {
+                const locations = victim[weaponName];
+                const weapon = causerNames[weaponName] || weaponName;
+
+                field.value += `${weapon} - `;
+
+                for (const locationName in locations) {
+                    const data = locations[locationName];
+                    const where = locationNames[locationName] || locationName;
+                    const damage = Math.round(data.damage);
+
+                    field.value += `${where}: ${damage} (${data.hits}) `;
+                    total += damage;
+                }
+
+                field.value += '\n';
+            }
+
+            field.value += '\n';
+        }
+
+        field.value += `Total: ${total}\`\`\``;
+        embedContent.fields.push(field);
+    }
+
+    if (stats.damageTaken) {
+        const field = {
+            name: 'Dégats subits',
+            value: '```py\n',
+        };
+        let total = 0;
+
+        for (const attackerName in stats.damageTaken) {
+            const victim = stats.damageTaken[attackerName];
+
+            field.value += `@ ${attackerName}\n`;
+
+            for (const weaponName in victim) {
+                const locations = victim[weaponName];
+                const weapon = causerNames[weaponName] || weaponName;
+
+                field.value += `${weapon} - `;
+
+                for (const locationName in locations) {
+                    const data = locations[locationName];
+                    const where = locationNames[locationName] || locationName;
+                    const damage = Math.round(data.damage);
+
+                    field.value += `${where}: ${damage} (${data.hits}) `;
+                    total += damage;
+                }
+
+                field.value += '\n';
+            }
+
+            field.value += '\n';
+        }
+
+        if (stats.blue) field.value += `Bleu: ${Math.round(stats.blue)}\n\n`;
+
+        field.value += `Total: ${total}${stats.blue ? ' (' + (total + Math.round(stats.blue)) + ')' : ''}\`\`\``;
+        embedContent.fields.push(field);
+    }
+
+    if (stats.death) {
+        const distance = humanizeMeters(stats.death.distance, false, true);
+        const weapon = causerNames[stats.death.weapon] || stats.death.weapon;
+        const location = locationNames[stats.death.location] || stats.death.location;
+
+        const field = {
+            name: 'Mort',
+            value: `\`\`\`py\n@ ${stats.death.name}\nArme: ${weapon}\nLocalisation: ${location}\nDistance: ${distance}\`\`\``,
+        };
+
+        embedContent.fields.push(field);
+    }
+
+    message.channel.send({ files: [area51, pubgIcon], embed: embedContent })
+        .catch(logger.error);
 }
 
 async function cleanMatches() {
@@ -524,7 +717,7 @@ async function cleanMatches() {
                         logger.debug(`Removed match: ${match.id} - With telemetry file: ${match.telemetry}`);
                     })
                     .catch(err => {
-                        logger.error(err);
+                        logger.error('module => pubg => cleanMatches: ', err);
                     });
             }
         }
@@ -540,7 +733,7 @@ async function gotNewMatch(idS) {
             logger.debug(`Getting match id: ${matchID}`);
             const match = await pubg.getMatch(matchID);
             if (typeof match !== 'object') {
-                logger.error(match);
+                logger.error('module => pubg => gotNewMatch typeof match: %o', match);
                 return;
             }
             await addSingleMatch(matchID, match);
@@ -565,20 +758,19 @@ async function gotNewMatch(idS) {
                             addTelemetry(matchID, telemetry);
                         });
                         writeStream.on('error', (err) => {
-                            logger.error(err);
+                            logger.error('module => pubg => gotNewMatch writestream error: %o', err);
                         });
                     }
                 })
                 .catch(err => {
                     if (err.response) {
-                        logger.error(err.response.status);
-                        logger.error(err.response.data);
+                        logger.error('module => pubg => gotNewMatch axios status: %o, data: %o', err.response.status, err.response.data);
                     }
                     else if (err.request) {
-                        logger.error(err.request);
+                        logger.error('module => pubg => gotNewMatch axios req: %o', err.response.request);
                     }
                     else {
-                        logger.error(err.message);
+                        logger.error('module => pubg => gotNewMatch axios message: %o', err.response.message);
                     }
                 });
         }
@@ -616,13 +808,18 @@ async function updatePlayersLastMatch() {
 }
 
 async function displayLastMatch(messageObj) {
-    const matches = await getPlayersLastMatchArray();
+    try {
+        const matches = await getPlayersLastMatchArray();
 
-    const filteredMatches = [...new Set(matches)];
-    filteredMatches.forEach(match => {
-        //if (match) displayMatch(match, messageObj);
-        if (match) displayMatchShort(match, messageObj);
-    });
+        const filteredMatches = [...new Set(matches)];
+        filteredMatches.forEach(match => {
+            //if (match) displayMatch(match, messageObj);
+            if (match) displayMatchShort(match, messageObj);
+        });
+    }
+    catch(err) {
+        logger.error('module => pubg => displayLastMatch: %o', err);
+    }
 }
 
 async function displayFullMatch(messageObj) {
@@ -631,7 +828,27 @@ async function displayFullMatch(messageObj) {
         if (match) displayMatch(match, messageObj);
     }
     catch(err) {
-        logger.error(err);
+        logger.error('module => pubg => displayFullMatch: %o', err);
+    }
+}
+
+async function commandStats(messageObj, args) {
+    let player;
+
+    if (args.length) {
+        player = args[0];
+        if(!/^[a-zA-Z0-9_-]{1,30}$/.test(player)) return;
+    }
+    else {
+        player = messageObj.author.username;
+    }
+
+    try {
+        const match = await dbDerpyGet('lastDisplayedMatch', false);
+        if (match) displayTelemetry(match, messageObj, player);
+    }
+    catch(err) {
+        logger.error('module => pubg => commandStats: %o', err);
     }
 }
 
@@ -644,6 +861,7 @@ function updateInterval(time) {
 
 exports.displayLastMatch = displayLastMatch;
 exports.displayFullMatch = displayFullMatch;
+exports.commandStats = commandStats;
 
 process.on('message', async message => {
     if (typeof message !== 'object') return;

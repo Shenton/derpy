@@ -732,10 +732,8 @@ async function gotNewMatch(idS) {
             // Get formated to array match from pubg api class, store it, display the match
             logger.debug(`Getting match id: ${matchID}`);
             const match = await pubg.getMatch(matchID);
-            if (typeof match !== 'object') {
-                logger.error('module => pubg => gotNewMatch typeof match: %o', match);
-                return;
-            }
+            if (typeof match !== 'object') return;
+
             await addSingleMatch(matchID, match);
             await dbDerpyUpdate('lastDisplayedMatch', matchID);
             displayMatchShort(matchID);

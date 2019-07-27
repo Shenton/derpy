@@ -370,7 +370,10 @@ class pubgClass extends EventEmitter {
     async getMatch(matchID) {
         try {
             const res = await axios(`matches/${matchID}`);
-            if (res.status > 400) return this.emit('error', 'pubg class error: res status: ' + (httpErrors[res.status]) ? httpErrors[res.status] : res.status);
+            if (res.status > 400) {
+                this.emit('error', 'pubg class error: res status: ' + (httpErrors[res.status]) ? httpErrors[res.status] : res.status);
+                return false;
+            }
             if (res.data.data.attributes.mapName === 'Range_Main') return false;
 
             const out = {};

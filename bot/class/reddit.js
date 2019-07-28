@@ -39,15 +39,20 @@ class RedditCaller extends EventEmitter {
         return axios(this.url)
             .then(res => {
                 if (res.status === 200) return res.data;
-                else throw new Error(`Reddit class => Axios status: ${res.status}`);
+                else this.emit('error', `Reddit class => Axios status: ${res.status}`);
             })
             .catch(err => {
+                this.canWatch = false;
+                setTimeout(function() {
+                    this.canWatch = true;
+                }, 60000);
+
                 let errorString;
 
                 if (err.response) {
                     if (err.response.status === 302) {
                         const url = err.response.config.url;
-                        errorString = `Reddit class: Reddit tried to redirect the request, this often mean the subreddit do not exists. URL: ${url}`;
+                        errorString = `Reddit class: Reddit tried to redirect the request, this often mean the subreddit does not exists. URL: ${url}`;
                     }
                     else {
                         errorString = `Reddit class => Axios status: ${err.response.status}, data: ${err.response.data}`;

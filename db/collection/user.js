@@ -18,6 +18,7 @@ const userSchema = new Schema({
     },
     isOwner: Boolean,
     hasAccess: Boolean,
+    statsAccess: Boolean,
     username: String,
     discriminator: String,
     avatar: String,
@@ -60,15 +61,14 @@ async function get(query) {
 // Add
 async function add(memberID, username, discriminator, avatar, accessToken, tokenType, expires, refreshToken) {
     const isOwner = memberID === ownerID ? true : false;
-    const hasAccess = false;
-
     const uniqueID = await getNewUUID();
 
     const user = new User({
         memberID: memberID,
         uniqueID: uniqueID,
         isOwner: isOwner,
-        hasAccess: hasAccess,
+        hasAccess: false,
+        statsAccess: false,
         username: username,
         discriminator: discriminator,
         avatar: avatar,

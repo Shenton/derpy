@@ -8,6 +8,7 @@ export const state = () => ({
     avatar: null,
     isOwner: null,
     hasAccess: null,
+    statsAccess: null,
 });
 
 export const mutations = {
@@ -32,12 +33,16 @@ export const mutations = {
     setHasAccess(s, value) {
         s.hasAccess = value;
     },
+    setStatsAccess(s, value) {
+        s.statsAccess = value;
+    },
 };
 
 export const actions = {
     authUser({ commit }, req) {
         if (req.session.discordAuth) {
             const hasAccess = req.session.discordAuth.isOwner ? true : req.session.discordAuth.hasAccess ? true : false;
+            const statsAccess = req.session.discordAuth.isOwner ? true : req.session.discordAuth.statsAccess ? true : false;
             const avatar = `https://cdn.discordapp.com/avatars/${req.session.discordAuth.memberID}/${req.session.discordAuth.avatar}.png`;
 
             commit('setIsAuth', true);
@@ -47,6 +52,7 @@ export const actions = {
             commit('setAvatar', avatar);
             commit('setIsOwner', req.session.discordAuth.isOwner);
             commit('setHasAccess', hasAccess);
+            commit('setStatsAccess', statsAccess);
         }
         else {
             commit('setIsAuth', null);
@@ -56,6 +62,7 @@ export const actions = {
             commit('setAvatar', null);
             commit('setIsOwner', null);
             commit('setHasAccess', null);
+            commit('setStatsAccess', null);
         }
     },
 };

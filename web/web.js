@@ -81,6 +81,7 @@ app.use(async function(req, res, next) {
             username: query.data.username,
             discriminator: query.data.discriminator,
             avatar: query.data.avatar,
+            statsAccess: query.data.statsAccess,
         };
 
         req.session.save();
@@ -92,14 +93,13 @@ app.use(async function(req, res, next) {
 app.use('/api/auth', require('./api/routes/auth'));
 app.use('/api/discord', require('./api/routes/discord'));
 app.use('/api/system', require('./api/routes/system'));
-app.use('/api/logs', require('./api/routes/logs'));
 
 // DB APIs
+// No access
 app.use('/api/public', require('./api/routes/public'));
-app.use('/api/derpy', require('./api/routes/derpy'));
-app.use('/api/commands', require('./api/routes/commands'));
-app.use('/api/members', require('./api/routes/members'));
-app.use('/api/modules', require('./api/routes/modules'));
+// Stats access
+app.use('/api/stats', require('./api/routes/stats'));
+// Has access
 app.use('/api/activity', require('./api/routes/activity'));
 app.use('/api/mp3', require('./api/routes/mp3'));
 app.use('/api/player', require('./api/routes/player'));
@@ -107,6 +107,12 @@ app.use('/api/quote', require('./api/routes/quote'));
 app.use('/api/reddit', require('./api/routes/reddit'));
 app.use('/api/rss', require('./api/routes/rss'));
 app.use('/api/response', require('./api/routes/response'));
+// Owner access
+app.use('/api/derpy', require('./api/routes/derpy'));
+app.use('/api/commands', require('./api/routes/commands'));
+app.use('/api/logs', require('./api/routes/logs'));
+app.use('/api/members', require('./api/routes/members'));
+app.use('/api/modules', require('./api/routes/modules'));
 
 // Render every route with Nuxt.js
 app.use(nuxt.render);

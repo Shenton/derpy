@@ -107,27 +107,27 @@ async function getSingleTelemetry(matchID) {
     }
 }
 
-async function getMatches() {
-    try {
-        const query = await getMatch();
+// async function getMatches() {
+//     try {
+//         const query = await getMatch();
 
-        if (!query.success) return {};
+//         if (!query.success) return {};
 
-        const data = query.data;
-        const output = {};
-        for (let i = 0; i < data.length; i++) {
-            const matchID = data[i].matchID;
-            const match = data[i].match;
-            output[matchID] = match;
-        }
+//         const data = query.data;
+//         const output = {};
+//         for (let i = 0; i < data.length; i++) {
+//             const matchID = data[i].matchID;
+//             const match = data[i].match;
+//             output[matchID] = match;
+//         }
 
-        return output;
-    }
-    catch(err) {
-        logger.error('module => pubg => getMatches: ', err);
-        return {};
-    }
-}
+//         return output;
+//     }
+//     catch(err) {
+//         logger.error('module => pubg => getMatches: ', err);
+//         return {};
+//     }
+// }
 
 async function addTelemetry(matchID, telemetry) {
     try {
@@ -531,9 +531,6 @@ function roundStat(stat) {
 async function displayTelemetry(id, message, player) {
     const telemetry = await getSingleTelemetry(id);
 
-    logger.debug('TELEM: %o', telemetry);
-    logger.debug('PLAYER ' + player);
-
     if (!telemetry) return;
     if (!telemetry[player]) return message.reply('ce joueur n\'a pas participé au dernier match.');
 
@@ -690,37 +687,36 @@ async function displayTelemetry(id, message, player) {
 }
 
 async function cleanMatches() {
-    const matches = await getMatches();
-    const timeToInfo = {};
-    const timeArray = [];
+    try {
+        const query = await getMatch();
 
-    for (const id in matches) {
-        const match = matches[id];
-        const time = moment(match.time).format('x');
-        const fileName = match.telemetryURL.substring(match.telemetryURL.lastIndexOf('/') + 1);
-        timeArray.push(time);
-        timeToInfo[time] = {
-            'id': id,
-            'telemetry': fileName,
-        };
-    }
+        if (!query.success) return;
 
-    if (timeArray.length > 20) {
-        timeArray.sort((a, b) => b - a);
-        for (let i = 20; i <= timeArray.length - 1; i++) {
-            const match = timeToInfo[timeArray[i]];
-            const success = await deleteSingleMatch(match.id);
+        const data = query.data;
 
-            if (success) {
-                fs.remove(path.join(rootDir, 'data/pubg/telemetry/raw', match.telemetry))
-                    .then(() => {
-                        logger.debug(`Removed match: ${match.id} - With telemetry file: ${match.telemetry}`);
-                    })
-                    .catch(err => {
-                        logger.error('module => pubg => cleanMatches: ', err);
-                    });
+        if (data.length > 60) {
+            const count = data.length - 60;
+
+            for (let i = 0; i < count; i++) {
+                const matchID = data[i].matchID;
+                const match = data[i].match;
+                const telemetryFile = match.telemetryURL.substring(match.telemetryURL.lastIndexOf('/') + 1);
+                const success = await deleteSingleMatch(matchID);
+
+                if (success) {
+                    fs.remove(path.join(rootDir, 'data/pubg/telemetry/raw', telemetryFile))
+                        .then(() => {
+                            logger.debug(`Removed match: ${matchID} - With telemetry file: ${telemetryFile}`);
+                        })
+                        .catch(err => {
+                            logger.error('module => pubg => cleanMatches: ', err);
+                        });
+                }
             }
         }
+    }
+    catch(err) {
+        logger.error('module => pubg => cleanMatches: ', err);
     }
 }
 

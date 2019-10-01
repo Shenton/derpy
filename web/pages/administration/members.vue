@@ -28,6 +28,11 @@
                     <b-form-checkbox v-model="row.item.hasAccess" name="check-button" switch @change="toggleAccess(row.item._id, row.item.hasAccess)" />
                 </b-form>
             </template>
+            <template slot="statsAccessCheckBox" slot-scope="row">
+                <b-form>
+                    <b-form-checkbox v-model="row.item.statsAccess" name="check-button" switch @change="toggleStatsAccess(row.item._id, row.item.statsAccess)" />
+                </b-form>
+            </template>
         </b-table>
         <b-row>
             <b-col>
@@ -61,12 +66,20 @@ export default {
                     label: 'Membre',
                     sortable: true,
                     thStyle: {
-                        width: '80%',
+                        width: '60%',
                     },
                 },
                 {
                     key: 'accessCheckBox',
                     label: 'Accès',
+                    sortable: true,
+                    thStyle: {
+                        width: '20%',
+                    },
+                },
+                {
+                    key: 'statsAccessCheckBox',
+                    label: 'Accès stats',
                     sortable: true,
                     thStyle: {
                         width: '20%',
@@ -127,11 +140,15 @@ export default {
             }
         },
         axiosPostError(err, methodMessage) {
-            this.$axiosPostErrorHandler(err, 'Activité non trouvée', 'Cette activité existe déjà', methodMessage);
+            this.$axiosPostErrorHandler(err, 'Membre non trouvée', 'Ce membre existe déjà', methodMessage);
         },
         toggleAccess(id, access) {
             if (access) this.submitUpdate(id, { hasAccess: false });
             else this.submitUpdate(id, { hasAccess: true });
+        },
+        toggleStatsAccess(id, access) {
+            if (access) this.submitUpdate(id, { statsAccess: false });
+            else this.submitUpdate(id, { statsAccess: true });
         },
     },
 };

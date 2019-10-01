@@ -26,9 +26,9 @@ module.exports = {
     css: [
         '~/assets/scss/main.scss',
     ],
-    build: {
-        extractCSS: true,
-    },
+    // build: {
+    //     extractCSS: true,
+    // },
     head: {
         title: 'Derpy',
         meta: [

@@ -3,10 +3,17 @@ const validator = require('../validator');
 
 const { addMatch, getMatch, updateMatch, deleteMatch } = require('../collection/match');
 
-async function get(query) {
-    if (!query) query = {};
+async function get(filter) {
+    const f = {};
 
-    const data = await getMatch(query);
+    if (filter) {
+        if (filter.matchID) {
+            if (!validator.uuidv4(filter.matchID)) return { success: false, status: 400, errors: '"matchID" is not valid' };
+            else f.matchID = filter.matchID;
+        }
+    }
+
+    const data = await getMatch(f);
 
     if (!data) return { success: false, status: 500, errors: ['Internal API error'] };
 

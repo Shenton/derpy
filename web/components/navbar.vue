@@ -9,6 +9,9 @@
             </b-navbar-brand>
 
             <b-navbar-nav>
+                <b-nav-item v-if="$store.state.auth.statsAccess" to="/pubg">PUBG</b-nav-item>
+            </b-navbar-nav>
+            <b-navbar-nav>
                 <b-nav-item-dropdown v-if="$store.state.auth.hasAccess" text="Modules">
                     <b-dropdown-item to="/modules/activity">Activity</b-dropdown-item>
                     <b-dropdown-item to="/modules/mp3">mp3</b-dropdown-item>

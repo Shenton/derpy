@@ -146,6 +146,10 @@ async function update(filter, data) {
         if (!validator.isBoolean(data.hasAccess)) badRequest.push('"hasAccess" is not valid');
         else doc.hasAccess = data.hasAccess;
     }
+    if (data.statsAccess === true || data.statsAccess === false) {
+        if (!validator.isBoolean(data.statsAccess)) badRequest.push('"statsAccess" is not valid');
+        else doc.statsAccess = data.statsAccess;
+    }
 
     if (badRequest.length) return { success: false, status: 400, errors: badRequest };
 

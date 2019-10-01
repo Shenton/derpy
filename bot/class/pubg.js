@@ -352,7 +352,10 @@ class pubgClass extends EventEmitter {
             await Promise.all(this.playersFormated.map(async players => {
                 const res = await axios(`players?filter[playerNames]=${players}`);
 
-                if (res.status > 400) return (httpErrors[res.status]) ? httpErrors[res.status] : res.status;
+                if (res.status > 400) {
+                    this.emit('error', 'pubg class error => getPlayersLastMatch: res status: ' + (httpErrors[res.status]) ? httpErrors[res.status] : res.status);
+                    return false;
+                }
 
                 res.data.data.forEach(player => {
                     // If the player did not play for a long time the last match did not exists
@@ -363,7 +366,7 @@ class pubgClass extends EventEmitter {
             return out;
         }
         catch(err) {
-            this.emit('error', 'pubg class error: ' + err);
+            this.emit('error', 'pubg class error => getPlayersLastMatch: ' + err);
         }
     }
 
@@ -371,7 +374,7 @@ class pubgClass extends EventEmitter {
         try {
             const res = await axios(`matches/${matchID}`);
             if (res.status > 400) {
-                this.emit('error', 'pubg class error: res status: ' + (httpErrors[res.status]) ? httpErrors[res.status] : res.status);
+                this.emit('error', 'pubg class error => getMatch: res status: ' + (httpErrors[res.status]) ? httpErrors[res.status] : res.status);
                 return false;
             }
             if (res.data.data.attributes.mapName === 'Range_Main') return false;
@@ -436,7 +439,7 @@ class pubgClass extends EventEmitter {
             return out;
         }
         catch(err) {
-            this.emit('error', 'pubg class error: ' + err);
+            this.emit('error', 'pubg class error => getMatch: ' + err);
         }
     }
 

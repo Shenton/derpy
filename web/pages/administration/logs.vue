@@ -29,8 +29,8 @@
             :items="logs"
             :fields="fields"
             :tbody-tr-class="rowClass"
-            sort-by="timestamp"
-            :sort-desc="true"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
             :filter="filter"
             :filter-function="filterFunc"
         />
@@ -74,6 +74,7 @@ export default {
                     key: 'timestamp',
                     label: 'Date',
                     sortable: true,
+                    //sortByFormatted: true,
                     thStyle: {
                         width: '30%',
                     },
@@ -90,6 +91,8 @@ export default {
                     },
                 },
             ],
+            sortBy: 'timestamp',
+            sortDesc: true,
         };
     },
     async asyncData({ $axios }) {

@@ -24,7 +24,7 @@
             :fields="fields"
             @row-selected="rowSelected"
         >
-            <template slot="enabledCheckBox" slot-scope="row">
+            <template v-slot:cell(enabledCheckBox)="row">
                 <b-form>
                     <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item._id, row.item.enabled)" />
                 </b-form>

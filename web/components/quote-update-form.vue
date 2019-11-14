@@ -12,7 +12,7 @@
             :items="quotesTable"
             :fields="fields"
         >
-            <template slot="delete" slot-scope="row">
+            <template v-slot:cell(delete)="row">
                 <i class="far fa-trash-alt text-danger" @click="deleteQuote(row.item.index)" />
             </template>
         </b-table>

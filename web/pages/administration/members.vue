@@ -20,15 +20,15 @@
             :items="members"
             :fields="fields"
         >
-            <template slot="fullName" slot-scope="row">
+            <template v-slot:cell(fullName)="row">
                 {{ row.item.username }}<span class="text-primary">#{{ row.item.discriminator }}</span>{{ row.item.isOwner ? '  (Owner)' : '' }}
             </template>
-            <template slot="accessCheckBox" slot-scope="row">
+            <template v-slot:cell(accessCheckBox)="row">
                 <b-form>
                     <b-form-checkbox v-model="row.item.hasAccess" name="check-button" switch @change="toggleAccess(row.item._id, row.item.hasAccess)" />
                 </b-form>
             </template>
-            <template slot="statsAccessCheckBox" slot-scope="row">
+            <template v-slot:cell(statsAccessCheckBox)="row">
                 <b-form>
                     <b-form-checkbox v-model="row.item.statsAccess" name="check-button" switch @change="toggleStatsAccess(row.item._id, row.item.statsAccess)" />
                 </b-form>

@@ -20,7 +20,7 @@
             :items="modulesData"
             :fields="fields"
         >
-            <template slot="enabledCheckBox" slot-scope="row">
+            <template v-slot:cell(enabledCheckBox)="row">
                 <b-form>
                     <b-form-checkbox v-model="row.item.enabled" name="check-button" switch @change="toggleEnabled(row.item.name, row.item.enabled)" />
                 </b-form>

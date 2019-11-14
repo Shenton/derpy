@@ -18,18 +18,18 @@
             selectable
             select-mode="single"
             selectedVariant="primary"
-            sort-by="date"
-            :sort-desc="true"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
             :current-page="currentPage"
             :per-page="perPage"
             :items="matches"
             :fields="fields"
             @row-selected="rowSelected"
         >
-            <template slot="date" slot-scope="data">
+            <template v-slot:cell(date)="data">
                 {{ momentCalendar(data.value) }}
             </template>
-            <template slot="stats" slot-scope="row">
+            <template v-slot:cell(stats)="row">
                 <b-link :to="'/pubg/' + row.item.matchID">Lien</b-link>
             </template>
             <template slot="row-details" slot-scope="row">
@@ -77,6 +77,7 @@ export default {
                     key: 'date',
                     label: 'Date',
                     sortable: true,
+                    sortByFormatted: true,
                     thStyle: {
                         width: '20%',
                     },
@@ -146,6 +147,8 @@ export default {
             currentPage: 1,
             perPage: 10,
             pageOptions: [5, 10, 15],
+            sortBy: 'date',
+            sortDesc: true,
             mapName: {
                 'Desert_Main': 'Miramar',
                 'DihorOtok_Main': 'Vikendi',

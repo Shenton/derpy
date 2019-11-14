@@ -40,9 +40,9 @@ async function init() {
                 const current = message.guild.region;
                 let newRegion;
 
-                if (current === 'eu-central') newRegion = 'eu-west';
-                else if (current === 'eu-west') newRegion = 'eu-central';
-                else newRegion = 'eu-west';
+                if (current === 'europe') newRegion = 'russia';
+                else if (current === 'russia') newRegion = 'europe';
+                else newRegion = 'europe';
 
                 message.guild.setRegion(newRegion)
                     .then(

@@ -361,12 +361,12 @@ async function displayMatch(id, message) {
                     {
                         name: 'Frags',
                         value: `\`\`\`swift\nFrags: ${data.kills} (HS: ${data.headshotKills})\nDBNOs: ${data.DBNOs}\nAssists: ${data.assists}\`\`\``,
-                        inline: true,
+                        //inline: true,
                     },
                     {
                         name: 'Survie',
                         value: `\`\`\`swift\nSoins: ${data.heals}\nBoosts: ${data.boosts}\nRelève: ${data.revives}\`\`\``,
-                        inline: true,
+                        //inline: true,
                     },
                     {
                         name: 'Informations',
@@ -394,7 +394,7 @@ async function displayMatch(id, message) {
                     },
                     {
                         name: 'Totaux',
-                        value: `\`\`\`py\n@ Dégats${totalDamage}\nFrags: ${totalKills} (HS: ${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
+                        value: `\`\`\`py\n@ Dégats: ${totalDamage}\nFrags: ${totalKills} (HS: ${totalHeadshots})\nDBNOs: ${totalDBNOs}\`\`\``,
                     },
                 );
             }
@@ -474,17 +474,41 @@ async function displayMatchShort(id, message) {
                 totalHeadshots += data.headshotKills;
                 totalDBNOs += data.DBNOs;
 
+                // Embeds fields before discord BREAKING modifications, 2 colums to 3 colums even with thumbnail
+                // embedContent.fields.push(
+                //     {
+                //         name: 'Joueur',
+                //         value: `\`\`\`css\n${data.name} [${damage} dégats]\`\`\``,
+                //         inline: true,
+                //     },
+                //     {
+                //         name: '\u200b',
+                //         value: `[op.gg](https://pubg.op.gg/user/${data.name}) • [pubg.sh](https://pubg.sh/${data.name}/steam/${id})`,
+                //         inline: true,
+                //     },
+                //     {
+                //         name: 'Frags',
+                //         value: `\`\`\`swift\nFrags: ${data.kills} (HS: ${data.headshotKills})\nDBNOs: ${data.DBNOs}\nFragDist: ${longestKill}\`\`\``,
+                //         inline: true,
+                //     },
+                //     {
+                //         name: 'Survie',
+                //         value: `\`\`\`swift\nSoins: ${data.heals}\nBoosts: ${data.boosts}\nTemps: ${timeSurvived}\`\`\``,
+                //         inline: true,
+                //     }
+                // );
+
                 embedContent.fields.push(
                     {
                         name: 'Joueur',
                         value: `\`\`\`css\n${data.name} [${damage} dégats]\`\`\``,
-                        inline: true,
+                        //inline: true,
                     },
-                    {
-                        name: '\u200b',
-                        value: `[op.gg](https://pubg.op.gg/user/${data.name}) • [pubg.sh](https://pubg.sh/${data.name}/steam/${id})`,
-                        inline: true,
-                    },
+                    // {
+                    //     name: '\u200b',
+                    //     value: `[op.gg](https://pubg.op.gg/user/${data.name}) • [pubg.sh](https://pubg.sh/${data.name}/steam/${id})`,
+                    //     //inline: true,
+                    // },
                     {
                         name: 'Frags',
                         value: `\`\`\`swift\nFrags: ${data.kills} (HS: ${data.headshotKills})\nDBNOs: ${data.DBNOs}\nFragDist: ${longestKill}\`\`\``,

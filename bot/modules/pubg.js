@@ -831,8 +831,8 @@ async function displayLastMatch(messageObj) {
 
         const filteredMatches = [...new Set(matches)];
         filteredMatches.forEach(match => {
-            //if (match) displayMatch(match, messageObj);
-            if (match) displayMatchShort(match, messageObj);
+            if (match) displayMatch(match, messageObj);
+            //if (match) displayMatchShort(match, messageObj);
         });
     }
     catch(err) {

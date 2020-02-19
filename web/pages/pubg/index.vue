@@ -156,6 +156,7 @@ export default {
                 'Baltic_Main': 'Erangel',
                 'Range_Main': 'Camp Jackal',
                 'Savage_Main': 'Sanhok',
+                'Summerland_Main': 'Karakin',
             },
             gameMode: {
                 duo: { gameType: null, gameMode: 'Duo', gamePOV: 'TPP' },

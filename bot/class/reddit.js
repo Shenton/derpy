@@ -43,7 +43,7 @@ class RedditCaller extends EventEmitter {
             })
             .catch(err => {
                 this.canWatch = false;
-                setTimeout(function() {
+                setTimeout(() => {
                     this.canWatch = true;
                 }, 60000);
 

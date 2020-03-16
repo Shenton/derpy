@@ -195,6 +195,9 @@ export default {
                 'zombie-solo-fpp': { gameType: 'Zombie', gameMode: 'Solo', gamePOV: 'FPP' },
                 'zombie-squad': { gameType: 'Zombie', gameMode: 'Squad', gamePOV: 'TPP' },
                 'zombie-squad-fpp': { gameType: 'Zombie', gameMode: 'Squad', gamePOV: 'FPP' },
+                'lab-tpp': { gameType: 'Lab', gameMode: null, gamePOV: 'TPP' },
+                'lab-fpp': { gameType: 'Lab', gameMode: null, gamePOV: 'FPP' },
+                'tdm': { gameType: 'TDM', gameMode: null, gamePOV: 'FPP' },
             },
         };
     },

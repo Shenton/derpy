@@ -203,4 +203,10 @@ process.on('message', message => {
 });
 
 // Log Derpy to Discord
-client.login(discordToken);
+client.login(discordToken)
+    .then(info => {
+        logger.info('Client login OK.');
+    })
+    .catch(err => {
+        logger.error(err);
+    });

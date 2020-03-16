@@ -23,7 +23,7 @@ const logger = createLogger({
     transports: [transport],
 });
 // If we are in dev we want to also output the log to the console
-if (1 === 1 || process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development') {
     const myFormat = format.printf(({ level, message, label, timestamp, stack }) => {
         let color = '';
 

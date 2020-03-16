@@ -326,6 +326,9 @@ export default {
                 'zombie-solo-fpp': { gameType: 'Zombie', gameMode: 'Solo', gamePOV: 'FPP' },
                 'zombie-squad': { gameType: 'Zombie', gameMode: 'Squad', gamePOV: 'TPP' },
                 'zombie-squad-fpp': { gameType: 'Zombie', gameMode: 'Squad', gamePOV: 'FPP' },
+                'lab-tpp': { gameType: 'Lab', gameMode: 'None', gamePOV: 'TPP' },
+                'lab-fpp': { gameType: 'Lab', gameMode: 'None', gamePOV: 'FPP' },
+                'tdm': { gameType: 'TDM', gameMode: 'None', gamePOV: 'FPP' },
             },
             causerToID:{
                 ProjGrenade_C: 'Item_Weapon_Grenade_C',

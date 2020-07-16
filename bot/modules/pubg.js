@@ -801,7 +801,7 @@ async function gotNewMatch(idS) {
 }
 
 async function updatePlayersLastMatch() {
-    logger.debug('Updating players last match');
+    logger.debug('module => pubg: Updating players last match');
     const matches = await pubg.getPlayersLastMatch();
 
     if (typeof matches !== 'object') {
@@ -814,6 +814,8 @@ async function updatePlayersLastMatch() {
     for (const player in matches) {
         const lastMatch = await getPlayerLastMatch(player);
         const matchID = matches[player];
+
+        logger.debug(`module => pubg => updatePlayersLastMatch: lastMatch: ${lastMatch}, matchID: ${matchID}`);
 
         if (matchID !== null && lastMatch !== matchID) {
             await updatePlayerLastMatch(player, matchID);

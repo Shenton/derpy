@@ -186,71 +186,73 @@
                     </b-col>
                 </b-row>
             </b-card>
-            <hr>
-            <h4>Frags</h4>
-            <b-table
-                hover
-                head-variant="light"
-                :items="match.telemetry[player.name].frag"
-                :fields="fragFields"
-            >
-                <template slot="weaponImage" slot-scope="row">
-                    <b-img :src="'/img/pubg/' + causerToID[row.item.weapon] + '.png'" :alt="causerToID[row.item.weapon]" height="20" />
-                </template>
-            </b-table>
-            <hr>
-            <h4>Armes</h4>
-            <b-row v-for="(row, index3) in getWeaponStats(match.telemetry[player.name].weapon)" :key="'weaponStats' + index3" class="mt-3">
-                <b-col v-for="(weapon, weaponName) in row" :key="weaponName" cols="6">
-                    <b-card
-                        :img-src="'/img/pubg/' + (causerToID[weaponName] || weaponName) + '.png'"
-                        :img-alt="weaponName"
-                        img-height="60vh"
-                        img-width="100%"
-                        img-top
-                    >
-                        <b-row>
-                            <b-col cols="6">
-                                <div class="chart-size">
-                                    <c-pie :data="weapon.shotsChartData" :options="weapon.chartOptions" />
-                                </div>
-                            </b-col>
-                            <b-col cols="6">
-                                <div class="chart-size">
-                                    <c-pie v-if="weapon.hits > 0" :data="weapon.headshotsChartData" :options="weapon.chartOptions" />
-                                </div>
-                            </b-col>
-                        </b-row>
-                    </b-card>
-                </b-col>
-            </b-row>
-            <hr>
-            <h4>Dégats faits</h4>
-            <b-card
-                v-for="(victim, victimName) in getDamageStats(match.telemetry[player.name].damageDone)"
-                :key="'damageStats' + victimName"
-                :header="victimName"
-                header-bg-variant="primary"
-                align="center"
-                class="mt-3"
-            >
-                <b-row>
-                    <b-col cols="6">
-                        <div class="chart-size-500">
-                            <c-radar :data="victim.damageChartData" :options="victim.damageChartOptions" />
-                        </div>
-                    </b-col>
-                    <b-col cols="6">
-                        <div class="chart-size-500">
-                            <c-bar :data="victim.hitChartData" :options="victim.hitChartOptions" />
-                        </div>
+            <div v-if="match.telemetry[player.name]">
+                <hr>
+                <h4>Frags</h4>
+                <b-table
+                    hover
+                    head-variant="light"
+                    :items="match.telemetry[player.name].frag"
+                    :fields="fragFields"
+                >
+                    <template slot="weaponImage" slot-scope="row">
+                        <b-img :src="'/img/pubg/' + causerToID[row.item.weapon] + '.png'" :alt="causerToID[row.item.weapon]" height="20" />
+                    </template>
+                </b-table>
+                <hr>
+                <h4>Armes</h4>
+                <b-row v-for="(row, index3) in getWeaponStats(match.telemetry[player.name].weapon)" :key="'weaponStats' + index3" class="mt-3">
+                    <b-col v-for="(weapon, weaponName) in row" :key="weaponName" cols="6">
+                        <b-card
+                            :img-src="'/img/pubg/' + (causerToID[weaponName] || weaponName) + '.png'"
+                            :img-alt="weaponName"
+                            img-height="60vh"
+                            img-width="100%"
+                            img-top
+                        >
+                            <b-row>
+                                <b-col cols="6">
+                                    <div class="chart-size">
+                                        <c-pie :data="weapon.shotsChartData" :options="weapon.chartOptions" />
+                                    </div>
+                                </b-col>
+                                <b-col cols="6">
+                                    <div class="chart-size">
+                                        <c-pie v-if="weapon.hits > 0" :data="weapon.headshotsChartData" :options="weapon.chartOptions" />
+                                    </div>
+                                </b-col>
+                            </b-row>
+                        </b-card>
                     </b-col>
                 </b-row>
-            </b-card>
+                <hr>
+                <h4>Dégats faits</h4>
+                <b-card
+                    v-for="(victim, victimName) in getDamageStats(match.telemetry[player.name].damageDone)"
+                    :key="'damageStats' + victimName"
+                    :header="victimName"
+                    header-bg-variant="primary"
+                    align="center"
+                    class="mt-3"
+                >
+                    <b-row>
+                        <b-col cols="6">
+                            <div class="chart-size-500">
+                                <c-radar :data="victim.damageChartData" :options="victim.damageChartOptions" />
+                            </div>
+                        </b-col>
+                        <b-col cols="6">
+                            <div class="chart-size-500">
+                                <c-bar :data="victim.hitChartData" :options="victim.hitChartOptions" />
+                            </div>
+                        </b-col>
+                    </b-row>
+                </b-card>
+            </div>
         </div>
     </b-container>
     <b-container>
-        <pre class="text-white">{{ JSON.stringify(match, null, 2) }}</pre>
+        <pre v-if="inDev" class="text-white">{{ JSON.stringify(match, null, 2) }}</pre>
     </b-container>
 </div>
 </template>
@@ -263,7 +265,7 @@ import 'chartjs-plugin-colorschemes';
 import ChartPie from '../../components/chart-pie';
 import ChartRadar from '../../components/chart-radar';
 import ChartBar from '../../components/chart-bar';
-import ChartHorizontalBar from '../../components/chart-horizontal-bar';
+//import ChartHorizontalBar from '../../components/chart-horizontal-bar';
 
 moment.locale('fr');
 
@@ -273,7 +275,7 @@ export default {
         'c-pie': ChartPie,
         'c-radar': ChartRadar,
         'c-bar': ChartBar,
-        'c-horizontal-bar': ChartHorizontalBar,
+        //'c-horizontal-bar': ChartHorizontalBar,
     },
     data() {
         return {
@@ -432,6 +434,7 @@ export default {
                 },
             ],
             chartScheme: 'office.Capital6',
+            inDev: process.env.NODE_ENV == 'development' ? true : false,
         };
     },
     head() {

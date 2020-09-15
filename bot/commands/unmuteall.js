@@ -9,12 +9,12 @@ const logger = require('../logger');
 const { dbCommandGet } = require('../methods');
 
 // Variables
-const commandName = 'unmuteall';
+const commandName = 'unmuteal';
 let allowedChannels = [];
 let allowedRoles = [];
 let guildOnly = true;
 let aliases = ['ua'];
-let description = 'Démute tous les membres du canal ou tu te trouve';
+let description = 'Démute tous les membres du canal ou tu te trouves';
 let usage = false;
 let cooldown = 3;
 

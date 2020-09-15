@@ -14,7 +14,7 @@ let allowedChannels = [];
 let allowedRoles = [];
 let guildOnly = true;
 let aliases = ['ma'];
-let description = 'Mute tous les membres du canal ou tu te trouve';
+let description = 'Mute tous les membres du canal ou tu te trouves';
 let usage = false;
 let cooldown = 3;
 

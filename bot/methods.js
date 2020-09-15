@@ -149,13 +149,17 @@ async function dbCommandGet(name, description, usage, aliases, cooldown) {
         const query = await getCommand({ name: name });
 
         if (query.status === 404) {
-            await addCommand({
+            const request = await addCommand({
                 name: name,
                 description: description,
                 usage: usage,
                 aliases: aliases,
                 cooldown: cooldown,
             });
+
+            if (!request.success) {
+                logger.error(`Adding command: ${name} failed. Error code: ${request.status}. Errors: ${request.errors}`);
+            }
             return false;
         }
 

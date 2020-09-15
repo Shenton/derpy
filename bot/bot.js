@@ -26,10 +26,12 @@ const commandsList = [];
         const file = commandFiles[i];
         const commandModule = require(`./commands/${file}`);
         const command = await commandModule.init();
+        logger.debug(`Loading commandfile: ${file}`);
 
         if (command) {
             client.commands.set(command.name, command);
             commandsList.push(prefix + command.name);
+            logger.info(`Loaded command: ${command.name}`);
         }
     }
     const commandsString = commandsList.join(' ');

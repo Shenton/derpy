@@ -277,6 +277,25 @@ export default {
         'c-bar': ChartBar,
         //'c-horizontal-bar': ChartHorizontalBar,
     },
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.statsAccess) return redirect('/');
+    },
+    async asyncData({ params, $axios }) {
+        const matchID = params.matchID;
+        let match = {};
+
+        try {
+            const data = await $axios.$get('stats/match/' + matchID);
+
+            if (data) match = data[0];
+        }
+        catch(err) {
+            //
+        }
+
+        return { matchID: matchID, match: match };
+    },
     data() {
         return {
             title: 'Match',
@@ -437,36 +456,9 @@ export default {
             inDev: process.env.NODE_ENV == 'development' ? true : false,
         };
     },
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
-    },
-    validate({ params }) {
-        return /^[A-F\d]{8}-[A-F\d]{4}-4[A-F\d]{3}-[89AB][A-F\d]{3}-[A-F\d]{12}$/i.test(params.matchID);
-    },
-    computed: {
+    // computed: {
 
-    },
-    async asyncData({ params, $axios }) {
-        const matchID = params.matchID;
-        let match = {};
-
-        try {
-            const data = await $axios.$get('stats/match/' + matchID);
-
-            if (data) match = data[0];
-        }
-        catch(err) {
-            //
-        }
-
-        return { matchID: matchID, match: match };
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.statsAccess) return redirect('/');
-    },
+    // },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
     },
@@ -680,6 +672,14 @@ export default {
 
             return out;
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
+    },
+    validate({ params }) {
+        return /^[A-F\d]{8}-[A-F\d]{4}-4[A-F\d]{3}-[89AB][A-F\d]{3}-[A-F\d]{12}$/i.test(params.matchID);
     },
 };
 </script>

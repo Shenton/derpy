@@ -17,7 +17,7 @@ const logger = createLogger({
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
         format.errors({ stack: true }),
         format.splat(),
-        format.json()
+        format.json(),
     ),
     defaultMeta: { service: 'db' },
     transports: [transport],
@@ -44,7 +44,7 @@ if (process.env.NODE_ENV === 'development') {
             format.timestamp({ format: 'HH:mm:ss' }),
             format.errors({ stack: true }),
             format.splat(),
-            myFormat
+            myFormat,
         ),
     }));
 }

@@ -24,7 +24,7 @@ const logger = createLogger({
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
         format.errors({ stack: true }),
         format.splat(),
-        format.json()
+        format.json(),
     ),
     defaultMeta: { service: 'web' },
     transports: [transport],
@@ -36,7 +36,7 @@ const accessLogger = createLogger({
         format.timestamp({ format: 'DD-MM-YYYY HH:mm:ss' }),
         format.errors({ stack: true }),
         format.splat(),
-        format.json()
+        format.json(),
     ),
     defaultMeta: { service: 'web-access' },
     transports: [accessTransport],
@@ -64,7 +64,7 @@ if (process.env.NODE_ENV === 'development') {
             format.timestamp({ format: 'HH:mm:ss' }),
             format.errors({ stack: true }),
             format.splat(),
-            myFormat
+            myFormat,
         ),
     }));
 
@@ -76,7 +76,7 @@ if (process.env.NODE_ENV === 'development') {
             format.timestamp({ format: 'HH:mm:ss' }),
             format.errors({ stack: true }),
             format.splat(),
-            myFormat
+            myFormat,
         ),
     }));
 }

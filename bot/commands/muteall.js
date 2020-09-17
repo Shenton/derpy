@@ -1,5 +1,5 @@
 //npm modules
-//const { Attachment } = require('discord.js');
+//const { MessageAttachment } = require('discord.js');
 //const path = require('path');
 
 // Derpy modules

@@ -7,6 +7,7 @@ module.exports = {
     rootDir: __dirname,
     modulesDir: ['./../node_modules'],
     modules: [
+        'nuxt-helmet',
         '@nuxtjs/axios',
         'bootstrap-vue/nuxt',
     ],

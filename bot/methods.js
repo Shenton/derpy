@@ -23,12 +23,12 @@ function restartDerpy(messageObject, message) {
                 .catch(logger.error);
         }
         else {
-            client.guilds.get(guildID).channels.get(channelID).send(message)
+            client.guilds.resolve(guildID).channels.resolve(channelID).send(message)
                 .catch(logger.error);
         }
     }
     else {
-        client.guilds.get(guildID).channels.get(channelID).send('Bye!')
+        client.guilds.resolve(guildID).channels.resolve(channelID).send('Bye!')
             .catch(logger.error);
     }
 
@@ -37,12 +37,12 @@ function restartDerpy(messageObject, message) {
 
 function getInformation() {
     const output = {};
-    const guild = client.guilds.get(guildID);
+    const guild = client.guilds.resolve(guildID);
 
     if (guild && guild.available) {
-        const channels = guild.channels.array();
-        const members = guild.members.array();
-        const roles = guild.roles.array();
+        const channels = guild.channels.cache.array();
+        const members = guild.members.cache.array();
+        const roles = guild.roles.cache.array();
 
         output.icon = guild.icon;
         output.iconURL = guild.iconURL;
@@ -72,7 +72,7 @@ function getInformation() {
 
         for (let i = 0; i < members.length; i++) {
             const member = members[i];
-            const memberRoles = member.roles.array();
+            const memberRoles = member.roles.cache.array();
 
             const r = [];
 

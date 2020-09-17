@@ -56,10 +56,19 @@ export default {
     components: {
         moduleConfiguration,
     },
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('modules');
+            const modules = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
+            return { modulesData: modules };
+        }
+        catch(err) {
+            //
+        }
     },
     data() {
         return {
@@ -90,20 +99,6 @@ export default {
             restarting: false,
             restartVariant: 'primary',
         };
-    },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('modules');
-            const modules = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
-            return { modulesData: modules };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -158,6 +153,11 @@ export default {
                 setTimeout(() => this.restartVariant = 'primary', 3000);
             }
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

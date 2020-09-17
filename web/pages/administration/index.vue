@@ -51,10 +51,29 @@
 <script>
 export default {
     name: 'administration-configuration',
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.isOwner) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const maxVideoDuration = await $axios.$get('derpy/maxVideoDuration');
+            const maxPlaylistSize = await $axios.$get('derpy/maxPlaylistSize');
+            const volume = await $axios.$get('derpy/volume');
+            const shard = await $axios.$get('derpy/pubgShard');
+            const callsPerMinute = await $axios.$get('derpy/pubgCallsPerMinute');
+
+            return {
+                maxVideoDuration: maxVideoDuration[0].value,
+                maxPlaylistSize: maxPlaylistSize[0].value,
+                volume: volume[0].value,
+                shard: shard[0].value,
+                callsPerMinute: callsPerMinute[0].value,
+            };
+        }
+        catch(err) {
+            //
+        }
     },
     data() {
         return {
@@ -79,30 +98,6 @@ export default {
                 callsPerMinute : 1,
             },
         };
-    },
-    async asyncData({ $axios }) {
-        try {
-            const maxVideoDuration = await $axios.$get('derpy/maxVideoDuration');
-            const maxPlaylistSize = await $axios.$get('derpy/maxPlaylistSize');
-            const volume = await $axios.$get('derpy/volume');
-            const shard = await $axios.$get('derpy/pubgShard');
-            const callsPerMinute = await $axios.$get('derpy/pubgCallsPerMinute');
-
-            return {
-                maxVideoDuration: maxVideoDuration[0].value,
-                maxPlaylistSize: maxPlaylistSize[0].value,
-                volume: volume[0].value,
-                shard: shard[0].value,
-                callsPerMinute: callsPerMinute[0].value,
-            };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.isOwner) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -187,6 +182,11 @@ export default {
                 this.$axiosPostErrorHandler(err, 'Configuration non trouvé', 'Cette configuration existe déjà', 'Erreur avec l\'édition de la configuration');
             }
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

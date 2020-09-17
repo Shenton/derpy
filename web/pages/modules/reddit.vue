@@ -78,10 +78,19 @@ export default {
     components: {
         RedditUpdateForm,
     },
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('reddit');
+            const imageSubreddit = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
+            return { imageSubreddit: imageSubreddit };
+        }
+        catch(err) {
+            //
+        }
     },
     data() {
         return {
@@ -148,20 +157,6 @@ export default {
                 { value: 100, text: 'Quatre pages' },
             ],
         };
-    },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('reddit');
-            const imageSubreddit = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
-            return { imageSubreddit: imageSubreddit };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -281,6 +276,11 @@ export default {
         listingFormatter(value) {
             return this.listingNames[value];
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

@@ -106,7 +106,7 @@ client.on('message', message => {
     if (!mp3List.includes(command)) return;
 
     // Grab the voice channel of the member
-    const { voiceChannel } = message.member;
+    const voiceChannel = message.member.voice.channel;
 
     // The member is not in a voice channel
     if (!voiceChannel) return;
@@ -123,11 +123,11 @@ client.on('message', message => {
     // Play the mp3
     voiceChannel.join().then(connection => {
         const file = path.join(rootDir, 'assets/mp3', command + '.mp3');
-        const dispatcher = connection.playFile(file);
+        const dispatcher = connection.play(file);
         dispatcher.on('start', () => {
             isPlaying = true;
         });
-        dispatcher.on('end', () => {
+        dispatcher.on('finish', () => {
             setTimeout(() => {
                 isPlaying = false;
                 voiceChannel.leave();

@@ -43,10 +43,18 @@ import moment from 'moment';
 
 export default {
     name: 'administration-logs',
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.isOwner) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('logs/bot');
+            return { logs: data };
+        }
+        catch(err) {
+            //
+        }
     },
     data() {
         return {
@@ -94,19 +102,6 @@ export default {
             sortBy: 'timestamp',
             sortDesc: true,
         };
-    },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('logs/bot');
-            return { logs: data };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.isOwner) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -162,6 +157,11 @@ export default {
             f++;
             this.filter = String(f);
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

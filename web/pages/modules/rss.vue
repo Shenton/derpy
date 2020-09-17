@@ -117,10 +117,31 @@ export default {
     components: {
         RssUpdateForm,
     },
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        let feeds;
+        let files;
+
+        try {
+            const data = await $axios.$get('rss');
+            feeds = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
+        }
+        catch(err) {
+            feeds = [];
+        }
+
+        try {
+            const data = await $axios.$get('rss/logos');
+            files = data;
+        }
+        catch(err) {
+            files = [];
+        }
+
+        return { feeds: feeds, logos: files };
     },
     data() {
         return {
@@ -182,32 +203,6 @@ export default {
             if (this.newLogo.size > 1024 * 1024) return false;
             return /^[a-z0-9]{2,22}(\.jpeg|\.jpg|\.png){1}$/.test(this.newLogo.name);
         },
-    },
-    async asyncData({ $axios }) {
-        let feeds;
-        let files;
-
-        try {
-            const data = await $axios.$get('rss');
-            feeds = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
-        }
-        catch(err) {
-            feeds = [];
-        }
-
-        try {
-            const data = await $axios.$get('rss/logos');
-            files = data;
-        }
-        catch(err) {
-            files = [];
-        }
-
-        return { feeds: feeds, logos: files };
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -404,6 +399,11 @@ export default {
                 this.logoSelectOptions.push({ value: file, text: fileName });
             }
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

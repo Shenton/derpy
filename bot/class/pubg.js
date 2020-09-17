@@ -377,7 +377,8 @@ class pubgClass extends EventEmitter {
 
                 res.data.data.forEach(player => {
                     // If the player did not play for a long time the last match did not exists
-                    out[player.attributes.name] = player.relationships.matches.data[0] ? player.relationships.matches.data[0].id : null;
+                    //out[player.attributes.name] = player.relationships.matches.data[0] ? player.relationships.matches.data[0].id : null;
+                    out[player.attributes.name] = player.relationships.matches.data[0] ? player.relationships.matches.data.map(m => m.id) : false;
                 });
             }));
 

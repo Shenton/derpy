@@ -1,7 +1,7 @@
 // npm modules
 const path = require('path');
 const moment = require('moment');
-const { Attachment } = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 
 // Derpy globals
 const logger = require('../logger');
@@ -66,8 +66,8 @@ async function getModuleConfig() {
 }
 
 function displayImagePost(post) {
-    const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
-    const redditIcon = new Attachment(path.join(rootDir, 'assets/img/reddit.png'));
+    const area51 = new MessageAttachment(path.join(rootDir, 'assets/img/area51.png'));
+    const redditIcon = new MessageAttachment(path.join(rootDir, 'assets/img/reddit.png'));
 
     const postDate = moment(post.created_utc * 1000).locale('fr').format('LLLL');
 
@@ -93,7 +93,7 @@ function displayImagePost(post) {
 
     if (!textChannel) return logger.error(`Reddit module is enabled and sub: ${post.subreddit} is defined, but the text channel is not.`);
 
-    client.guilds.get(guildID).channels.get(textChannel).send({ files: [area51, redditIcon], embed: embedContent })
+    client.guilds.resolve(guildID).channels.resolve(textChannel).send({ files: [area51, redditIcon], embed: embedContent })
         .catch(logger.error);
 }
 

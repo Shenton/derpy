@@ -1,5 +1,5 @@
 //npm modules
-const { Attachment } = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 const path = require('path');
 
 // Derpy modules
@@ -59,7 +59,7 @@ async function init() {
                     });
 
                 if (!args.length) {
-                    const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
+                    const area51 = new MessageAttachment(path.join(rootDir, 'assets/img/area51.png'));
                     const embed = {
                         color: 0x25701e,
                         author: {
@@ -94,7 +94,7 @@ async function init() {
                 message.guild.setRegion(newRegion)
                     .then(
                         message.channel.send(`Région changée pour: ${newRegion}.`)
-                            .catch(logger.error)
+                            .catch(logger.error),
                     )
                     .catch(err => {
                         logger.error(`Region change failed - Member: ${message.author.tag} - Region: ${newRegion}\n`, err);

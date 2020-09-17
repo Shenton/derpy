@@ -51,10 +51,19 @@
 <script>
 export default {
     name: 'administration-members',
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.isOwner) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('members');
+            const members = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
+            return { members: members };
+        }
+        catch(err) {
+            //
+        }
     },
     data() {
         return {
@@ -91,20 +100,6 @@ export default {
             perPage: 10,
             pageOptions: [5, 10, 15],
         };
-    },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('members');
-            const members = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
-            return { members: members };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.isOwner) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -150,6 +145,11 @@ export default {
             if (access) this.submitUpdate(id, { statsAccess: false });
             else this.submitUpdate(id, { statsAccess: true });
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

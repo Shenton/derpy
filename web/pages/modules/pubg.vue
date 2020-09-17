@@ -66,10 +66,19 @@ export default {
     components: {
         PlayerUpdateForm,
     },
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('player');
+            const players = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
+            return { players: players };
+        }
+        catch(err) {
+            //
+        }
     },
     data() {
         return {
@@ -100,20 +109,6 @@ export default {
             showNewForm: true,
             newPlayer: '',
         };
-    },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('player');
-            const players = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
-            return { players: players };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -227,6 +222,11 @@ export default {
                 this.showNewForm = true;
             });
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

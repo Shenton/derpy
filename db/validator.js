@@ -57,6 +57,15 @@ validator.uuidv4 = (uuid) => {
     return /^[A-F\d]{8}-[A-F\d]{4}-4[A-F\d]{3}-[89AB][A-F\d]{3}-[A-F\d]{12}$/i.test(uuid);
 };
 
+validator.uuidv4Array = (array) => {
+    if (typeof array !== 'object') return false;
+    for (let i = 0; i < array.length; i++) {
+        const item = array[i];
+        if (!validator.uuidv4(item)) return false;
+    }
+    return true;
+};
+
 validator.response = (response) => {
     if (typeof response !== 'string') return false;
     if (response === '') return false;

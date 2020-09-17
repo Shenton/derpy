@@ -4,7 +4,7 @@ const humanizeDuration = require('humanize-duration');
 const moment = require('moment');
 const fs = require('fs-extra');
 const axiosModule = require('axios');
-const { Attachment } = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 const jsonfile = require('jsonfile');
 
 // Derpy modules
@@ -293,9 +293,9 @@ async function displayMatch(id, message) {
         const matchDate = moment(match.time).locale('fr').format('LLLL');
         const { gameType, gameMode, gamePOV } = gameModes[match.mode];
 
-        const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
-        const pubgIcon = new Attachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
-        const mapThumb = new Attachment(path.join(rootDir, `assets/img/${match.map}.png`));
+        const area51 = new MessageAttachment(path.join(rootDir, 'assets/img/area51.png'));
+        const pubgIcon = new MessageAttachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
+        const mapThumb = new MessageAttachment(path.join(rootDir, `assets/img/${match.map}.png`));
 
         const teams = match.teams;
 
@@ -371,7 +371,7 @@ async function displayMatch(id, message) {
                     {
                         name: 'Informations',
                         value: `\`\`\`swift\nSurvie: ${timeSurvived}\nFragDist: ${longestKill}\nVéhicule: ${rideDistance} (VK: ${data.roadKills}) (VD: ${data.vehicleDestroys})\nHiking: ${walkDistance}\nNage: ${swimDistance}\nTK: ${data.teamKills}\nArmes: ${data.weaponsAcquired}\`\`\``,
-                    }
+                    },
                 );
 
                 // this is a blank line separator between players
@@ -381,7 +381,7 @@ async function displayMatch(id, message) {
                         {
                             name: '\u200b',
                             value: '\u200b',
-                        }
+                        },
                     );
                 }
             }
@@ -426,9 +426,9 @@ async function displayMatchShort(id, message) {
         const matchDate = moment(match.time).locale('fr').format('LLLL');
         const { gameType, gameMode, gamePOV } = gameModes[match.mode];
 
-        const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
-        const pubgIcon = new Attachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
-        const mapThumb = new Attachment(path.join(rootDir, `assets/img/${match.map}.png`));
+        const area51 = new MessageAttachment(path.join(rootDir, 'assets/img/area51.png'));
+        const pubgIcon = new MessageAttachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
+        const mapThumb = new MessageAttachment(path.join(rootDir, `assets/img/${match.map}.png`));
 
         const teams = match.teams;
 
@@ -518,7 +518,7 @@ async function displayMatchShort(id, message) {
                         name: 'Survie',
                         value: `\`\`\`swift\nSoins: ${data.heals}\nBoosts: ${data.boosts}\nTemps: ${timeSurvived}\`\`\``,
                         inline: true,
-                    }
+                    },
                 );
             }
 
@@ -558,8 +558,8 @@ async function displayTelemetry(id, message, player) {
     if (!telemetry) return;
     if (!telemetry[player]) return message.reply('ce joueur n\'a pas participé au dernier match.');
 
-    const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
-    const pubgIcon = new Attachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
+    const area51 = new MessageAttachment(path.join(rootDir, 'assets/img/area51.png'));
+    const pubgIcon = new MessageAttachment(path.join(rootDir, 'assets/img/pubgIcon.gif'));
     const stats = telemetry[player];
 
     const embedContent = {
@@ -802,26 +802,40 @@ async function gotNewMatch(idS) {
 
 async function updatePlayersLastMatch() {
     logger.debug('module => pubg: Updating players last match');
-    const matches = await pubg.getPlayersLastMatch();
+    const players = await pubg.getPlayersLastMatch();
 
-    if (typeof matches !== 'object') {
-        logger.error('module => pubg => updatePlayersLastMatch: matches is not an object, matches: %o', matches);
+    if (typeof players !== 'object') {
+        logger.error('module => pubg => updatePlayersLastMatch: players is not an object, players: %o', players);
         return;
     }
     let gotNew = false;
     const idS = [];
 
-    for (const player in matches) {
-        const lastMatch = await getPlayerLastMatch(player);
-        const matchID = matches[player];
+    for (const player in players) {
+        const lastMatches = await getPlayerLastMatch(player);
+        const matches = players[player];
+        let shouldUpdateDB = false;
 
-        logger.debug(`module => pubg => updatePlayersLastMatch: lastMatch: ${lastMatch}, matchID: ${matchID}`);
+        logger.debug(`module => pubg => updatePlayersLastMatch: lastMatches: ${lastMatches}, matches: ${matches}`);
 
-        if (matchID !== null && lastMatch !== matchID) {
-            await updatePlayerLastMatch(player, matchID);
-            gotNew = true;
-            idS.push(matchID);
+        // If matches is not an object, the player did not play for some time
+        if (typeof matches === 'object') {
+            // PUBG modified the API and the last matches array order is now random (thanks btw)
+            // If lastMatches is not an object it was the old method using a string, fix that
+            if (typeof lastMatches !== 'object') await updatePlayerLastMatch(player, matches);
+
+            for (const index in matches) {
+                const match = matches[index];
+
+                if (!lastMatches.includes(match)) {
+                    gotNew = true;
+                    shouldUpdateDB = true;
+                    idS.push(match);
+                }
+            }
         }
+
+        if (shouldUpdateDB) await updatePlayerLastMatch(player, matches);
     }
 
     if (gotNew) gotNewMatch(idS);

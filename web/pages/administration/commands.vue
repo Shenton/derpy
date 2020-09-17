@@ -61,10 +61,19 @@ export default {
     components: {
         CommandUpdateForm,
     },
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.isOwner) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('commands');
+            const commands = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
+            return { commands: commands };
+        }
+        catch(err) {
+            //
+        }
     },
     data() {
         return {
@@ -96,20 +105,6 @@ export default {
             restarting: false,
             restartVariant: 'primary',
         };
-    },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('commands');
-            const commands = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
-            return { commands: commands };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.isOwner) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -193,6 +188,11 @@ export default {
                 }
             }
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

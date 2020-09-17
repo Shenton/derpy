@@ -2,7 +2,7 @@
 const Youtube = require('simple-youtube-api');
 const ytdl = require('ytdl-core');
 const path = require('path');
-const { Attachment } = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 const htmlspecialchars = require('html-specialchars');
 
 // Derpy modules
@@ -15,7 +15,7 @@ const { dbDerpyGet, dbDerpyUpdate } = require('../methods');
 
 // Module variables
 let playlist = [];
-let isPlaying = {
+const isPlaying = {
     status: false,
     where: {},
     who: {},
@@ -91,8 +91,8 @@ async function searchYoutube(message, search) {
         if (videos.length === 0) return { valid: false, response: 'Aucune vidéo trouvée.' };
 
         // Construct the embed
-        const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
-        const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
+        const area51 = new MessageAttachment(path.join(rootDir, 'assets/img/area51.png'));
+        const youtubeIcon = new MessageAttachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
         const embedContent = {
             color: 0x9b0f29,
             author: {
@@ -188,7 +188,7 @@ async function getVideoObject(message, request) {
     else {
         const search = request.join(' ');
         const searchResult = await searchYoutube(message, search);
-        console.log(searchResult);
+        logger.debug(`module => music => getVideoObject: searchResult: ${searchResult}`);
 
         if (searchResult.valid) url = searchResult.url;
         else return searchResult;
@@ -224,16 +224,16 @@ function play(message, where, source, who) {
         ({ where, source, who } = item);
 
         // Check if we can play the video in the voice channel
-        const member = where.guild.members.get(who.id);
+        const member = where.guild.members.resolve(who.id);
         if (!member.voiceChannel) {
             return message.channel.send(`Tu n'es plus dans un canal vocal <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                 .catch(logger.error);
         }
-        if (!voiceChannels.includes(member.voiceChannelID)) {
+        if (!voiceChannels.includes(member.voice.channelID)) {
             return message.channel.send(`Tu n'es plus dans un canal vocal autorisé <@${who.id}>, ta vidéo a été retiré de la playlist.`)
                 .catch(logger.error);
         }
-        const members = member.voiceChannel.members.array();
+        const members = member.voice.channel.members.array();
         for (let i = 0; i < members.length; i++) {
             const m = members[i];
             if (!m.user.bot && m.presence.game) {
@@ -241,40 +241,42 @@ function play(message, where, source, who) {
                     .catch(logger.error);
             }
         }
-        if (member.voiceChannelID != where.id) where = member.voiceChannel;
+        if (member.voiceChannelID != where.id) where = member.voice.channel;
     }
 
-    where.join().then(connection => {
-        const stream = ytdl(source, { filter: 'audioonly' });
-        if (volume > 1) volume = 1;
-        dispatcher = connection.playStream(stream);
-        dispatcher.setVolume(volume);
-        dispatcher.on('start', () => {
-            isPlaying = {
-                status: true,
-                where: where,
-                who: who,
-            };
-        });
-        dispatcher.on('end', () => {
-            if (!wasStopped && playlist.length > 0) {
-                play(message);
-                return;
-            }
-            isPlaying.where.leave();
-            isPlaying.status = false;
-            wasStopped = false;
-        });
-        dispatcher.on('error', (err) => {
-            isPlaying.where.leave();
-            isPlaying.status = false;
-            wasStopped = false;
-            logger.error(err);
-        });
-        dispatcher.on('debug', (debug) => {
-            logger.debug(debug);
-        });
-    });
+    where.join()
+        .then(connection => {
+            logger.debug(`music => play: source: ${source}`);
+            const stream = ytdl(source, { filter: 'audioonly' });
+            if (volume > 1) volume = 1;
+            dispatcher = connection.play(stream);
+            dispatcher.setVolume(volume);
+            isPlaying.where = where;
+            isPlaying.who = who;
+            dispatcher.on('start', () => {
+                isPlaying.status = true;
+            });
+            //dispatcher.on('end', () => {
+            dispatcher.on('finish', () => {
+                if (!wasStopped && playlist.length > 0) {
+                    play(message);
+                    return;
+                }
+                isPlaying.where.leave();
+                isPlaying.status = false;
+                wasStopped = false;
+            });
+            dispatcher.on('error', (err) => {
+                isPlaying.where.leave();
+                isPlaying.status = false;
+                wasStopped = false;
+                logger.error(err);
+            });
+            dispatcher.on('debug', (debug) => {
+                logger.debug(debug);
+            });
+        })
+        .catch(logger.error);
 }
 
 function canPlayHere(message, voiceChannel) {
@@ -307,7 +309,7 @@ async function commandAdd(message, request) {
     if (!request || !request[0]) return message.reply('si il n\'y a rien à chercher, je ne risque pas de trouver.').catch(logger.error);
     if (request[0].length > 80) return message.reply('le nombre de charactères autorisé pour une URL dépassé (80).').catch(logger.error);
 
-    const { voiceChannel } = message.member;
+    const voiceChannel = message.member.voice.channel;
     if (!canPlayHere(message, voiceChannel)) return;
 
     // Add the video
@@ -343,7 +345,7 @@ async function commandPlay(message, request) {
 
     if (request[0].length > 80) return message.reply('le nombre de charactères autorisé pour une URL dépassé (80).').catch(logger.error);
 
-    const { voiceChannel } = message.member;
+    const voiceChannel = message.member.voice.channel;
     if (!canPlayHere(message, voiceChannel)) return;
 
     // Play the video
@@ -365,14 +367,14 @@ async function commandPlay(message, request) {
 
 function commandPause(message) {
     if (!isPlaying.status) return;
-    if (message.member.voiceChannel.id != isPlaying.where.id) return message.reply('tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
+    if (message.member.voice.channelID != isPlaying.where.id) return message.reply('tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
     if (dispatcher.paused) dispatcher.resume();
     else dispatcher.pause();
 }
 
 function commandStop(message) {
     if (!isPlaying.status) return;
-    if (message.member.voiceChannel.id != isPlaying.where.id) return message.reply('tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
+    if (message.member.voice.channelID != isPlaying.where.id) return message.reply('tu n\'es pas dans le même canal que moi, stop troller manant!').catch(logger.error);
     wasStopped = true;
     dispatcher.end();
 }
@@ -380,8 +382,8 @@ function commandStop(message) {
 function commandPlaylist(message) {
     if (playlist.length === 0) return message.reply('la playlist est vide.').catch(logger.error);
 
-    const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
-    const youtubeIcon = new Attachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
+    const area51 = new MessageAttachment(path.join(rootDir, 'assets/img/area51.png'));
+    const youtubeIcon = new MessageAttachment(path.join(rootDir, 'assets/img/youtubeIcon.png'));
 
     const embedContent = {
         color: 0x9b0f29,
@@ -440,36 +442,67 @@ async function commandVolume(message, args) {
 }
 
 // This will follow the trolls who launch a music and leave the channel
-client.on('voiceStateUpdate', (oldMember, newMember) => {
+client.on('voiceStateUpdate', (oldState, newState) => {
     // Not playing, nothing to do
     if (!isPlaying.status) return;
 
     // The bot was moved
-    if (newMember.id == client.user.id && oldMember.voiceChannelID != newMember.voiceChannelID) {
+    if (newState.id == client.user.id && oldState.channelID != newState.channelID) {
         // Get the the member who initiated the command, and join his voice channel
-        const member = newMember.guild.members.get(isPlaying.who.id);
-        member.voiceChannel.join();
+        const member = newState.guild.members.resolve(isPlaying.who.id);
+        member.voice.channel.join();
     }
 
     // The member who moved is not the one who asked for a music, nothing to do
-    if (isPlaying.who.id != newMember.id) return;
+    if (isPlaying.who.id != newState.id) return;
 
     // Check if the member left the channel
-    if (oldMember.voiceChannelID != newMember.voiceChannelID) {
+    if (oldState.channelID != newState.channelID) {
         // If the member did not move to an authorized channel, this will also handle a vocal disconnection
-        if (!voiceChannels.includes(newMember.voiceChannelID)) {
+        if (!voiceChannels.includes(newState.channelID)) {
             // Stop the music, taunt the troll
             dispatcher.end();
-            client.guilds.get(guildID).channels.get(channelID).send(`Bien tenté <@${isPlaying.who.id}>, mais non.`)
+            client.guilds.resolve(guildID).channels.resolve(channelID).send(`Bien tenté <@${isPlaying.who.id}>, mais non.`)
                 .catch(logger.error);
         }
         else {
             // Follow the troll
-            isPlaying.where = newMember.voiceChannel;
-            newMember.voiceChannel.join();
+            isPlaying.where = newState.channel;
+            newState.channel.join();
         }
     }
 });
+
+// Random search on youtube to keep the API key active
+const randomArtists = ['coldplay', 'acdc', 'sepultura', 'soulfly', 'offspring', 'nirvana'];
+
+async function keepKeyAlive() {
+    const search = randomArtists[Math.floor(Math.random() * randomArtists.length)];
+
+    try {
+        const videos = await youtube.searchVideos(search, 4);
+
+        if (videos.length === 0) logger.error('module => music => keepKeyAlive: No video found');
+        else logger.info(`module => music => keepKeyAlive: search: ${search}, videos: ${videos}`);
+    }
+    catch(err) {
+        logger.error(err);
+    }
+}
+
+(function loop() {
+    // 60 * 60 * 12 * 1000
+    const rand = Math.floor(Math.random() * 43200000) + 43200000;
+
+    logger.debug('module => music => Started keep alive loop');
+
+    setTimeout(function() {
+        keepKeyAlive();
+        loop();
+    }, rand);
+}());
+
+keepKeyAlive();
 
 process.on('message', async message => {
     if (typeof message !== 'object') return;

@@ -66,10 +66,19 @@ export default {
     components: {
         ActivityUpdateForm,
     },
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('activity');
+            const activities = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
+            return { activities: activities };
+        }
+        catch(err) {
+            //
+        }
     },
     data() {
         return {
@@ -102,20 +111,6 @@ export default {
                 activity: '',
             },
         };
-    },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('activity');
-            const activities = data.map(items => ({ ...items, _showDetails: false, key: `${items._id}/${items.revision}` }));
-            return { activities: activities };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -229,6 +224,11 @@ export default {
                 this.showNewForm = true;
             });
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

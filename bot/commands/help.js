@@ -1,5 +1,5 @@
 // npm modules
-const { Attachment } = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 const path = require('path');
 
 // Derpy modules
@@ -44,7 +44,7 @@ async function init() {
             usage: usage,
             cooldown: cooldown,
             execute(message, args) {
-                const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
+                const area51 = new MessageAttachment(path.join(rootDir, 'assets/img/area51.png'));
                 let embed;
                 if (!args.length) {
                     embed = helpEmbed;

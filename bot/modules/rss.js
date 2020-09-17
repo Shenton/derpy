@@ -1,7 +1,7 @@
 // npm modules
 const path = require('path');
 const Parser = require('rss-parser');
-const { Attachment } = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 
 // Derpy modules
 const logger = require('../logger');
@@ -112,8 +112,8 @@ function updateRssFeeds() {
 function displayFeed(name, nameURL, description, img, title, url, content) {
     img = img || 'rss.png';
 
-    const area51 = new Attachment(path.join(rootDir, 'assets/img/area51.png'));
-    const logo = new Attachment(path.join(rootDir, `assets/img/rss/${img}`));
+    const area51 = new MessageAttachment(path.join(rootDir, 'assets/img/area51.png'));
+    const logo = new MessageAttachment(path.join(rootDir, `assets/img/rss/${img}`));
 
     const embedContent = {
         color: 0x0099ff,
@@ -139,13 +139,13 @@ function displayFeed(name, nameURL, description, img, title, url, content) {
             {
                 name: 'Aperçu',
                 value: content,
-            }
+            },
         );
     }
 
     if (!textChannel) return logger.error('rss module is enabled, but the text channel is not defined.');
 
-    client.guilds.get(guildID).channels.get(textChannel).send({ files: [area51, logo], embed: embedContent })
+    client.guilds.resolve(guildID).channels.resolve(textChannel).send({ files: [area51, logo], embed: embedContent })
         .catch(logger.error);
 }
 

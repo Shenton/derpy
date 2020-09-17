@@ -55,19 +55,6 @@
 <script>
 export default {
     name: 'index',
-    data() {
-        return {
-            title: 'Accueil',
-            modules: [],
-            commands: [],
-
-        };
-    },
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
-    },
     async asyncData({ $axios }) {
         try {
             const modules = await $axios.$get('public/modules');
@@ -78,9 +65,22 @@ export default {
             //
         }
     },
+    data() {
+        return {
+            title: 'Accueil',
+            modules: [],
+            commands: [],
+
+        };
+    },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
         this.$store.dispatch('botinfo/getInfo');
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

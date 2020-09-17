@@ -1,6 +1,6 @@
 const mongoose = require('../mongo');
 const Schema = mongoose.Schema;
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 const { logger } = require('../logger');
 const { ownerID } = require('../config');

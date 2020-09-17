@@ -74,10 +74,19 @@
 <script>
 export default {
     name: 'module-mp3',
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.hasAccess) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('mp3');
+            const mp3s = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
+            return { mp3s: mp3s };
+        }
+        catch(err) {
+            //
+        }
     },
     data() {
         return {
@@ -121,20 +130,6 @@ export default {
             if (this.newMP3.size > 1024 * 1024) return false;
             return /^[a-z0-9]{3,10}\.mp3$/.test(this.newMP3.name);
         },
-    },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('mp3');
-            const mp3s = data.map(items => ({ ...items, key: `${items._id}/${items.revision}` }));
-            return { mp3s: mp3s };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.hasAccess) return redirect('/');
     },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
@@ -254,6 +249,11 @@ export default {
                 this.showNewForm = true;
             });
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

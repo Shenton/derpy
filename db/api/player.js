@@ -63,7 +63,7 @@ async function update(filter, data) {
     }
 
     if (data.lastMatch) {
-        if (!validator.uuidv4(data.lastMatch)) badRequest.push('"lastMatch" is not valid');
+        if (!validator.uuidv4Array(data.lastMatch)) badRequest.push('"lastMatch" is not valid');
         else doc.lastMatch = data.lastMatch;
     }
 

@@ -68,6 +68,26 @@ moment.locale('fr');
 
 export default {
     name: 'pubg',
+    fetch({ store, redirect }) {
+        if (!store.state.auth.isAuth) return redirect('/');
+        if (!store.state.auth.statsAccess) return redirect('/');
+    },
+    async asyncData({ $axios }) {
+        try {
+            const data = await $axios.$get('stats/match');
+            /**
+             *
+             * At one point this should be removed
+             *
+             */
+            let matches = data.filter(items => items.match.teams);
+            matches = matches.map(items => ({ ...items, _showDetails: false, key: items._id }));
+            return { matches: matches };
+        }
+        catch(err) {
+            //
+        }
+    },
     data() {
         return {
             title: 'PUBG',
@@ -201,31 +221,6 @@ export default {
             },
         };
     },
-    head() {
-        return {
-            titleTemplate: '%s - ' + this.title,
-        };
-    },
-    async asyncData({ $axios }) {
-        try {
-            const data = await $axios.$get('stats/match');
-            /**
-             *
-             * At one point this should be removed
-             *
-             */
-            let matches = data.filter(items => items.match.teams);
-            matches = matches.map(items => ({ ...items, _showDetails: false, key: items._id }));
-            return { matches: matches };
-        }
-        catch(err) {
-            //
-        }
-    },
-    fetch({ store, redirect }) {
-        if (!store.state.auth.isAuth) return redirect('/');
-        if (!store.state.auth.statsAccess) return redirect('/');
-    },
     mounted() {
         this.$store.dispatch('breadcrumbs/setCrumbs', this.$route.path);
         this.totalRows = this.matches.length;
@@ -243,6 +238,11 @@ export default {
         momentCalendar(date) {
             return moment(date).calendar();
         },
+    },
+    head() {
+        return {
+            titleTemplate: '%s - ' + this.title,
+        };
     },
 };
 </script>

@@ -1,6 +1,6 @@
 {
   "name": "derpy",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Derpy the discord bot",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon app.js",

@@ -820,18 +820,21 @@ async function updatePlayersLastMatch() {
 
         // If matches is not an object, the player did not play for some time
         if (typeof matches === 'object') {
-            // PUBG modified the API and the last matches array order is now random (thanks btw)
-            // If lastMatches is not an object it was the old method using a string, fix that
-            if (typeof lastMatches !== 'object') await updatePlayerLastMatch(player, matches);
+            if (typeof lastMatches === 'object') {
+                for (const index in matches) {
+                    const match = matches[index];
 
-            for (const index in matches) {
-                const match = matches[index];
-
-                if (!lastMatches.includes(match)) {
-                    gotNew = true;
-                    shouldUpdateDB = true;
-                    idS.push(match);
+                    if (!lastMatches.includes(match)) {
+                        gotNew = true;
+                        shouldUpdateDB = true;
+                        idS.push(match);
+                    }
                 }
+            }
+            else {
+                // PUBG modified the API and the last matches array order is now random (thanks btw)
+                // If lastMatches is not an object it was the old method, storing the UUID of the last match, fix that
+                shouldUpdateDB = true;
             }
         }
 

@@ -825,9 +825,13 @@ async function updatePlayersLastMatch() {
                     const match = matches[index];
 
                     if (!lastMatches.includes(match)) {
-                        gotNew = true;
-                        shouldUpdateDB = true;
-                        idS.push(match);
+                        const exists = await getSingleMatch(match);
+
+                        if (!exists) {
+                            gotNew = true;
+                            shouldUpdateDB = true;
+                            idS.push(match);
+                        }
                     }
                 }
             }

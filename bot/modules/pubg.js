@@ -816,7 +816,7 @@ async function updatePlayersLastMatch() {
         const matches = players[player];
         let shouldUpdateDB = false;
 
-        logger.debug(`module => pubg => updatePlayersLastMatch: lastMatches: ${lastMatches}, matches: ${matches}`);
+        logger.debug(`module => pubg => updatePlayersLastMatch: player: ${player}, lastMatches: ${lastMatches}, matches: ${matches}`);
 
         // If matches is not an object, the player did not play for some time
         if (typeof matches === 'object') {
@@ -826,6 +826,7 @@ async function updatePlayersLastMatch() {
 
                     if (!lastMatches.includes(match)) {
                         const exists = await getSingleMatch(match);
+                        logger.debug(`module => pubg => updatePlayersLastMatch: exists: ${exists}, match: ${match}`);
 
                         if (!exists) {
                             gotNew = true;

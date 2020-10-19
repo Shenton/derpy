@@ -718,8 +718,8 @@ async function cleanMatches() {
 
         const data = query.data;
 
-        if (data.length > 60) {
-            const count = data.length - 60;
+        if (data.length > 600) {
+            const count = data.length - 600;
 
             for (let i = 0; i < count; i++) {
                 const matchID = data[i].matchID;

@@ -159,6 +159,7 @@ class pubgClass extends EventEmitter {
 
     mapName() {
         return {
+            'Chimera_Main': 'Paramo',
             'Desert_Main': 'Miramar',
             'DihorOtok_Main': 'Vikendi',
             'Erangel_Main': 'Erangel',

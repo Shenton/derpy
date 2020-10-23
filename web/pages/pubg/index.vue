@@ -170,6 +170,7 @@ export default {
             sortBy: 'date',
             sortDesc: true,
             mapName: {
+                'Chimera_Main': 'Paramo',
                 'Desert_Main': 'Miramar',
                 'DihorOtok_Main': 'Vikendi',
                 'Erangel_Main': 'Erangel',

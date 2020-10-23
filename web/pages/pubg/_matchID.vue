@@ -302,6 +302,7 @@ export default {
             matchID: '',
             match: {},
             mapName: {
+                'Chimera_Main': 'Paramo',
                 'Desert_Main': 'Miramar',
                 'DihorOtok_Main': 'Vikendi',
                 'Erangel_Main': 'Erangel',

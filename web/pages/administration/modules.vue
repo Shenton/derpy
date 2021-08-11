@@ -136,8 +136,8 @@ export default {
             }
         },
         toggleEnabled(name, enabled) {
-            if (enabled) this.submitUpdate(name, { enabled: false });
-            else this.submitUpdate(name, { enabled: true });
+            if (enabled) this.submitUpdate(name, { enabled: true });
+            else this.submitUpdate(name, { enabled: false });
         },
         async restartDerpy() {
             try {

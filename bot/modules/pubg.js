@@ -176,6 +176,7 @@ async function updatePlayerLastMatch(player, matchID) {
         const query = await updatePlayerByPlayer(player, data);
 
         if (query.success) return true;
+        logger.error('module => pubg => updatePlayerLastMatch: Errors: %o', query.errors);
         return false;
     }
     catch(err) {
@@ -759,7 +760,7 @@ async function gotNewMatch(idS) {
             displayMatchShort(matchID);
 
             // Get the telemetry json
-            const url = match.telemetryURL.match(/^https:\/\/telemetry-cdn\.playbattlegrounds\.com\/bluehole-pubg\/(.+)$/)[1];
+            const url = match.telemetryURL.match(/^https:\/\/telemetry-cdn\.pubg\.com\/bluehole-pubg\/(.+)$/)[1];
             const fileName = match.telemetryURL.substring(match.telemetryURL.lastIndexOf('/') + 1);
             const filePath = path.join(rootDir, 'data/pubg/telemetry/raw', fileName);
             const writeStream = fs.createWriteStream(filePath);
@@ -800,7 +801,9 @@ async function gotNewMatch(idS) {
     cleanMatches();
 }
 
-async function updatePlayersLastMatch() {
+// This was the updatePlayersLastMatch() function used when the API was providing random match IDs list
+// Keeping this in case PUBG screw things again
+/* async function updatePlayersLastMatch() {
     logger.debug('module => pubg: Updating players last match');
     const players = await pubg.getPlayersLastMatch();
 
@@ -844,6 +847,31 @@ async function updatePlayersLastMatch() {
         }
 
         if (shouldUpdateDB) await updatePlayerLastMatch(player, matches);
+    }
+
+    if (gotNew) gotNewMatch(idS);
+} */
+
+async function updatePlayersLastMatch() {
+    logger.debug('Updating players last match');
+    const matches = await pubg.getPlayersLastMatch();
+
+    if (typeof matches !== 'object') {
+        logger.error('module => pubg => updatePlayersLastMatch: matches is not an object, matches: %o', matches);
+        return;
+    }
+    let gotNew = false;
+    const idS = [];
+
+    for (const player in matches) {
+        const lastMatch = await getPlayerLastMatch(player);
+        const matchID = matches[player];
+
+        if (matchID !== null && lastMatch !== matchID) {
+            await updatePlayerLastMatch(player, matchID);
+            gotNew = true;
+            idS.push(matchID);
+        }
     }
 
     if (gotNew) gotNewMatch(idS);

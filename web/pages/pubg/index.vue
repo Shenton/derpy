@@ -30,7 +30,7 @@
                 {{ momentCalendar(data.value) }}
             </template>
             <template v-slot:cell(stats)="row">
-                <b-link :to="'/pubg/' + row.item.matchID">Lien</b-link>
+                <b-link :to="'/pubg/' + row.item.matchID">Afficher</b-link>
             </template>
             <template slot="row-details" slot-scope="row">
                 <b-row>
@@ -64,6 +64,8 @@
 
 <script>
 import moment from 'moment';
+import { mapNames, gameModes } from '../../../bot/class/pubgVars';
+
 moment.locale('fr');
 
 export default {
@@ -169,57 +171,8 @@ export default {
             pageOptions: [5, 10, 15],
             sortBy: 'date',
             sortDesc: true,
-            mapName: {
-                'Chimera_Main': 'Paramo',
-                'Desert_Main': 'Miramar',
-                'DihorOtok_Main': 'Vikendi',
-                'Erangel_Main': 'Erangel',
-                'Baltic_Main': 'Erangel',
-                'Range_Main': 'Camp Jackal',
-                'Savage_Main': 'Sanhok',
-                'Summerland_Main': 'Karakin',
-            },
-            gameMode: {
-                duo: { gameType: null, gameMode: 'Duo', gamePOV: 'TPP' },
-                'duo-fpp': { gameType: null, gameMode: 'Duo', gamePOV: 'FPP' },
-                solo: { gameType: null, gameMode: 'Solo', gamePOV: 'TPP' },
-                'solo-fpp': { gameType: null, gameMode: 'Solo', gamePOV: 'FPP' },
-                squad: { gameType: null, gameMode: 'Squad', gamePOV: 'TPP' },
-                'squad-fpp': { gameType: null, gameMode: 'Squad', gamePOV: 'FPP' },
-                'conquest-duo': { gameType: 'Conquest', gameMode: 'Duo', gamePOV: 'TPP' },
-                'conquest-duo-fpp': { gameType: 'Conquest', gameMode: 'Duo', gamePOV: 'FPP' },
-                'conquest-solo': { gameType: 'Conquest', gameMode: 'Solo', gamePOV: 'TPP' },
-                'conquest-solo-fpp': { gameType: 'Conquest', gameMode: 'Solo', gamePOV: 'FPP' },
-                'conquest-squad': { gameType: 'Conquest', gameMode: 'Squad', gamePOV: 'TPP' },
-                'conquest-squad-fpp': { gameType: 'Conquest', gameMode: 'Squad', gamePOV: 'FPP' },
-                'esports-duo': { gameType: 'Esports', gameMode: 'Duo', gamePOV: 'TPP' },
-                'esports-duo-fpp': { gameType: 'Esports', gameMode: 'Duo', gamePOV: 'FPP' },
-                'esports-solo': { gameType: 'Esports', gameMode: 'Solo', gamePOV: 'TPP' },
-                'esports-solo-fpp': { gameType: 'Esports', gameMode: 'Solo', gamePOV: 'FPP' },
-                'esports-squad': { gameType: 'Esports', gameMode: 'Squad', gamePOV: 'TPP' },
-                'esports-squad-fpp': { gameType: 'Esports', gameMode: 'Squad', gamePOV: 'FPP' },
-                'normal-duo': { gameType: 'Normal', gameMode: 'Duo', gamePOV: 'TPP' },
-                'normal-duo-fpp': { gameType: 'Normal', gameMode: 'Duo', gamePOV: 'FPP' },
-                'normal-solo': { gameType: 'Normal', gameMode: 'Solo', gamePOV: 'TPP' },
-                'normal-solo-fpp': { gameType: 'Normal', gameMode: 'Solo', gamePOV: 'FPP' },
-                'normal-squad': { gameType: 'Normal', gameMode: 'Squad', gamePOV: 'TPP' },
-                'normal-squad-fpp': { gameType: 'Normal', gameMode: 'Squad', gamePOV: 'FPP' },
-                'war-duo': { gameType: 'War', gameMode: 'Duo', gamePOV: 'TPP' },
-                'war-duo-fpp': { gameType: 'War', gameMode: 'Duo', gamePOV: 'FPP' },
-                'war-solo': { gameType: 'War', gameMode: 'Solo', gamePOV: 'TPP' },
-                'war-solo-fpp': { gameType: 'War', gameMode: 'Solo', gamePOV: 'FPP' },
-                'war-squad': { gameType: 'War', gameMode: 'Squad', gamePOV: 'TPP' },
-                'war-squad-fpp': { gameType: 'War', gameMode: 'Squad', gamePOV: 'FPP' },
-                'zombie-duo': { gameType: 'Zombie', gameMode: 'Duo', gamePOV: 'TPP' },
-                'zombie-duo-fpp': { gameType: 'Zombie', gameMode: 'Duo', gamePOV: 'FPP' },
-                'zombie-solo': { gameType: 'Zombie', gameMode: 'Solo', gamePOV: 'TPP' },
-                'zombie-solo-fpp': { gameType: 'Zombie', gameMode: 'Solo', gamePOV: 'FPP' },
-                'zombie-squad': { gameType: 'Zombie', gameMode: 'Squad', gamePOV: 'TPP' },
-                'zombie-squad-fpp': { gameType: 'Zombie', gameMode: 'Squad', gamePOV: 'FPP' },
-                'lab-tpp': { gameType: 'Lab', gameMode: null, gamePOV: 'TPP' },
-                'lab-fpp': { gameType: 'Lab', gameMode: null, gamePOV: 'FPP' },
-                'tdm': { gameType: 'TDM', gameMode: null, gamePOV: 'FPP' },
-            },
+            mapName: mapNames,
+            gameMode: gameModes,
         };
     },
     mounted() {

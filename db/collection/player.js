@@ -10,7 +10,7 @@ const playerSchema = new Schema({
         required: true,
     },
     enabled: Boolean,
-    lastMatch: Array,
+    lastMatch: String,
     revision: Number,
 });
 

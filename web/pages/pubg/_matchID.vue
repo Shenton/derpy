@@ -194,23 +194,13 @@
                     head-variant="light"
                     :items="match.telemetry[player.name].frag"
                     :fields="fragFields"
-                >
-                    <template slot="weaponImage" slot-scope="row">
-                        <b-img :src="'/img/pubg/' + causerToID[row.item.weapon] + '.png'" :alt="causerToID[row.item.weapon]" height="20" />
-                    </template>
-                </b-table>
+                />
                 <hr>
                 <h4>Armes</h4>
                 <b-row v-for="(row, index3) in getWeaponStats(match.telemetry[player.name].weapon)" :key="'weaponStats' + index3" class="mt-3">
                     <b-col v-for="(weapon, weaponName) in row" :key="weaponName" cols="6">
-                        <b-card
-                            :img-src="'/img/pubg/' + (causerToID[weaponName] || weaponName) + '.png'"
-                            :img-alt="weaponName"
-                            img-height="60vh"
-                            img-width="100%"
-                            img-top
-                        >
-                            <b-row>
+                        <b-card header-bg-variant="primary" :header="causerName[weaponName]">
+                            <b-row class="m-0">
                                 <b-col cols="6">
                                     <div class="chart-size">
                                         <c-pie :data="weapon.shotsChartData" :options="weapon.chartOptions" />
@@ -251,9 +241,9 @@
             </div>
         </div>
     </b-container>
-    <b-container>
+    <!-- <b-container>
         <pre v-if="inDev" class="text-white">{{ JSON.stringify(match, null, 2) }}</pre>
-    </b-container>
+    </b-container> -->
 </div>
 </template>
 
@@ -265,6 +255,7 @@ import 'chartjs-plugin-colorschemes';
 import ChartPie from '../../components/chart-pie';
 import ChartRadar from '../../components/chart-radar';
 import ChartBar from '../../components/chart-bar';
+import { causerNames, gameModes, mapNames } from '../../../bot/class/pubgVars';
 //import ChartHorizontalBar from '../../components/chart-horizontal-bar';
 
 moment.locale('fr');
@@ -301,109 +292,9 @@ export default {
             title: 'Match',
             matchID: '',
             match: {},
-            mapName: {
-                'Chimera_Main': 'Paramo',
-                'Desert_Main': 'Miramar',
-                'DihorOtok_Main': 'Vikendi',
-                'Erangel_Main': 'Erangel',
-                'Baltic_Main': 'Erangel',
-                'Range_Main': 'Camp Jackal',
-                'Savage_Main': 'Sanhok',
-                'Summerland_Main': 'Karakin',
-            },
-            gameMode: {
-                duo: { gameType: null, gameMode: 'Duo', gamePOV: 'TPP' },
-                'duo-fpp': { gameType: null, gameMode: 'Duo', gamePOV: 'FPP' },
-                solo: { gameType: null, gameMode: 'Solo', gamePOV: 'TPP' },
-                'solo-fpp': { gameType: null, gameMode: 'Solo', gamePOV: 'FPP' },
-                squad: { gameType: null, gameMode: 'Squad', gamePOV: 'TPP' },
-                'squad-fpp': { gameType: null, gameMode: 'Squad', gamePOV: 'FPP' },
-                'conquest-duo': { gameType: 'Conquest', gameMode: 'Duo', gamePOV: 'TPP' },
-                'conquest-duo-fpp': { gameType: 'Conquest', gameMode: 'Duo', gamePOV: 'FPP' },
-                'conquest-solo': { gameType: 'Conquest', gameMode: 'Solo', gamePOV: 'TPP' },
-                'conquest-solo-fpp': { gameType: 'Conquest', gameMode: 'Solo', gamePOV: 'FPP' },
-                'conquest-squad': { gameType: 'Conquest', gameMode: 'Squad', gamePOV: 'TPP' },
-                'conquest-squad-fpp': { gameType: 'Conquest', gameMode: 'Squad', gamePOV: 'FPP' },
-                'esports-duo': { gameType: 'Esports', gameMode: 'Duo', gamePOV: 'TPP' },
-                'esports-duo-fpp': { gameType: 'Esports', gameMode: 'Duo', gamePOV: 'FPP' },
-                'esports-solo': { gameType: 'Esports', gameMode: 'Solo', gamePOV: 'TPP' },
-                'esports-solo-fpp': { gameType: 'Esports', gameMode: 'Solo', gamePOV: 'FPP' },
-                'esports-squad': { gameType: 'Esports', gameMode: 'Squad', gamePOV: 'TPP' },
-                'esports-squad-fpp': { gameType: 'Esports', gameMode: 'Squad', gamePOV: 'FPP' },
-                'normal-duo': { gameType: 'Normal', gameMode: 'Duo', gamePOV: 'TPP' },
-                'normal-duo-fpp': { gameType: 'Normal', gameMode: 'Duo', gamePOV: 'FPP' },
-                'normal-solo': { gameType: 'Normal', gameMode: 'Solo', gamePOV: 'TPP' },
-                'normal-solo-fpp': { gameType: 'Normal', gameMode: 'Solo', gamePOV: 'FPP' },
-                'normal-squad': { gameType: 'Normal', gameMode: 'Squad', gamePOV: 'TPP' },
-                'normal-squad-fpp': { gameType: 'Normal', gameMode: 'Squad', gamePOV: 'FPP' },
-                'war-duo': { gameType: 'War', gameMode: 'Duo', gamePOV: 'TPP' },
-                'war-duo-fpp': { gameType: 'War', gameMode: 'Duo', gamePOV: 'FPP' },
-                'war-solo': { gameType: 'War', gameMode: 'Solo', gamePOV: 'TPP' },
-                'war-solo-fpp': { gameType: 'War', gameMode: 'Solo', gamePOV: 'FPP' },
-                'war-squad': { gameType: 'War', gameMode: 'Squad', gamePOV: 'TPP' },
-                'war-squad-fpp': { gameType: 'War', gameMode: 'Squad', gamePOV: 'FPP' },
-                'zombie-duo': { gameType: 'Zombie', gameMode: 'Duo', gamePOV: 'TPP' },
-                'zombie-duo-fpp': { gameType: 'Zombie', gameMode: 'Duo', gamePOV: 'FPP' },
-                'zombie-solo': { gameType: 'Zombie', gameMode: 'Solo', gamePOV: 'TPP' },
-                'zombie-solo-fpp': { gameType: 'Zombie', gameMode: 'Solo', gamePOV: 'FPP' },
-                'zombie-squad': { gameType: 'Zombie', gameMode: 'Squad', gamePOV: 'TPP' },
-                'zombie-squad-fpp': { gameType: 'Zombie', gameMode: 'Squad', gamePOV: 'FPP' },
-                'lab-tpp': { gameType: 'Lab', gameMode: 'None', gamePOV: 'TPP' },
-                'lab-fpp': { gameType: 'Lab', gameMode: 'None', gamePOV: 'FPP' },
-                'tdm': { gameType: 'TDM', gameMode: 'None', gamePOV: 'FPP' },
-            },
-            causerToID:{
-                ProjGrenade_C: 'Item_Weapon_Grenade_C',
-                ProjMolotov_C: 'Item_Weapon_Molotov_C',
-                BP_MolotovFireDebuff_C: 'Item_Weapon_Molotov_C',
-                WeapAK47_C: 'Item_Weapon_AK47_C',
-                WeapAUG_C: 'Item_Weapon_AUG_C',
-                WeapAWM_C: 'Item_Weapon_AWM_C',
-                WeapBerreta686_C: 'Item_Weapon_Berreta686_C',
-                WeapBerylM762_C: 'Item_Weapon_BerylM762_C',
-                WeapBizonPP19_C: 'Item_Weapon_BizonPP19_C',
-                WeapCowbar_C: 'Item_Weapon_Cowbar_C',
-                WeapCrossbow_1_C: 'Item_Weapon_Crossbow_C',
-                WeapDesertEagle_C: 'Item_Weapon_DesertEagle_C',
-                WeapDP12_C: 'Item_Weapon_DP12_C',
-                WeapDP28_C: 'Item_Weapon_DP28_C',
-                WeapFNFal_C: 'Item_Weapon_FNFal_C',
-                WeapG18_C: 'Item_Weapon_G18_C',
-                WeapG36C_C: 'Item_Weapon_G36C_C',
-                WeapGroza_C: 'Item_Weapon_Groza_C',
-                WeapHK416_C: 'Item_Weapon_HK416_C',
-                WeapKar98k_C: 'Item_Weapon_Kar98k_C',
-                WeapM16A4_C: 'Item_Weapon_M16A4_C',
-                WeapM1911_C: 'Item_Weapon_M1911_C',
-                WeapM249_C: 'Item_Weapon_M249_C',
-                WeapM24_C: 'Item_Weapon_M24_C',
-                WeapM9_C: 'Item_Weapon_M9_C',
-                WeapMachete_C: 'Item_Weapon_Machete_C',
-                WeapMini14_C: 'Item_Weapon_Mini14_C',
-                WeapMk14_C: 'Item_Weapon_Mk14_C',
-                WeapMk47Mutant_C: 'Item_Weapon_Mk47Mutant_C',
-                WeapMP5K_C: 'Item_Weapon_MP5K_C',
-                WeapNagantM1895_C: 'Item_Weapon_NagantM1895_C',
-                WeapPan_C: 'Item_Weapon_Pan_C',
-                WeapQBU88_C: 'Item_Weapon_QBU88_C',
-                WeapQBZ95_C: 'Item_Weapon_QBZ95_C',
-                WeapRhino_C: 'Item_Weapon_Rhino_C',
-                WeapSaiga12_C: 'Item_Weapon_Saiga12_C',
-                WeapSawnoff_C: 'Item_Weapon_Sawnoff_C',
-                'WeapSCAR-L_C': 'Item_Weapon_SCAR-L_C',
-                WeapSickle_C: 'Item_Weapon_Sickle_C',
-                WeapSKS_C: 'Item_Weapon_SKS_C',
-                BP_Spiketrap_C: 'Item_Weapon_SpikeTrap_C',
-                ProjStickyGrenade_C: 'Item_Weapon_StickyGrenade_C',
-                WeapThompson_C: 'Item_Weapon_Thompson_C',
-                WeapUMP_C: 'Item_Weapon_UMP_C',
-                WeapUZI_C: 'Item_Weapon_UZI_C',
-                WeapVector_C: 'Item_Weapon_Vector_C',
-                WeapVSS_C: 'Item_Weapon_VSS_C',
-                Weapvz61Skorpion_C: 'Item_Weapon_vz61Skorpion_C',
-                WeapWin94_C: 'Item_Weapon_Win1894_C',
-                WeapWinchester_C: 'Item_Weapon_Winchester_C',
-            },
+            mapName: mapNames,
+            gameMode: gameModes,
+            causerName: causerNames,
             locationName: {
                 ArmShot: 'Bras',
                 HeadShot: 'Tête',
@@ -423,11 +314,14 @@ export default {
                     },
                 },
                 {
-                    key: 'weaponImage',
+                    key: 'weapon',
                     label: 'Arme',
                     sortable: true,
                     thStyle: {
                         width: '25%',
+                    },
+                    formatter: (value) => {
+                        return this.causerName[value];
                     },
                 },
                 {
@@ -604,13 +498,13 @@ export default {
                     }
 
                     damageChartData.datasets.push({
-                        label: weaponName,
+                        label: causerNames[weaponName],
                         data: damageData,
                         borderWidth: 1,
                     });
 
                     hitChartData.datasets.push({
-                        label: weaponName,
+                        label: causerNames[weaponName],
                         data: hitData,
                         borderWidth: 1,
                     });

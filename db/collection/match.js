@@ -60,7 +60,7 @@ async function add(matchID, data) {
 async function update(filter, doc) {
     try {
         const data = await Match.updateOne(filter, doc);
-        logger.debug('collection => match => update: filter: %o - doc: %o', filter, doc);
+        //logger.debug('collection => match => update: filter: %o - doc: %o', filter, doc);
         return data;
     }
     catch(err) {

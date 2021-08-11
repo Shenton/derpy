@@ -28,13 +28,13 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             // eslint-disable-next-line quotes
-            "default-src": ["'self'"],
+            "default-src": ["'self'", "*.fontawesome.com"],
             // eslint-disable-next-line quotes
-            "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "kit.fontawesome.com", "code.jquery.com"],
+            "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'", "*.fontawesome.com", "code.jquery.com"],
             // eslint-disable-next-line quotes
-            "style-src": ["'self'", "'unsafe-inline'", "fonts.googleapis.com", "kit-free.fontawesome.com"],
+            "style-src": ["'self'", "'unsafe-inline'", "fonts.googleapis.com", "*.fontawesome.com"],
             // eslint-disable-next-line quotes
-            "font-src": ["'self'", "fonts.gstatic.com", "kit-free.fontawesome.com"],
+            "font-src": ["'self'", "fonts.gstatic.com", "*.fontawesome.com"],
             // eslint-disable-next-line quotes
             "img-src": ["'self'", "cdn.discordapp.com", "data:"],
         },

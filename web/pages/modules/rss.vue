@@ -300,8 +300,9 @@ export default {
             this.$axiosPostErrorHandler(err, 'Flux non trouvé', 'Ce flux existe déjà', methodMessage);
         },
         toggleEnabled(id, enabled) {
-            if (enabled) this.submitUpdateRss(id, { enabled: false });
-            else this.submitUpdateRss(id, { enabled: true });
+            !!enabled;
+            !enabled;
+            this.submitUpdateRss(id, { enabled: enabled });
         },
         rowSelected(row) {
             this.hideRowDetails();

@@ -199,8 +199,9 @@ export default {
             this.$axiosPostErrorHandler(err, 'Joueur non trouvé', 'Ce joueur existe déjà', methodMessage);
         },
         toggleEnabled(id, enabled) {
-            if (enabled) this.submitPlayerUpdate(id, { enabled: false });
-            else this.submitPlayerUpdate(id, { enabled: true });
+            !!enabled;
+            !enabled;
+            this.submitPlayerUpdate(id, { enabled: enabled });
         },
         rowSelected(row) {
             this.hideRowDetails();

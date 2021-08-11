@@ -201,8 +201,9 @@ export default {
             this.$axiosPostErrorHandler(err, 'Activité non trouvée', 'Cette activité existe déjà', methodMessage);
         },
         toggleEnabled(id, enabled) {
-            if (enabled) this.submitUpdate(id, { enabled: false });
-            else this.submitUpdate(id, { enabled: true });
+            !!enabled;
+            !enabled;
+            this.submitUpdate(id, { enabled: enabled });
         },
         rowSelected(row) {
             this.hideRowDetails();

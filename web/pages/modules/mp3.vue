@@ -235,8 +235,9 @@ export default {
             this.$axiosPostErrorHandler(err, 'mp3 non trouvée', 'Ce mp3 existe déjà', methodMessage);
         },
         toggleEnabled(id, enabled) {
-            if (enabled) this.submitUpdate(id, { enabled: false });
-            else this.submitUpdate(id, { enabled: true });
+            !!enabled;
+            !enabled;
+            this.submitUpdate(id, { enabled: enabled });
         },
         resetNew(event) {
             if (event) event.preventDefault();

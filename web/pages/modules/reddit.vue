@@ -247,8 +247,9 @@ export default {
             this.$axiosPostErrorHandler(err, 'Subreddit non trouvé', 'Ce subreddit existe déjà', methodMessage);
         },
         toggleEnabled(id, enabled) {
-            if (enabled) this.submitUpdate(id, { enabled: false });
-            else this.submitUpdate(id, { enabled: true });
+            !!enabled;
+            !enabled;
+            this.submitUpdate(id, { enabled: enabled });
         },
         rowSelected(row) {
             this.hideRowDetails();

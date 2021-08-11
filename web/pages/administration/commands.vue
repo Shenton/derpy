@@ -147,8 +147,9 @@ export default {
             this.$axiosPostErrorHandler(err, 'Commande non trouvée', 'Cette commande existe déjà', methodMessage);
         },
         toggleEnabled(id, enabled) {
-            if (enabled) this.submitUpdate(id, { enabled: false });
-            else this.submitUpdate(id, { enabled: true });
+            !!enabled;
+            !enabled;
+            this.submitUpdate(id, { enabled: enabled });
         },
         rowSelected(row) {
             this.hideRowDetails();

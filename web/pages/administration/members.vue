@@ -138,12 +138,14 @@ export default {
             this.$axiosPostErrorHandler(err, 'Membre non trouvée', 'Ce membre existe déjà', methodMessage);
         },
         toggleAccess(id, access) {
-            if (access) this.submitUpdate(id, { hasAccess: false });
-            else this.submitUpdate(id, { hasAccess: true });
+            !!access;
+            !access;
+            this.submitUpdate(id, { hasAccess: access });
         },
         toggleStatsAccess(id, access) {
-            if (access) this.submitUpdate(id, { statsAccess: false });
-            else this.submitUpdate(id, { statsAccess: true });
+            !!access;
+            !access;
+            this.submitUpdate(id, { statsAccess: access });
         },
     },
     head() {

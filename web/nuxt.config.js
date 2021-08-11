@@ -27,9 +27,12 @@ module.exports = {
     css: [
         '~/assets/scss/main.scss',
     ],
-    // build: {
-    //     extractCSS: true,
-    // },
+    /* build: {
+        //extractCSS: true,
+        babel: {
+            plugins: [['@babel/plugin-proposal-private-methods', { loose: true }]],
+        },
+    }, */
     head: {
         title: 'Derpy',
         meta: [

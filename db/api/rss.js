@@ -54,7 +54,7 @@ async function updateByName(name, data) {
 async function update(filter, data) {
     const badRequest = [];
 
-    if (!data.name && !data.feed && !data.nameURL && !data.logo && !data.description && !data.enabled && !data.lastFeeds) {
+    if (!data.name && !data.feed && !data.nameURL && !data.logo && !data.description && !(data.enabled === true || data.enabled === false) && !data.lastFeeds) {
         logger.error('api => rss => update: Missing parameter.');
         return { success: false, status: 400, errors: ['Missing parameters'] };
     }

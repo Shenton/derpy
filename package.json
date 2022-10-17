@@ -3,7 +3,7 @@
   "version": "2.2.4",
   "description": "Derpy the discord bot",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon app.js",
+    "dev": "cross-env NODE_ENV=development NODE_OPTIONS='--openssl-legacy-provider' nodemon app.js",
     "build": "nuxt build -c ./web/nuxt.config.js",
     "start": "cross-env NODE_ENV=production pm2 start app.js",
     "stop": "pm2 stop all && pm2 kill",

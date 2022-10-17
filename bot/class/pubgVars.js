@@ -5,6 +5,7 @@ const mapNames = {
     'DihorOtok_Main': 'Vikendi',
     'Erangel_Main': 'Erangel',
     'Heaven_Main': 'Haven',
+    'Kiki_Main': 'Deston',
     'Range_Main': 'Camp Jackal',
     'Savage_Main': 'Sanhok',
     'Summerland_Main': 'Karakin',

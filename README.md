@@ -1,5 +1,5 @@
 # Derpy
-A simple discord bot made with love, using Node.js.
+A simple discord bot made with love, in javascript using Node.js.
 
 This repository is mainly here to easily deploy Derpy on my server, but if someone can find any kind of use from it, go.
 
@@ -13,7 +13,7 @@ This repository is mainly here to easily deploy Derpy on my server, but if someo
 
 ## Deploy Derpy
 Before anything you will need:
-* Node.js (Derpy was developed with version 10.15.3)
+* Node.js (Derpy was developed with version 14.17.4)
 * MongoDB
 * A web server to act as a proxy (NGINX/Apache)
 * Python 2.7
@@ -25,16 +25,15 @@ Before anything you will need:
 ### Linux
 On Linux it is pretty straightforward, this should get you there (on Debian 9)
 ```bash
-sudo apt install mongodb nginx python2.7 ffmpeg
+sudo apt install build-essential mongodb nginx python2.7 ffmpeg
 ```
+Note: On Debian 11 MongoDB is not available atm, [here is a link to it's documentation](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-debian/).
+
 For Node.js it is up to you, I personally create a new user for each app and use [nvm](https://github.com/nvm-sh/nvm).
 
 ### Windows
 On Windows you should install Node.js globally, and google how to install FFmpeg.  
-For Python you should use "windows-build-tools", open a console (Windows 10: shift+right-click on an explorer window => PowerShell).
-```bash
-npm i -g windows-build-tools
-```
+Follow the instruction on [node-gyp page](https://www.npmjs.com/package/node-gyp) after "Depending on your operating system, you will need to install:".
 
 ### Installing Derpy
 Assuming you got Git installed:

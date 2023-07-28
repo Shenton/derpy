@@ -7,7 +7,7 @@ if (!mongoose.connection.name) {
     mongoose.set('useCreateIndex', true);
     mongoose.set('useNewUrlParser', true);
     mongoose.set('useUnifiedTopology', true);
-    //mongoose.connect(dbConnect + dbName, { useNewUrlParser: true, useUnifiedTopology: true });
+    //mongoose.connect(dbConnect + dbName, { useCreateIndex: true, useNewUrlParser: true, useUnifiedTopology: true });
     mongoose.connect(dbConnect + dbName);
     mongoose.connection.on('error', err => logger.error('DB connection error: ' + err));
     mongoose.connection.once('open', () => logger.info('DB connected.'));

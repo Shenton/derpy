@@ -29,7 +29,7 @@ validator.username = (username) => {
 
 validator.discriminator = (discriminator) => {
     if (typeof discriminator !== 'string') return false;
-    return /^[0-9]{4}$/.test(discriminator);
+    return /^(0|[0-9]{4})$/.test(discriminator);
 };
 
 validator.avatar = (avatar) => {
